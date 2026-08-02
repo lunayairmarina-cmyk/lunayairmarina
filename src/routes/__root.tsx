@@ -13,8 +13,11 @@ import appCss from "../styles.css?url";
 import { LanguageProvider } from "@/lib/i18n";
 import { SiteContentProvider } from "@/providers/SiteContentProvider";
 import { companyInfo } from "@/data/mock";
+import { absoluteUrl, DEFAULT_LOGO_PATH, DEFAULT_OG_IMAGE_PATH, getSiteUrl } from "@/lib/site";
 
-const siteUrl = "https://lunayairmarina.com";
+const siteUrl = getSiteUrl();
+const ogCover = absoluteUrl(DEFAULT_OG_IMAGE_PATH, siteUrl);
+const brandLogo = absoluteUrl(DEFAULT_LOGO_PATH, siteUrl);
 
 const organizationSchema = {
   "@context": "https://schema.org",
@@ -26,7 +29,7 @@ const organizationSchema = {
       url: siteUrl,
       email: companyInfo.email,
       telephone: companyInfo.phoneDisplay,
-      logo: `${siteUrl}/favicon.png`,
+      logo: brandLogo,
       sameAs: Object.values(companyInfo.social),
       areaServed: ["SA", "AE", "BH", "QA", "KW", "OM"],
     },
@@ -34,7 +37,7 @@ const organizationSchema = {
       "@type": "LocalBusiness",
       "@id": `${siteUrl}/#localbusiness`,
       name: "lunayairmarina",
-      image: `${siteUrl}/favicon.png`,
+      image: ogCover,
       url: siteUrl,
       telephone: companyInfo.phoneDisplay,
       email: companyInfo.email,
@@ -131,38 +134,46 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Yacht Management Saudi Arabia & Gulf | lunayairmarina" },
+      { title: "lunayairmarina | إدارة يخوت احترافية — Yacht Management Saudi Arabia" },
       {
         name: "description",
         content:
-          "Lunay Air Marina provides professional yacht management solutions for yacht owners in Saudi Arabia and the Gulf — 360° management, marina ops, agency and crew.",
+          "إدارة يخوت ٣٦٠ درجة في جدة والبحر الأحمر والخليج — 360° yacht management, marina ops, visiting yacht agency and crew. lunayairmarina.",
+      },
+      {
+        name: "keywords",
+        content:
+          "إدارة يخوت السعودية, إدارة يخوت جدة, lunayairmarina, yacht management Saudi Arabia, marina management, Red Sea yacht management",
       },
       { name: "author", content: "lunayairmarina" },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "lunayairmarina" },
-      { property: "og:locale", content: "en_US" },
-      { property: "og:locale:alternate", content: "ar_SA" },
+      { property: "og:locale", content: "ar_SA" },
+      { property: "og:locale:alternate", content: "en_US" },
       { property: "og:url", content: siteUrl },
       {
         property: "og:title",
-        content: "Yacht Management Saudi Arabia & Gulf | lunayairmarina",
+        content: "lunayairmarina | إدارة يخوت احترافية — Yacht Management Saudi Arabia & Gulf",
       },
       {
         property: "og:description",
         content:
-          "Professional yacht management for owners across Jeddah, the Red Sea and the Arabian Gulf.",
+          "إدارة يخوت ٣٦٠، تشغيل مارينا، وكالة اليخوت الزائرة وخدمات الطواقم في جدة والخليج. Professional yacht management for Red Sea & Gulf owners.",
       },
-      { property: "og:image", content: `${siteUrl}/apple-touch-icon.png` },
+      { property: "og:image", content: ogCover },
+      { property: "og:image:secure_url", content: ogCover },
+      { property: "og:image:alt", content: "lunayairmarina — إدارة يخوت | Yacht Management" },
       { name: "twitter:card", content: "summary_large_image" },
       {
         name: "twitter:title",
-        content: "Yacht Management Saudi Arabia & Gulf | lunayairmarina",
+        content: "lunayairmarina | إدارة يخوت احترافية — Yacht Management Saudi Arabia",
       },
       {
         name: "twitter:description",
         content:
-          "Professional yacht management for owners across Jeddah, the Red Sea and the Arabian Gulf.",
+          "إدارة يخوت احترافية في السعودية والخليج — 360° yacht management, marina ops and crew.",
       },
+      { name: "twitter:image", content: ogCover },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -170,16 +181,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "alternate", hrefLang: "en", href: siteUrl },
       { rel: "alternate", hrefLang: "ar", href: siteUrl },
       { rel: "alternate", hrefLang: "x-default", href: siteUrl },
+      { rel: "image_src", href: brandLogo },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&family=Noto+Kufi+Arabic:wght@300;400;500;700&display=swap",
       },
-      { rel: "icon", href: "/favicon.png?v=6", type: "image/png", sizes: "64x64" },
-      { rel: "icon", href: "/favicon-32.png?v=6", type: "image/png", sizes: "32x32" },
-      { rel: "shortcut icon", href: "/favicon.ico?v=6" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=6", sizes: "180x180" },
+      { rel: "icon", href: "/favicon.png?v=7", type: "image/png", sizes: "64x64" },
+      { rel: "icon", href: "/favicon-32.png?v=7", type: "image/png", sizes: "32x32" },
+      { rel: "shortcut icon", href: "/favicon.ico?v=7" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=7", sizes: "180x180" },
     ],
     scripts: [
       {

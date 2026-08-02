@@ -7,27 +7,32 @@ import {
 } from "@/lib/cms-store";
 import type { LocalizedString } from "@/types/content";
 import { SERVICE_SLUGS, type ServiceSlug } from "@/data/services";
-
-const SITE = "https://lunayairmarina.com";
+import {
+  absoluteUrl,
+  DEFAULT_LOGO_PATH,
+  DEFAULT_OG_IMAGE_PATH,
+  getSiteUrl,
+} from "@/lib/site";
 
 const DEFAULT_SEO: Record<SeoPageId, SeoPageMeta> = {
   home: {
     title: {
-      en: "lunayairmarina | Professional Yacht Management Saudi Arabia",
-      ar: "lunayairmarina | إدارة يخوت احترافية في السعودية",
+      en: "lunayairmarina | Yacht Management Saudi Arabia & Gulf",
+      ar: "lunayairmarina | إدارة يخوت احترافية في السعودية والخليج",
     },
     description: {
-      en: "Professional yacht management solutions for yacht owners in Saudi Arabia and the Gulf region.",
-      ar: "حلول إدارة يخوت احترافية لملاك اليخوت في السعودية ومنطقة الخليج.",
+      en: "Professional 360° yacht management, marina ops, visiting yacht agency and crew for owners in Jeddah, the Red Sea and the Gulf.",
+      ar: "إدارة يخوت ٣٦٠ درجة، تشغيل مارينا، وكالة اليخوت الزائرة وخدمات الطواقم لملاك اليخوت في جدة والبحر الأحمر والخليج.",
     },
     keywords: {
-      en: "yacht management Saudi Arabia, boat management Jeddah, Red Sea yacht management",
-      ar: "إدارة يخوت السعودية, إدارة قوارب جدة, إدارة يخوت البحر الأحمر",
+      en: "yacht management Saudi Arabia, lunayairmarina, boat management Jeddah, Red Sea yacht management, marina management",
+      ar: "إدارة يخوت السعودية, lunayairmarina, إدارة قوارب جدة, إدارة يخوت البحر الأحمر, إدارة مارينا, وكالة يخوت",
     },
     focusKeyword: { en: "yacht management Saudi Arabia", ar: "إدارة يخوت السعودية" },
     canonicalPath: "/",
     robots: "index,follow",
     ogType: "website",
+    ogImage: DEFAULT_OG_IMAGE_PATH,
   },
   about: {
     title: {
@@ -45,6 +50,7 @@ const DEFAULT_SEO: Record<SeoPageId, SeoPageMeta> = {
     focusKeyword: { en: "yacht management company", ar: "شركة إدارة يخوت" },
     canonicalPath: "/about",
     robots: "index,follow",
+    ogImage: DEFAULT_OG_IMAGE_PATH,
   },
   services: {
     title: {
@@ -62,6 +68,7 @@ const DEFAULT_SEO: Record<SeoPageId, SeoPageMeta> = {
     focusKeyword: { en: "yacht management services", ar: "خدمات إدارة اليخوت" },
     canonicalPath: "/services",
     robots: "index,follow",
+    ogImage: DEFAULT_OG_IMAGE_PATH,
   },
   contact: {
     title: {
@@ -79,6 +86,7 @@ const DEFAULT_SEO: Record<SeoPageId, SeoPageMeta> = {
     focusKeyword: { en: "yacht management consultation", ar: "استشارة إدارة يخوت" },
     canonicalPath: "/contact",
     robots: "index,follow",
+    ogImage: DEFAULT_OG_IMAGE_PATH,
   },
   blog: {
     title: {
@@ -96,6 +104,7 @@ const DEFAULT_SEO: Record<SeoPageId, SeoPageMeta> = {
     focusKeyword: { en: "yacht management blog", ar: "مدونة إدارة اليخوت" },
     canonicalPath: "/blog",
     robots: "index,follow",
+    ogImage: DEFAULT_OG_IMAGE_PATH,
   },
   application: {
     title: {
@@ -113,6 +122,7 @@ const DEFAULT_SEO: Record<SeoPageId, SeoPageMeta> = {
     focusKeyword: { en: "yacht owner app", ar: "تطبيق ملاك اليخوت" },
     canonicalPath: "/application",
     robots: "index,follow",
+    ogImage: DEFAULT_OG_IMAGE_PATH,
   },
 };
 
@@ -290,25 +300,55 @@ export function buildSeoHeadFromMeta(
   language: "en" | "ar" = "en",
 ) {
   const picked = pickSeo(meta, language);
+  const titleAr = pickLocalized(meta.title, "ar");
+  const titleEn = pickLocalized(meta.title, "en");
+  const descAr = pickLocalized(meta.description, "ar");
+  const descEn = pickLocalized(meta.description, "en");
+  const keywordsAr = pickLocalized(meta.keywords, "ar");
+  const keywordsEn = pickLocalized(meta.keywords, "en");
+
+  // WhatsApp / social previews: bilingual title + description so Arabic shows too.
+  const shareTitle =
+    titleAr && titleEn && titleAr !== titleEn ? `${titleAr} | ${titleEn}` : picked.title;
+  const shareDescription =
+    descAr && descEn && descAr !== descEn ? `${descAr} — ${descEn}` : picked.description;
+  const shareKeywords = [keywordsAr, keywordsEn].filter(Boolean).join(", ");
+
+  const site = getSiteUrl();
   const path = picked.canonicalPath || fallbackPath;
-  const url = path.startsWith("http") ? path : `${SITE}${path.startsWith("/") ? path : `/${path}`}`;
+  const url = path.startsWith("http")
+    ? path
+    : `${site}${path.startsWith("/") ? path : `/${path}`}`;
+  const ogImage = absoluteUrl(picked.ogImage || DEFAULT_OG_IMAGE_PATH, site);
+  const logoUrl = absoluteUrl(DEFAULT_LOGO_PATH, site);
+
   return {
     meta: [
       { title: picked.title },
-      { name: "description", content: picked.description },
-      ...(picked.keywords ? [{ name: "keywords", content: picked.keywords }] : []),
+      { name: "description", content: shareDescription },
+      ...(shareKeywords ? [{ name: "keywords", content: shareKeywords }] : []),
       { name: "robots", content: picked.robots || "index,follow" },
-      { property: "og:title", content: picked.title },
-      { property: "og:description", content: picked.description },
+      { property: "og:site_name", content: "lunayairmarina" },
+      { property: "og:locale", content: "ar_SA" },
+      { property: "og:locale:alternate", content: "en_US" },
+      { property: "og:title", content: shareTitle },
+      { property: "og:description", content: shareDescription },
       { property: "og:type", content: picked.ogType || "website" },
       { property: "og:url", content: url },
-      ...(picked.ogImage ? [{ property: "og:image", content: picked.ogImage }] : []),
+      { property: "og:image", content: ogImage },
+      { property: "og:image:secure_url", content: ogImage },
+      { property: "og:image:alt", content: "lunayairmarina — إدارة يخوت | Yacht Management" },
+      { property: "og:image:type", content: ogImage.endsWith(".png") ? "image/png" : "image/jpeg" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: picked.title },
-      { name: "twitter:description", content: picked.description },
-      ...(picked.ogImage ? [{ name: "twitter:image", content: picked.ogImage }] : []),
+      { name: "twitter:title", content: shareTitle },
+      { name: "twitter:description", content: shareDescription },
+      { name: "twitter:image", content: ogImage },
+      { name: "twitter:image:alt", content: "lunayairmarina logo and yacht management" },
     ],
-    links: [{ rel: "canonical", href: url }],
+    links: [
+      { rel: "canonical", href: url },
+      { rel: "image_src", href: logoUrl },
+    ],
   };
 }
 
