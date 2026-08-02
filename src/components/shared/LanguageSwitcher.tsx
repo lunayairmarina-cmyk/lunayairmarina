@@ -6,13 +6,13 @@ export function LanguageSwitcher({ tone = "dark" }: { tone?: "light" | "dark" })
   const base = tone === "light" ? "text-navy-foreground/70" : "text-navy/60";
 
   return (
-    <div className={cn("flex items-center gap-2 text-xs tracking-[0.16em]", base)}>
+    <div className={cn("flex items-center gap-1 text-xs tracking-[0.16em]", base)}>
       <button
         type="button"
         onClick={() => setLanguage("en")}
         aria-pressed={language === "en"}
         className={cn(
-          "transition-colors hover:text-gold",
+          "inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg px-2 transition-colors hover:text-gold",
           language === "en" && "text-gold",
         )}
       >
@@ -26,7 +26,7 @@ export function LanguageSwitcher({ tone = "dark" }: { tone?: "light" | "dark" })
         onClick={() => setLanguage("ar")}
         aria-pressed={language === "ar"}
         className={cn(
-          "font-arabic transition-colors hover:text-gold",
+          "inline-flex min-h-11 items-center justify-center rounded-lg px-2 font-arabic transition-colors hover:text-gold",
           language === "ar" && "text-gold",
         )}
       >

@@ -114,7 +114,7 @@ export function ContactSection() {
         <Reveal direction="right" delay={0.1}>
           <form
             onSubmit={(event) => void handleSubmit(event)}
-            className="glass-card flex flex-col gap-5 rounded-lg p-8 lg:p-10"
+            className="glass-card flex flex-col gap-5 rounded-lg p-5 sm:p-8 lg:p-10"
           >
             <Field
               id="contact-name"

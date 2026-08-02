@@ -22,15 +22,45 @@ export function DataTable<T>({ columns, rows, getRowId, actions }: DataTableProp
 
   return (
     <div className="overflow-hidden rounded-2xl border border-navy/8 bg-white shadow-sm">
-      <div className="admin-hide-scrollbar overflow-x-auto">
-        <table className="w-full min-w-[720px] text-start text-sm">
+      {/* Mobile card list */}
+      <div className="divide-y divide-navy/8 md:hidden">
+        {rows.length === 0 ? (
+          <p className="px-4 py-10 text-center text-sm text-navy/45">{t("admin.table.empty")}</p>
+        ) : (
+          rows.map((row, index) => (
+            <motion.article
+              key={getRowId(row)}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.03, duration: 0.35 }}
+              className="space-y-3 p-4"
+            >
+              {columns.map((column) => (
+                <div key={column.key} className="min-w-0">
+                  <p className="text-[0.6rem] tracking-[0.18em] text-navy/40 uppercase">
+                    {column.header}
+                  </p>
+                  <div className="mt-1 text-sm text-navy">{column.render(row)}</div>
+                </div>
+              ))}
+              {actions ? (
+                <div className="flex flex-wrap gap-2 pt-1">{actions(row)}</div>
+              ) : null}
+            </motion.article>
+          ))
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <div className="admin-table-scroll hidden overflow-x-auto md:block">
+        <table className="w-full min-w-[640px] text-start text-sm">
           <thead>
             <tr className="border-b border-navy/8 bg-[#faf8f4]">
               {columns.map((column) => (
                 <th
                   key={column.key}
                   className={cn(
-                    "px-5 py-4 text-start text-[0.6rem] font-medium tracking-[0.2em] text-navy/40 uppercase",
+                    "px-4 py-4 text-start text-[0.6rem] font-medium tracking-[0.2em] text-navy/40 uppercase lg:px-5",
                     column.className,
                   )}
                 >
@@ -38,7 +68,7 @@ export function DataTable<T>({ columns, rows, getRowId, actions }: DataTableProp
                 </th>
               ))}
               {actions ? (
-                <th className="px-5 py-4 text-end text-[0.6rem] font-medium tracking-[0.2em] text-navy/40 uppercase">
+                <th className="px-4 py-4 text-end text-[0.6rem] font-medium tracking-[0.2em] text-navy/40 uppercase lg:px-5">
                   {t("admin.table.actions")}
                 </th>
               ) : null}
@@ -64,12 +94,15 @@ export function DataTable<T>({ columns, rows, getRowId, actions }: DataTableProp
                   className="border-b border-navy/6 transition-colors last:border-0 hover:bg-[#faf8f4]/80"
                 >
                   {columns.map((column) => (
-                    <td key={column.key} className={cn("px-5 py-4 align-middle", column.className)}>
+                    <td
+                      key={column.key}
+                      className={cn("px-4 py-4 align-middle lg:px-5", column.className)}
+                    >
                       {column.render(row)}
                     </td>
                   ))}
                   {actions ? (
-                    <td className="px-5 py-4 text-end">
+                    <td className="px-4 py-4 text-end lg:px-5">
                       <div className="flex justify-end gap-2">{actions(row)}</div>
                     </td>
                   ) : null}
@@ -117,7 +150,7 @@ export function RowAction({
       aria-label={label}
       title={label}
       className={cn(
-        "grid size-9 place-items-center rounded-xl border transition-colors",
+        "grid size-11 place-items-center rounded-xl border transition-colors",
         tone === "danger"
           ? "border-red-200 text-red-500 hover:border-red-400 hover:bg-red-50"
           : "border-navy/10 text-navy/55 hover:border-navy/25 hover:bg-[#faf8f4] hover:text-navy",

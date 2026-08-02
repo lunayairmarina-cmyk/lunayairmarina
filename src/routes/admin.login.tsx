@@ -62,7 +62,7 @@ function AdminLoginPage() {
         className="glass-card relative z-10 w-full max-w-md rounded-xl p-8 sm:p-10"
       >
         <div className="flex justify-center">
-          <Logo tone="light" className="h-40 w-48" />
+          <Logo tone="light" className="h-28 w-36 sm:h-40 sm:w-48" />
         </div>
 
         <h1 className="mt-8 text-center text-2xl text-navy-foreground">{t("admin.portal")}</h1>

@@ -168,7 +168,7 @@ export function AdminSidebar({
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="absolute top-4 left-3 z-10 rounded-md p-1.5 text-navy/50 transition-colors hover:bg-navy/5 hover:text-navy"
+                className="absolute top-3 left-3 z-10 grid size-11 place-items-center rounded-md text-navy/50 transition-colors hover:bg-navy/5 hover:text-navy"
               >
                 <X className="size-5" strokeWidth={1.5} />
               </button>

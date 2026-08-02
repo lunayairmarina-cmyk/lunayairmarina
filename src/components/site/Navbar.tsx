@@ -34,9 +34,9 @@ export function Navbar({ transparent: _transparent = false }: { transparent?: bo
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         className="fixed inset-x-0 top-0 z-50 h-16 overflow-visible border-b border-navy/10 bg-white shadow-card"
       >
-        <div className="container-luxe grid h-full grid-cols-[auto_1fr_auto] items-center gap-4 lg:grid-cols-[1fr_auto_1fr]">
-          <Link to="/" className="relative z-10 min-w-0" aria-label={t("brand.name")}>
-            <Logo tone="dark" className="h-11 w-32 sm:h-12 sm:w-36" />
+        <div className="container-luxe grid h-full grid-cols-[1fr_auto] items-center gap-3 lg:grid-cols-[1fr_auto_1fr]">
+          <Link to="/" className="relative z-10 min-w-0 justify-self-start" aria-label={t("brand.name")}>
+            <Logo tone="dark" className="h-10 w-28 sm:h-12 sm:w-36" />
           </Link>
 
           <nav className="hidden items-center gap-9 lg:flex">
@@ -66,7 +66,7 @@ export function Navbar({ transparent: _transparent = false }: { transparent?: bo
             type="button"
             onClick={() => setOpen(true)}
             aria-label="Open menu"
-            className="justify-self-end p-2 text-navy transition-colors lg:hidden"
+            className="grid size-11 place-items-center justify-self-end rounded-lg text-navy transition-colors hover:bg-navy/5 lg:hidden"
           >
             <Menu className="size-6" strokeWidth={1.5} />
           </button>
@@ -80,21 +80,21 @@ export function Navbar({ transparent: _transparent = false }: { transparent?: bo
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.35 }}
-            className="fixed inset-0 z-60 bg-white lg:hidden"
+            className="fixed inset-0 z-[100] overflow-y-auto bg-white lg:hidden"
           >
             <div className="container-luxe flex h-16 items-center justify-between border-b border-navy/10">
-              <Logo tone="dark" className="h-11 w-32" />
+              <Logo tone="dark" className="h-10 w-28" />
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close menu"
-                className="p-2 text-navy"
+                className="grid size-11 place-items-center rounded-lg text-navy"
               >
                 <X className="size-6" strokeWidth={1.5} />
               </button>
             </div>
 
-            <nav className="container-luxe mt-10 flex flex-col gap-6">
+            <nav className="container-luxe mt-8 flex flex-col gap-2 pb-8">
               {links.map((link, index) => (
                 <motion.div
                   key={link.to}
@@ -105,7 +105,7 @@ export function Navbar({ transparent: _transparent = false }: { transparent?: bo
                   <Link
                     to={link.to}
                     onClick={() => setOpen(false)}
-                    className="font-display text-3xl text-navy transition-colors hover:text-gold"
+                    className="block py-3 font-display text-2xl text-navy transition-colors hover:text-gold sm:text-3xl"
                   >
                     {t(link.key)}
                   </Link>
@@ -113,7 +113,7 @@ export function Navbar({ transparent: _transparent = false }: { transparent?: bo
               ))}
             </nav>
 
-            <div className="container-luxe mt-12 flex flex-col gap-6">
+            <div className="container-luxe mt-4 flex flex-col gap-4 pb-10">
               <LanguageSwitcher tone="dark" />
               <Link
                 to="/contact"

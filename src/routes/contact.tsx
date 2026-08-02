@@ -192,7 +192,7 @@ function ContactPage() {
           <Reveal direction="right" delay={0.08}>
             <form
               onSubmit={(event) => void handleSubmit(event)}
-              className="border border-navy/10 bg-background p-7 sm:p-9 lg:p-10"
+              className="border border-navy/10 bg-background p-5 sm:p-9 lg:p-10"
             >
               <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
                 {t("contact.formSection.title")}

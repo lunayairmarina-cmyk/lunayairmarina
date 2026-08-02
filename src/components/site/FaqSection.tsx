@@ -41,7 +41,7 @@ export function FaqSection({ variant = "default" }: { variant?: "default" | "hom
                 >
                   <span
                     className={cn(
-                      "font-display text-lg transition-colors",
+                      "font-display text-base transition-colors sm:text-lg",
                       isOpen ? "text-gold" : "text-navy",
                     )}
                   >

@@ -12,7 +12,7 @@ export function WhatsAppButton() {
       target="_blank"
       rel="noreferrer"
       aria-label={t("whatsapp.label")}
-      className="fixed right-5 bottom-5 z-50 inline-flex size-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-luxe transition-transform hover:-translate-y-0.5 hover:bg-[#1ebe57] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-gold sm:right-7 sm:bottom-7"
+      className="fixed inset-inline-end-4 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-40 inline-flex size-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-luxe transition-transform hover:-translate-y-0.5 hover:bg-[#1ebe57] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-gold sm:inset-inline-end-7 sm:bottom-7"
     >
       <svg
         viewBox="0 0 32 32"

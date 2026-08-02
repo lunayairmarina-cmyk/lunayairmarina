@@ -77,9 +77,9 @@ export function GallerySection({ limit }: { limit?: number }) {
                 loading="lazy"
                 className="size-full object-cover transition-transform duration-[1.1s] ease-out group-hover:scale-110"
               />
-              <span className="absolute inset-0 bg-navy/0 transition-colors duration-500 group-hover:bg-navy/55" />
-              <span className="absolute inset-0 flex items-center justify-center p-6">
-                <span className="translate-y-2 text-center text-sm tracking-[0.18em] text-white uppercase opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 sm:text-base">
+              <span className="absolute inset-0 bg-navy/35 transition-colors duration-500 sm:bg-navy/0 sm:group-hover:bg-navy/55" />
+              <span className="absolute inset-0 flex items-end justify-center p-4 sm:items-center sm:p-6">
+                <span className="text-center text-xs tracking-[0.18em] text-white uppercase opacity-100 transition-all duration-500 sm:translate-y-2 sm:text-sm sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 sm:text-base">
                   {image.caption[language]}
                 </span>
               </span>
@@ -95,7 +95,7 @@ export function GallerySection({ limit }: { limit?: number }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setActive(null)}
-            className="fixed inset-0 z-70 grid place-items-center bg-navy/92 p-6 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] grid place-items-center bg-navy/92 p-4 backdrop-blur-sm sm:p-6"
             role="dialog"
             aria-modal="true"
           >
@@ -103,7 +103,7 @@ export function GallerySection({ limit }: { limit?: number }) {
               type="button"
               onClick={() => setActive(null)}
               aria-label={t("gallery.close")}
-              className="absolute top-6 inset-inline-end-6 grid size-11 place-items-center rounded-full border border-navy-foreground/20 text-navy-foreground transition-colors hover:border-gold hover:text-gold"
+              className="absolute top-4 inset-inline-end-4 grid size-11 place-items-center rounded-full border border-navy-foreground/20 text-navy-foreground transition-colors hover:border-gold hover:text-gold sm:top-6 sm:inset-inline-end-6"
             >
               <X className="size-5" strokeWidth={1.5} />
             </button>
@@ -113,12 +113,12 @@ export function GallerySection({ limit }: { limit?: number }) {
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               onClick={(event) => event.stopPropagation()}
-              className="max-h-[85vh] max-w-5xl"
+              className="w-full max-w-5xl max-h-[85vh]"
             >
               <img
                 src={active.src}
                 alt={active.caption[language]}
-                className="max-h-[75vh] w-auto object-contain"
+                className="mx-auto max-h-[70vh] w-full max-w-full object-contain sm:max-h-[75vh]"
               />
               <figcaption className="mt-4 text-center text-sm tracking-[0.16em] text-navy-foreground/70 uppercase">
                 {active.caption[language]}

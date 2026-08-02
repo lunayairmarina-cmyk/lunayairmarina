@@ -39,7 +39,7 @@ export function Modal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-70 grid place-items-center bg-navy/45 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] grid place-items-end bg-navy/45 p-0 backdrop-blur-sm sm:place-items-center sm:p-4"
           onClick={onClose}
           role="dialog"
           aria-modal="true"
@@ -50,28 +50,28 @@ export function Modal({
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             onClick={(event) => event.stopPropagation()}
-            className="admin-hide-scrollbar max-h-[88vh] w-full max-w-xl overflow-y-auto rounded-2xl border border-navy/8 bg-white shadow-luxe"
+            className="admin-hide-scrollbar flex max-h-[92dvh] w-full max-w-xl flex-col overflow-y-auto rounded-t-2xl border border-navy/8 bg-white shadow-luxe sm:max-h-[88vh] sm:rounded-2xl"
           >
-            <div className="flex items-center justify-between gap-4 border-b border-navy/8 px-6 py-5">
-              <h2 className="font-display text-lg text-navy">{title}</h2>
+            <div className="flex items-center justify-between gap-4 border-b border-navy/8 px-4 py-4 sm:px-6 sm:py-5">
+              <h2 className="min-w-0 truncate font-display text-lg text-navy">{title}</h2>
               <button
                 type="button"
                 onClick={onClose}
                 aria-label={t("admin.actions.cancel")}
-                className="rounded-lg p-1 text-navy/40 transition-colors hover:bg-[#faf8f4] hover:text-navy"
+                className="grid size-11 shrink-0 place-items-center rounded-lg text-navy/40 transition-colors hover:bg-[#faf8f4] hover:text-navy"
               >
                 <X className="size-5" strokeWidth={1.5} />
               </button>
             </div>
 
-            <div className="flex flex-col gap-5 px-6 py-6">{children}</div>
+            <div className="flex flex-col gap-5 px-4 py-5 sm:px-6 sm:py-6">{children}</div>
 
             {onSubmit ? (
-              <div className="flex justify-end gap-3 border-t border-navy/8 px-6 py-5">
+              <div className="sticky bottom-0 flex flex-col-reverse gap-3 border-t border-navy/8 bg-white px-4 py-4 sm:flex-row sm:justify-end sm:px-6 sm:py-5">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-full border border-navy/10 px-5 py-2.5 text-xs tracking-[0.16em] text-navy/65 uppercase transition-colors hover:text-navy"
+                  className="rounded-full border border-navy/10 px-5 py-3 text-xs tracking-[0.16em] text-navy/65 uppercase transition-colors hover:text-navy"
                 >
                   {t("admin.actions.cancel")}
                 </button>
@@ -79,7 +79,7 @@ export function Modal({
                   type="button"
                   disabled={busy}
                   onClick={onSubmit}
-                  className="rounded-full bg-navy px-5 py-2.5 text-xs tracking-[0.16em] text-white uppercase transition-colors hover:bg-navy/90 disabled:opacity-60"
+                  className="rounded-full bg-navy px-5 py-3 text-xs tracking-[0.16em] text-white uppercase transition-colors hover:bg-navy/90 disabled:opacity-60"
                 >
                   {submitLabel ?? t("admin.actions.save")}
                 </button>

@@ -79,7 +79,7 @@ export function Hero() {
   }, [shouldLoadVideo, heroVideo]);
 
   return (
-    <section className="relative flex h-svh min-h-[640px] items-center justify-center overflow-hidden pt-16">
+    <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pt-16 pb-20 sm:min-h-[640px] sm:pb-0">
       <div className="absolute inset-0">
         <img
           src={heroImage}
@@ -109,7 +109,7 @@ export function Hero() {
         <div className="absolute inset-0 bg-gradient-to-t from-navy/75 via-navy/20 to-navy/40" />
       </div>
 
-      <div className="container-luxe relative z-10 flex w-full flex-col items-center px-4 text-center">
+      <div className="container-luxe relative z-10 flex w-full flex-col items-center text-center">
         <motion.span
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
@@ -123,7 +123,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 1, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-6 font-display text-5xl leading-none tracking-[0.08em] text-balance text-white uppercase sm:text-6xl md:text-7xl lg:text-8xl"
+          className="mt-5 font-display text-4xl leading-none tracking-[0.04em] text-balance text-white uppercase sm:mt-6 sm:text-5xl sm:tracking-[0.08em] md:text-7xl lg:text-8xl"
         >
           {t("brand.name")}
         </motion.h1>

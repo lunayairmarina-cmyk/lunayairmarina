@@ -163,7 +163,11 @@
   width: 100%;
   margin-inline: auto;
   max-width: 80rem;
-  padding-inline: 1.25rem;
+  padding-inline: 1rem;
+
+  @media (min-width: 640px) {
+    padding-inline: 1.25rem;
+  }
 
   @media (min-width: 1024px) {
     padding-inline: 2.5rem;
@@ -252,19 +256,34 @@
   animation: slow-zoom 9s var(--ease-luxe) forwards;
 }
 
-/* Hide ALL scrollbars inside admin (keep scrolling) */
-.admin-hide-scrollbar,
-.admin-shell,
-.admin-shell * {
+/* Hide scrollbars in admin chrome, but keep table horizontal scroll visible */
+.admin-hide-scrollbar {
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
 }
 
-.admin-hide-scrollbar::-webkit-scrollbar,
-.admin-shell::-webkit-scrollbar,
-.admin-shell *::-webkit-scrollbar {
+.admin-hide-scrollbar::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
   height: 0 !important;
   background: transparent !important;
+}
+
+.admin-table-scroll {
+  scrollbar-width: thin;
+}
+
+.admin-table-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.admin-table-scroll::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--navy) 25%, transparent);
+  border-radius: 999px;
+}
+
+@media (max-width: 639px) {
+  .eyebrow {
+    letter-spacing: 0.16em;
+  }
 }
