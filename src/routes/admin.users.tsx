@@ -1,0 +1,407 @@
+import { useEffect, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { KeyRound, Pencil, Plus, Shield, Trash2 } from "lucide-react";
+import { AdminLayout } from "@/components/admin/AdminLayout";
+import { DataTable, RowAction, StatusBadge, type Column } from "@/components/admin/DataTable";
+import { Modal, ModalField } from "@/components/admin/Modal";
+import { useLanguage } from "@/lib/i18n";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import {
+  ADMIN_PERMISSIONS,
+  canChangeUserRole,
+  canDeleteUser,
+  canManageUser,
+  isSuperAdmin,
+  loadAdminUsers,
+  permissionsForRole,
+  saveAdminUsers,
+  type AdminPermission,
+  type AdminRoleId,
+  type AdminUser,
+} from "@/lib/admin-roles";
+import {
+  createAdminUser,
+  deleteAdminUserProfile,
+  fetchAdminUsersFromFirebase,
+  sendAdminPasswordReset,
+  updateAdminUser,
+} from "@/services/adminUsersService";
+import { cn } from "@/lib/utils";
+
+export const Route = createFileRoute("/admin/users")({
+  head: () => ({
+    meta: [
+      { title: "Users & Roles — lunayairmarina Admin" },
+      { name: "description", content: "Manage admin users, roles and permissions." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
+  component: AdminUsersPage,
+});
+
+const ROLE_OPTIONS: AdminRoleId[] = [
+  "super_admin",
+  "editor",
+  "gallery_manager",
+  "support",
+  "custom",
+];
+
+type Draft = {
+  name: string;
+  email: string;
+  password: string;
+  role: AdminRoleId;
+  permissions: AdminPermission[];
+  active: boolean;
+};
+
+const emptyDraft: Draft = {
+  name: "",
+  email: "",
+  password: "",
+  role: "editor",
+  permissions: permissionsForRole("editor"),
+  active: true,
+};
+
+function AdminUsersPage() {
+  const { t } = useLanguage();
+  const { user: currentUser, can } = useAdminAuth();
+  const [rows, setRows] = useState<AdminUser[]>(() => loadAdminUsers());
+  const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Draft>(emptyDraft);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    void fetchAdminUsersFromFirebase()
+      .then((users) => {
+        if (users.length) {
+          setRows(users);
+          saveAdminUsers(users);
+        }
+      })
+      .catch(() => {
+        // Keep local cache if Firebase is unreachable.
+      });
+  }, []);
+
+  if (!can("users") || !isSuperAdmin(currentUser)) {
+    return (
+      <AdminLayout title={t("admin.nav.users")}>
+        <div className="rounded-2xl border border-navy/8 bg-white p-10 text-center shadow-sm">
+          <Shield className="mx-auto size-8 text-gold" strokeWidth={1.4} />
+          <p className="mt-4 text-navy">{t("admin.users.noAccess")}</p>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  const persistLocal = (next: AdminUser[]) => {
+    setRows(next);
+    saveAdminUsers(next);
+    window.dispatchEvent(new Event("lunayairmarina-admin-users"));
+  };
+
+  const setRole = (role: AdminRoleId) => {
+    setDraft((current) => ({
+      ...current,
+      role,
+      permissions: role === "custom" ? current.permissions : permissionsForRole(role),
+    }));
+  };
+
+  const togglePermission = (permission: AdminPermission) => {
+    setDraft((current) => {
+      const exists = current.permissions.includes(permission);
+      const permissions = exists
+        ? current.permissions.filter((item) => item !== permission)
+        : [...current.permissions, permission];
+      return { ...current, role: "custom", permissions };
+    });
+  };
+
+  const save = async () => {
+    if (!draft.name.trim() || !draft.email.trim()) return;
+    const target = editingId != null ? rows.find((row) => row.id === editingId) : null;
+
+    if (target && !canManageUser(currentUser, target)) {
+      setNotice(t("admin.users.noAccess"));
+      return;
+    }
+    if (target && !canChangeUserRole(currentUser, target, draft.role, rows)) {
+      setNotice(
+        target.id === currentUser?.id
+          ? t("admin.users.cannotEditSelfRole")
+          : t("admin.users.protectLastSuper"),
+      );
+      return;
+    }
+    if (
+      target?.role === "super_admin" &&
+      (!draft.active || draft.role !== "super_admin") &&
+      rows.filter((item) => item.role === "super_admin" && item.active).length <= 1
+    ) {
+      setNotice(t("admin.users.protectLastSuper"));
+      return;
+    }
+
+    if (!editingId && draft.password.trim().length < 6) {
+      setNotice(t("admin.users.passwordRequired"));
+      return;
+    }
+
+    setBusy(true);
+    setNotice(null);
+    try {
+      if (editingId) {
+        const updated = await updateAdminUser(editingId, {
+          name: draft.name.trim(),
+          email: draft.email.trim().toLowerCase(),
+          role: draft.role,
+          permissions:
+            draft.role === "custom" ? draft.permissions : permissionsForRole(draft.role),
+          active: draft.active,
+          password: draft.password.trim() || undefined,
+        });
+        persistLocal(rows.map((row) => (row.id === editingId ? updated : row)));
+        if (draft.password.trim()) {
+          setNotice(t("admin.users.resetSent"));
+        }
+      } else {
+        const created = await createAdminUser({
+          name: draft.name.trim(),
+          email: draft.email.trim().toLowerCase(),
+          password: draft.password.trim(),
+          role: draft.role,
+          permissions:
+            draft.role === "custom" ? draft.permissions : permissionsForRole(draft.role),
+          active: draft.active,
+        });
+        persistLocal([...rows, created]);
+        setNotice(t("admin.users.savedFirebase"));
+      }
+      setOpen(false);
+      setEditingId(null);
+      setDraft(emptyDraft);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : t("admin.users.saveFailed");
+      setNotice(message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const columns: Column<AdminUser>[] = [
+    {
+      key: "name",
+      header: t("admin.table.name"),
+      render: (row) => (
+        <div>
+          <p className="font-medium text-navy">{row.name}</p>
+          <p className="text-xs text-muted-foreground" dir="ltr">
+            {row.email}
+          </p>
+        </div>
+      ),
+    },
+    {
+      key: "role",
+      header: t("admin.users.role"),
+      render: (row) => <span className="text-navy">{t(`admin.users.roles.${row.role}`)}</span>,
+    },
+    {
+      key: "permissions",
+      header: t("admin.users.permissions"),
+      render: (row) => (
+        <span className="text-xs text-muted-foreground">
+          {row.permissions.length} {t("admin.users.permissionsCount")}
+        </span>
+      ),
+    },
+    {
+      key: "status",
+      header: t("admin.table.status"),
+      render: (row) => (
+        <StatusBadge
+          label={row.active ? t("admin.status.active") : t("admin.users.inactive")}
+          tone={row.active ? "active" : "draft"}
+        />
+      ),
+    },
+  ];
+
+  return (
+    <AdminLayout title={t("admin.nav.users")}>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="max-w-xl text-sm text-muted-foreground">{t("admin.users.subtitleFirebase")}</p>
+        <button
+          type="button"
+          onClick={() => {
+            setEditingId(null);
+            setDraft(emptyDraft);
+            setNotice(null);
+            setOpen(true);
+          }}
+          className="flex items-center justify-center gap-2 rounded-full bg-navy px-5 py-3 text-xs tracking-[0.18em] text-white uppercase transition-colors hover:bg-navy/90"
+        >
+          <Plus className="size-4" strokeWidth={1.5} />
+          {t("admin.users.add")}
+        </button>
+      </div>
+
+      {notice ? (
+        <p className="mb-4 rounded-xl border border-amber-300/50 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          {notice}
+        </p>
+      ) : null}
+
+      <DataTable
+        columns={columns}
+        rows={rows}
+        getRowId={(row) => row.id}
+        actions={(row) => (
+          <>
+            <RowAction
+              icon={Pencil}
+              label={t("admin.actions.edit")}
+              onClick={() => {
+                if (!canManageUser(currentUser, row)) return;
+                setEditingId(row.id);
+                setDraft({
+                  name: row.name,
+                  email: row.email,
+                  password: "",
+                  role: row.role,
+                  permissions: [...row.permissions],
+                  active: row.active,
+                });
+                setNotice(null);
+                setOpen(true);
+              }}
+            />
+            <RowAction
+              icon={KeyRound}
+              label={t("admin.users.resetPassword")}
+              onClick={() => {
+                void sendAdminPasswordReset(row.email)
+                  .then(() => setNotice(t("admin.users.resetSent")))
+                  .catch(() => setNotice(t("admin.users.saveFailed")));
+              }}
+            />
+            <RowAction
+              icon={Trash2}
+              tone="danger"
+              label={t("admin.actions.delete")}
+              onClick={() => {
+                if (!canDeleteUser(currentUser, row, rows)) {
+                  setNotice(
+                    row.id === currentUser?.id
+                      ? t("admin.users.cannotEditSelfRole")
+                      : t("admin.users.protectLastSuper"),
+                  );
+                  return;
+                }
+                void deleteAdminUserProfile(row.id)
+                  .then(() => persistLocal(rows.filter((item) => item.id !== row.id)))
+                  .catch(() => setNotice(t("admin.users.saveFailed")));
+              }}
+            />
+          </>
+        )}
+      />
+
+      <Modal
+        open={open}
+        title={editingId ? t("admin.users.edit") : t("admin.users.add")}
+        onClose={() => setOpen(false)}
+        onSubmit={() => void save()}
+        busy={busy}
+      >
+        <ModalField
+          label={t("admin.table.name")}
+          value={draft.name}
+          onChange={(value) => setDraft({ ...draft, name: value })}
+        />
+        <ModalField
+          label={t("admin.table.email")}
+          type="email"
+          value={draft.email}
+          onChange={(value) => setDraft({ ...draft, email: value })}
+        />
+        <ModalField
+          label={
+            editingId ? t("admin.users.newPasswordOptional") : t("admin.password")
+          }
+          type="password"
+          value={draft.password}
+          onChange={(value) => setDraft({ ...draft, password: value })}
+        />
+        {!editingId ? (
+          <p className="text-xs text-muted-foreground">{t("admin.users.passwordHint")}</p>
+        ) : (
+          <p className="text-xs text-muted-foreground">{t("admin.users.editPasswordHint")}</p>
+        )}
+
+        <label className="flex flex-col gap-2">
+          <span className="text-[0.6rem] tracking-[0.22em] text-muted-foreground uppercase">
+            {t("admin.users.role")}
+          </span>
+          <select
+            value={draft.role}
+            onChange={(event) => setRole(event.target.value as AdminRoleId)}
+            className="rounded-md border border-navy/10 bg-[#faf8f4] px-4 py-3 text-sm outline-none transition-colors focus:border-navy/30"
+          >
+            {ROLE_OPTIONS.map((role) => (
+              <option key={role} value={role}>
+                {t(`admin.users.roles.${role}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <div>
+          <p className="text-[0.6rem] tracking-[0.22em] text-muted-foreground uppercase">
+            {t("admin.users.permissions")}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("admin.users.permissionsHint")}</p>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            {ADMIN_PERMISSIONS.map((permission) => {
+              const checked = draft.permissions.includes(permission);
+              return (
+                <label
+                  key={permission}
+                  className={cn(
+                    "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-3 text-sm transition-colors",
+                    checked ? "border-gold/50 bg-gold/8 text-navy" : "border-border text-navy/70",
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => togglePermission(permission)}
+                    className="accent-[oklch(0.755_0.075_82)]"
+                  />
+                  {t(`admin.users.permissionLabels.${permission}`)}
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        <label className="flex items-center gap-3 text-sm text-navy">
+          <input
+            type="checkbox"
+            checked={draft.active}
+            onChange={(event) => setDraft({ ...draft, active: event.target.checked })}
+            className="accent-[oklch(0.755_0.075_82)]"
+          />
+          {t("admin.users.activeAccount")}
+        </label>
+      </Modal>
+    </AdminLayout>
+  );
+}

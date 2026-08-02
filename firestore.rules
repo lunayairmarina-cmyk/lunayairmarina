@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function adminDoc() {
+      return get(/databases/$(database)/documents/admins/$(request.auth.uid)).data;
+    }
+
+    function isActiveAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        && adminDoc().active == true;
+    }
+
+    function isSuperAdmin() {
+      return isActiveAdmin() && adminDoc().role == 'super_admin';
+    }
+
+    function isPublicContent(collection) {
+      return collection in [
+        'settings', 'homepage', 'about', 'copy', 'why', 'trust',
+        'team', 'fleet', 'services', 'gallery', 'testimonials',
+        'faq', 'blog', 'seo', 'pageHeaders', 'cms', 'media', 'locations'
+      ];
+    }
+
+    // First Super Admin bootstrap lock
+    match /config/bootstrap {
+      allow read: if true;
+      allow create: if signedIn() && !exists(/databases/$(database)/documents/config/bootstrap);
+      allow update, delete: if false;
+    }
+
+    // Admin profiles — not public
+    match /admins/{uid} {
+      allow read: if isActiveAdmin() || (signedIn() && request.auth.uid == uid);
+      allow create: if isSuperAdmin()
+        || (
+          signedIn()
+          && request.auth.uid == uid
+          && request.resource.data.role == 'super_admin'
+          && request.resource.data.active == true
+          && !exists(/databases/$(database)/documents/config/bootstrap)
+        );
+      allow update, delete: if isSuperAdmin();
+    }
+
+    // Contact leads — public can create only; admins manage
+    match /messages/{id} {
+      allow read: if isActiveAdmin();
+      allow create: if request.resource.data.keys().hasAll([
+          'id', 'name', 'email', 'message', 'date', 'status', 'source'
+        ])
+        && request.resource.data.id == id
+        && request.resource.data.status == 'new'
+        && request.resource.data.source == 'contact-form'
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 120
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 3
+        && request.resource.data.email.size() <= 200
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 5000
+        && request.resource.data.date is string
+        && request.resource.data.date.size() <= 40;
+      allow update, delete: if isActiveAdmin();
+    }
+
+    // Uploaded media (data URLs) — public read for site images, admin write
+    match /media/{id} {
+      allow read: if true;
+      allow write: if isActiveAdmin();
+    }
+
+    // Public marketing content
+    match /{collection}/{document} {
+      allow read: if isPublicContent(collection);
+      allow write: if isActiveAdmin() && isPublicContent(collection);
+    }
+  }
+}

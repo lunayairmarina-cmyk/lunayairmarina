@@ -1,0 +1,1076 @@
+{
+  "brand": {
+    "name": "lunayairmarina",
+    "tagline": "Yacht Management"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "blog": "Blog",
+    "application": "App",
+    "gallery": "Gallery",
+    "contact": "Private Consultation",
+    "cta": "Request Consultation"
+  },
+  "hero": {
+    "eyebrow": "Jeddah · Red Sea · Arabian Gulf",
+    "title": "Professional yacht management for owners across Saudi Arabia and the Gulf",
+    "subtitle": "Lunay Air Marina provides professional yacht management solutions for yacht owners — operations, crew, compliance and OPEX clarity from one desk.",
+    "primary": "Request Yacht Management Consultation",
+    "secondary": "Explore Services",
+    "scroll": "Scroll"
+  },
+  "about": {
+    "eyebrow": "About Us",
+    "title": "Yacht management built for Gulf owners",
+    "lead": "Lunay Air Marina provides professional yacht management solutions for yacht owners in Saudi Arabia and the Gulf region.",
+    "body": "From planned maintenance and crew oversight to visiting-yacht agency and marina operations, we manage the technical and operational details so owners keep control with clarity.",
+    "points": [
+      "Dedicated yacht manager",
+      "Class & flag compliance",
+      "Transparent OPEX reporting",
+      "24/7 operations desk"
+    ],
+    "stats": [
+      {
+        "value": 42,
+        "suffix": "",
+        "label": "Yachts managed • Gulf & Mediterranean"
+      },
+      {
+        "value": 78,
+        "suffix": "",
+        "label": "Specialist partners in yards, crew and operations"
+      },
+      {
+        "value": 13,
+        "suffix": "",
+        "label": "Minutes average operations-room response"
+      }
+    ],
+    "pageTitle": "Yacht management\nwith quiet precision",
+    "pageSubtitle": "Professional yacht management solutions for yacht owners in Saudi Arabia and the Gulf region.",
+    "cta": "Discover more",
+    "story": {
+      "eyebrow": "Our Story",
+      "title": "From Red Sea operations to Gulf-wide management",
+      "body": "Based in Jeddah, lunayairmarina supports yacht owners with integrated management: maintenance planning, crew coordination, compliance, and discreet owner reporting. Our multilingual team includes marine engineers, former captains and operations coordinators — one point of contact for every vessel."
+    },
+    "since": {
+      "label": "Since",
+      "year": "2014",
+      "caption": "Year founded"
+    },
+    "mission": {
+      "eyebrow": "Our Mission",
+      "body": "To deliver precise, transparent yacht management that protects the asset, the crew and the owner’s time."
+    },
+    "vision": {
+      "eyebrow": "Our Vision",
+      "body": "To be the trusted yacht management partner for owners across Saudi Arabia and the Arabian Gulf."
+    },
+    "valuesTitle": "More than operations — a covenant of trust",
+    "valuesLead": "Every management decision reflects our commitment to safety, discretion and clear reporting.",
+    "values": [
+      {
+        "title": "Safety first",
+        "description": "Every vessel is managed to rigorous marine safety and class standards."
+      },
+      {
+        "title": "Owner-first service",
+        "description": "We structure management around your vessel, season and family office requirements."
+      },
+      {
+        "title": "Operational reliability",
+        "description": "Maintenance, crew and logistics are coordinated so the yacht stays ready."
+      },
+      {
+        "title": "Transparency",
+        "description": "Clear budgets, no surprises — detailed reporting from the start."
+      }
+    ],
+    "clients": {
+      "eyebrow": "Our Clients",
+      "title": "Discreet relationships built on privacy",
+      "body": "We serve yacht owners, family offices and institutions across the Gulf with absolute confidentiality and precise operational care.",
+      "quote": "Trust is the foundation of every vessel we manage."
+    },
+    "ctaBand": {
+      "eyebrow": "Get in touch",
+      "title": "Ready for professional yacht management?",
+      "body": "Speak with our Jeddah operations desk about managing, crewing or berthing your yacht.",
+      "button": "Request consultation"
+    }
+  },
+  "services": {
+    "eyebrow": "What We Do",
+    "title": "Our Premium Services",
+    "subtitle": "A complete marine operations partner for owners, captains and visiting vessels.",
+    "cta": "Discover more",
+    "viewAll": "View All Services",
+    "items": [
+      {
+        "title": "Complete Yacht & Boat Management (360°)",
+        "description": "Integrated operational, technical and financial management for yachts and boats.",
+        "features": [
+          "Planned maintenance systems",
+          "Class & flag compliance",
+          "Budgeting and reporting"
+        ],
+        "slug": "yacht-management-360"
+      },
+      {
+        "title": "Agency Services for Visiting Yachts",
+        "description": "Support for international yachts arriving in Saudi waters, including permits and logistics.",
+        "features": [
+          "Clearance & permits",
+          "Berth reservation",
+          "Provisioning and concierge"
+        ],
+        "slug": "visiting-yacht-agency"
+      },
+      {
+        "title": "Marina & Yacht Club Operations",
+        "description": "World-class marina and yacht-club operations for safe, luxury berthing.",
+        "features": [
+          "Berth allocation",
+          "Facility operations",
+          "Safety and security"
+        ],
+        "slug": "marina-management"
+      },
+      {
+        "title": "Crew Recruitment Services",
+        "description": "Carefully selected, qualified crew matched to your requirements and service standards.",
+        "features": [
+          "Vetted crew placement",
+          "Payroll & contracts",
+          "Training and certification"
+        ],
+        "slug": "crew-management"
+      }
+    ],
+    "back": "Back to services",
+    "details": {
+      "yacht-management-360": {
+        "title": "Complete Yacht & Boat Management (360°)",
+        "intro": "We deliver an integrated solution for managing your yacht or boat across operational, technical and financial dimensions. From crew supervision and planned maintenance to budgeting and maritime compliance, we take care of everything. You can also choose a modular approach that lets you select only the services you need.",
+        "summary": "From administration and finance to maintenance and operations, we ensure peace of mind with the highest levels of comfort and safety.",
+        "meta": {
+          "investmentLabel": "Initial investment",
+          "investmentValue": "Custom package",
+          "galleryLabel": "Gallery assets",
+          "galleryValue": "2",
+          "benefitsLabel": "Benefits",
+          "benefitsValue": "+3",
+          "categoryLabel": "Category",
+          "categoryValue": "Custom"
+        },
+        "startCta": "Start your journey",
+        "exploreCta": "Explore details",
+        "detailEyebrow": "Detailed description",
+        "detailTitle": "Enriching the experience at every stage",
+        "detailBody": "From administration and finance to maintenance and operations, we ensure peace of mind with the highest levels of comfort and safety.",
+        "benefitsEyebrow": "Key advantages",
+        "benefitsLead": "Every element is backed by specialist teams and live monitoring tools.",
+        "benefits": [
+          "24/7 command centre with full voyage logging",
+          "Integrated maintenance planning and class requirements",
+          "Transparent financial oversight with detailed monthly dashboards"
+        ],
+        "valueEyebrow": "Added value",
+        "valueTitle": "Why clients choose us",
+        "valueLead": "Every benefit comes from precise day-to-day operations aligned with owner needs.",
+        "values": [
+          {
+            "title": "Dedicated yacht manager",
+            "description": "One point of contact managing crew and suppliers with accurate owner updates."
+          },
+          {
+            "title": "Predictive maintenance",
+            "description": "A digital maintenance matrix aligning class surveys, guest bookings and haul-outs."
+          },
+          {
+            "title": "Governance & compliance",
+            "description": "Periodic reviews of ISM and ISPS documents and insurance renewals before deadlines."
+          }
+        ],
+        "galleryEyebrow": "Visual gallery",
+        "galleryTitle": "See the service up close",
+        "galleryLead": "High-resolution imagery that reveals the finest details.",
+        "gallery": {
+          "g1": "Service image",
+          "g2": "Bridge team tracking technical data in real time",
+          "g3": "Maintenance review before guest arrival"
+        }
+      },
+      "visiting-yacht-agency": {
+        "title": "Agency Services for Visiting Yachts",
+        "intro": "We welcome visiting yachts to the shores of the Kingdom of Saudi Arabia and handle every procedure required for a smooth arrival and comfortable departure. We take care of entry permits, customs clearance and all required documentation, so you can focus on enjoying the beauty of the Red Sea.",
+        "summary": "We welcome visiting yachts to Saudi shores and simplify every arrival and departure procedure with confidence.",
+        "meta": {
+          "investmentLabel": "Initial investment",
+          "investmentValue": "Annual subscription",
+          "galleryLabel": "Gallery assets",
+          "galleryValue": "2",
+          "benefitsLabel": "Benefits",
+          "benefitsValue": "+3",
+          "categoryLabel": "Category",
+          "categoryValue": "Custom"
+        },
+        "startCta": "Start your journey",
+        "exploreCta": "Explore details",
+        "detailEyebrow": "Detailed description",
+        "detailTitle": "Enriching the experience at every stage",
+        "detailBody": "We welcome visiting yachts to the shores of the Kingdom of Saudi Arabia and handle every procedure required for a smooth arrival and comfortable departure. We take care of entry permits, customs clearance and all required documentation, so you can focus on enjoying the beauty of the Red Sea.",
+        "benefitsEyebrow": "Key advantages",
+        "benefitsLead": "Every element is backed by specialist teams and live monitoring tools.",
+        "benefits": [
+          "Fast entry permits and coordination with port authorities",
+          "Full hospitality and provisioning for guests and crew",
+          "Real-time follow-up on customs and clearance procedures"
+        ],
+        "valueEyebrow": "Added value",
+        "valueTitle": "Why clients choose us",
+        "valueLead": "Every benefit comes from precise day-to-day operations aligned with owner and captain needs.",
+        "values": [
+          {
+            "title": "Simplified arrival procedures",
+            "description": "We coordinate pilotage, bunkering and berthing so the captain stays focused on navigation."
+          },
+          {
+            "title": "Integrated hospitality",
+            "description": "VIP transfers, provisioning and villa bookings through one connected channel."
+          },
+          {
+            "title": "Regulatory reliability",
+            "description": "Our accredited agents remain present until all official departure procedures are complete."
+          }
+        ],
+        "galleryEyebrow": "Visual gallery",
+        "galleryTitle": "See the service up close",
+        "galleryLead": "High-resolution imagery that reveals the finest details.",
+        "gallery": {
+          "g1": "Service image",
+          "g2": "Crew reception by the agency officer",
+          "g3": "Customs clearance desk"
+        }
+      },
+      "marina-management": {
+        "title": "Marina & Yacht Club Operations",
+        "intro": "We operate marinas to the highest international standards, creating a safe and luxurious berthing environment for yachts and boats. We also manage yacht clubs that offer exclusive leisure and amenities for owners, powered by modern technology that makes them ideal destinations for relaxation and connection.",
+        "summary": "World-class marina and yacht-club operations for safe berthing and a refined member experience.",
+        "meta": {
+          "investmentLabel": "Initial investment",
+          "investmentValue": "Managed programme",
+          "galleryLabel": "Gallery assets",
+          "galleryValue": "2",
+          "benefitsLabel": "Benefits",
+          "benefitsValue": "+3",
+          "categoryLabel": "Category",
+          "categoryValue": "Custom"
+        },
+        "startCta": "Start your journey",
+        "exploreCta": "Explore details",
+        "detailEyebrow": "Detailed description",
+        "detailTitle": "Enriching the experience at every stage",
+        "detailBody": "We operate marinas to the highest international standards, creating a safe and luxurious berthing environment for yachts and boats. We also manage yacht clubs that offer exclusive leisure and amenities for owners, powered by modern technology that makes them ideal destinations for relaxation and connection.",
+        "benefitsEyebrow": "Key advantages",
+        "benefitsLead": "Every element is backed by specialist teams and live monitoring tools.",
+        "benefits": [
+          "Digital berth bookings with real-time utility monitoring",
+          "Dock and guest-service teams trained in luxury hospitality",
+          "Club programmes and events that lift operational yield"
+        ],
+        "valueEyebrow": "Added value",
+        "valueTitle": "Why clients choose us",
+        "valueLead": "Every benefit comes from precise day-to-day operations aligned with marina and member needs.",
+        "values": [
+          {
+            "title": "Seamless operations",
+            "description": "We apply SOPs, training and safety routines every week."
+          },
+          {
+            "title": "Member loyalty",
+            "description": "Curated events and guest-experience analytics keep members engaged."
+          },
+          {
+            "title": "Revenue clarity",
+            "description": "Dynamic pricing models and clear reporting for partners and owners."
+          }
+        ],
+        "galleryEyebrow": "Visual gallery",
+        "galleryTitle": "See the service up close",
+        "galleryLead": "High-resolution imagery that reveals the finest details.",
+        "gallery": {
+          "g1": "Service image",
+          "g2": "Smart control panel for berth allocation",
+          "g3": "Exclusive club programmes and events"
+        }
+      },
+      "crew-management": {
+        "title": "Crew Recruitment Services",
+        "intro": "We know the right crew is the foundation of an exceptional experience. Our recruitment team carefully selects candidates to match your unique requirements in skill and character. You can trust that every crew member is qualified, experienced and ready to deliver the highest standard of service.",
+        "summary": "Carefully selected, qualified crew matched to your needs and ready to deliver outstanding service.",
+        "meta": {
+          "investmentLabel": "Initial investment",
+          "investmentValue": "Placement fee",
+          "galleryLabel": "Gallery assets",
+          "galleryValue": "2",
+          "benefitsLabel": "Benefits",
+          "benefitsValue": "+3",
+          "categoryLabel": "Category",
+          "categoryValue": "Custom"
+        },
+        "startCta": "Start your journey",
+        "exploreCta": "Explore details",
+        "detailEyebrow": "Detailed description",
+        "detailTitle": "Enriching the experience at every stage",
+        "detailBody": "We know the right crew is the foundation of an exceptional experience. Our recruitment team carefully selects candidates to match your unique requirements in skill and character. You can trust that every crew member is qualified, experienced and ready to deliver the highest standard of service.",
+        "benefitsEyebrow": "Key advantages",
+        "benefitsLead": "Every element is backed by specialist teams and live monitoring tools.",
+        "benefits": [
+          "Global talent network with comprehensive background checks",
+          "Behavioural assessments focused on hospitality skills",
+          "Crew rotation plans and continuous training credentials"
+        ],
+        "valueEyebrow": "Added value",
+        "valueTitle": "Why clients choose us",
+        "valueLead": "Every benefit comes from precise day-to-day operations aligned with owner and yacht needs.",
+        "values": [
+          {
+            "title": "Precise shortlists",
+            "description": "Three matched profiles per role with personality insights."
+          },
+          {
+            "title": "Faster onboarding",
+            "description": "Visa, screening and registration run in parallel to reduce time."
+          },
+          {
+            "title": "Performance follow-up",
+            "description": "90-day monitoring with guest-satisfaction metrics to keep standards steady."
+          }
+        ],
+        "galleryEyebrow": "Visual gallery",
+        "galleryTitle": "See the service up close",
+        "galleryLead": "High-resolution imagery that reveals the finest details.",
+        "gallery": {
+          "g1": "Service image",
+          "g2": "Hospitality crew assessment centre",
+          "g3": "Bridge-room simulation training"
+        }
+      }
+    }
+  },
+  "why": {
+    "eyebrow": "Why choose Lunay Air Marina",
+    "title": "Yacht management expertise owners can rely on",
+    "items": [
+      {
+        "title": "Professional marine team",
+        "description": "Captains, marine engineers and operations coordinators managing vessels to five-star standards."
+      },
+      {
+        "title": "360° yacht management",
+        "description": "Technical, operational and financial oversight from planned maintenance to owner reporting."
+      },
+      {
+        "title": "Saudi & Gulf coverage",
+        "description": "Jeddah-based desk supporting Red Sea and Arabian Gulf owners, visiting yachts and marina needs."
+      },
+      {
+        "title": "Fast operations response",
+        "description": "A dedicated operations room that follows mechanical alerts, crew changes and logistics around the clock."
+      }
+    ]
+  },
+  "trust": {
+    "eyebrow": "Trust foundation",
+    "title": "Proof we continue to strengthen",
+    "lead": "These spaces are prepared for verified case studies, certifications, licenses and team profiles — shared with owner consent.",
+    "cta": "Speak with our management desk",
+    "slots": [
+      {
+        "title": "Case Studies",
+        "body": "Anonymized management projects and operational outcomes will appear here."
+      },
+      {
+        "title": "Certifications",
+        "body": "Marine and management certifications will be listed once verified for publication."
+      },
+      {
+        "title": "Licenses",
+        "body": "Operating licenses and compliance credentials for Saudi and Gulf operations."
+      },
+      {
+        "title": "Team Members",
+        "body": "Captains, engineers and operations leads — profiles coming with role titles."
+      }
+    ]
+  },
+  "whatsapp": {
+    "label": "WhatsApp Concierge",
+    "prefill": "Hello lunayairmarina, I would like a private yacht management consultation."
+  },
+  "fleet": {
+    "eyebrow": "Our Fleet",
+    "title": "Yachts Under Management",
+    "subtitle": "A curated portfolio of motor yachts, sailing yachts and explorers.",
+    "view": "View details",
+    "length": "Length",
+    "category": "Category",
+    "capacity": "Guests",
+    "crew": "Crew",
+    "all": "All",
+    "viewAll": "View Full Fleet"
+  },
+  "blog": {
+    "eyebrow": "Insights",
+    "title": "Marina & Yacht Blog",
+    "subtitle": "Practical guides on yacht management, marina operations and Red Sea ownership.",
+    "viewAll": "View All Articles",
+    "readMore": "Read article",
+    "empty": "No published articles yet.",
+    "by": "By",
+    "related": "Related articles",
+    "back": "Back to blog",
+    "ctaContact": "Request Consultation"
+  },
+  "application": {
+    "hero": {
+      "eyebrow": "Exclusive Mobile Application",
+      "title": "Premium Yacht Management.\nAnywhere. Anytime.",
+      "titleAr": "تطبيق إدارة يخوت احترافي",
+      "subtitleAr": "راقب يختك من أي مكان في العالم.",
+      "description": "Imagine monitoring your yacht from anywhere in the world with a single tap. Our exclusive application gives yacht owners complete visibility over maintenance, tank levels, inspections, services, crew status, documents and much more.",
+      "ask": "Ask a Question",
+      "appStore": "Download on the App Store",
+      "googlePlay": "Get it on Google Play"
+    },
+    "overview": {
+      "eyebrow": "App Overview",
+      "title": "Everything your yacht needs, in one place",
+      "cards": {
+        "tanks": "Tank Levels",
+        "checklist": "Checklist",
+        "safety": "Safety",
+        "systems": "Systems",
+        "documents": "Documents",
+        "crew": "Crew",
+        "services": "Upcoming Services",
+        "history": "History",
+        "info": "Information"
+      }
+    },
+    "tanks": {
+      "eyebrow": "Live Monitoring",
+      "title": "Monitor Tank Levels Anywhere",
+      "description": "View your yacht's tank levels from anywhere in the world. Our captains update tank information after every trip. Receive instant notifications whenever new data is available.",
+      "titleAr": "راقب مستويات الخزانات من أي مكان",
+      "descriptionAr": "اطّلع على مستويات خزانات يختك من أي مكان في العالم. يقوم القباطنة بتحديث البيانات بعد كل رحلة، وتصلك إشعارات فورية عند توفر معلومات جديدة.",
+      "screenTitle": "Tank Levels",
+      "brand": "Golden Eye",
+      "updated": "Last Updated: Today",
+      "diesel": "Diesel",
+      "fresh": "Fresh Water",
+      "waste": "Waste",
+      "gas": "Gas"
+    },
+    "checklist": {
+      "eyebrow": "Inspections",
+      "title": "Custom Weekly Inspection Checklist",
+      "description": "Every yacht receives a completely customized inspection checklist. Our management team updates every inspection weekly. Track maintenance history with complete transparency.",
+      "titleAr": "قائمة فحص أسبوعية مخصصة",
+      "descriptionAr": "يحصل كل يخت على قائمة فحص مخصصة بالكامل. يحدّث فريق الإدارة كل فحص أسبوعيًا مع سجل صيانة شفاف بالكامل.",
+      "groups": {
+        "exterior": "Exterior",
+        "interior": "Interior",
+        "below": "Below Deck"
+      },
+      "items": {
+        "fullWash": "Full Wash",
+        "windshield": "Windshield Polish",
+        "deck": "Deck Cleaning",
+        "cupHolder": "Cup Holder Cleaning",
+        "sink": "Sink Polish",
+        "floor": "Floor Cleaning",
+        "fingerprint": "Fingerprint Removal",
+        "generator": "Generator Strainer",
+        "engine": "Engine Inspection",
+        "battery": "Battery Check"
+      }
+    },
+    "services": {
+      "eyebrow": "Maintenance",
+      "title": "Upcoming Services",
+      "description": "Never miss an important maintenance schedule. Receive reminders before every service. Our management team handles the planning for you.",
+      "titleAr": "الخدمات القادمة",
+      "descriptionAr": "لا تفوّت أي موعد صيانة مهم. تصلك تذكيرات قبل كل خدمة، ويتولى فريق الإدارة التخطيط بالكامل نيابةً عنك.",
+      "status": {
+        "completed": "Completed",
+        "upcoming": "Upcoming",
+        "overdue": "Overdue"
+      },
+      "items": {
+        "bottomPaint": "Bottom Paint",
+        "engine": "Engine Service",
+        "generator": "Generator Service",
+        "seakeeper": "SeaKeeper",
+        "ac": "Air Conditioning"
+      },
+      "dates": {
+        "sep19": "Sep 19",
+        "aug14": "Aug 14",
+        "sep15": "Sep 15",
+        "aug10": "Aug 10",
+        "noDate": "No Date"
+      }
+    },
+    "features": {
+      "eyebrow": "Capabilities",
+      "title": "Application Features",
+      "items": {
+        "monitoring": {
+          "title": "24/7 Monitoring",
+          "description": "Continuous visibility over yacht systems and operations."
+        },
+        "notifications": {
+          "title": "Live Notifications",
+          "description": "Instant alerts when captains update critical data."
+        },
+        "maintenance": {
+          "title": "Maintenance Tracking",
+          "description": "Follow every service from schedule to completion."
+        },
+        "crew": {
+          "title": "Crew Management",
+          "description": "Stay informed about crew status and rotations."
+        },
+        "documents": {
+          "title": "Digital Documents",
+          "description": "Access certificates and papers securely anytime."
+        },
+        "safety": {
+          "title": "Safety Reports",
+          "description": "Review inspections and safety checks in one place."
+        },
+        "tanks": {
+          "title": "Tank Monitoring",
+          "description": "Diesel, water, waste and gas levels at a glance."
+        },
+        "expenses": {
+          "title": "Expense Tracking",
+          "description": "Transparent cost visibility for ownership clarity."
+        },
+        "photos": {
+          "title": "Photo Reports",
+          "description": "Visual updates from decks, systems and service work."
+        },
+        "scheduling": {
+          "title": "Service Scheduling",
+          "description": "Plan upcoming yard and onboard work with reminders."
+        },
+        "fleet": {
+          "title": "Fleet Overview",
+          "description": "A clear snapshot of every managed vessel."
+        },
+        "history": {
+          "title": "Maintenance History",
+          "description": "Complete archive of inspections and completed work."
+        }
+      }
+    },
+    "gallery": {
+      "eyebrow": "Inside the App",
+      "title": "A gallery of premium screens"
+    },
+    "download": {
+      "title": "Take Full Control of Your Yacht",
+      "description": "Experience professional yacht management in your pocket.",
+      "titleAr": "تحكم كامل في يختك",
+      "descriptionAr": "اختبر إدارة يخوت احترافية بين يديك.",
+      "appStore": "Download on App Store",
+      "googlePlay": "Get it on Google Play",
+      "contact": "Contact Us"
+    }
+  },
+  "gallery": {
+    "eyebrow": "Gallery",
+    "title": "Life On Board",
+    "subtitle": "Moments from our marinas, decks and the waters we operate in.",
+    "close": "Close",
+    "viewAll": "View Gallery"
+  },
+  "testimonials": {
+    "eyebrow": "Testimonials",
+    "title": "Trusted By Owners",
+    "items": [
+      {
+        "name": "Khalid Al-Rasheed",
+        "position": "Yacht Owner, 42m Motor Yacht",
+        "review": "lunayairmarina took over a complicated refit mid-season and delivered ahead of schedule. Their reporting is the most transparent I have seen in twenty years of ownership."
+      },
+      {
+        "name": "Sophie Laurent",
+        "position": "Family Office Director",
+        "review": "Budget discipline, impeccable crew and absolute discretion. Managing three vessels became genuinely effortless."
+      },
+      {
+        "name": "Captain Marco Bianchi",
+        "position": "Master, S/Y Meridian",
+        "review": "As a captain I care about response time. lunayairmarina answers at 3am and solves it before sunrise."
+      }
+    ]
+  },
+  "faq": {
+    "eyebrow": "FAQ",
+    "title": "Frequently Asked Questions",
+    "items": [
+      {
+        "question": "What yacht management services do you provide?",
+        "answer": "We provide full 360° management: technical supervision, planned maintenance, refit management, crew recruitment and payroll, insurance and class compliance, operational planning, and transparent financial reporting."
+      },
+      {
+        "question": "Do you manage international yachts?",
+        "answer": "Yes. Our visiting yacht agency supports international vessels arriving to Saudi waters with clearance, permits, berthing, provisioning, logistics and concierge services."
+      },
+      {
+        "question": "Do you provide crew recruitment?",
+        "answer": "We recruit, vet and manage certified marine professionals from captains and engineers to interior and service crew, including contracts, payroll and ongoing training."
+      },
+      {
+        "question": "How can I request consultation?",
+        "answer": "Send us a message through the contact form or call our operations desk. A dedicated manager will respond within one business day to arrange a private consultation."
+      }
+    ]
+  },
+  "contact": {
+    "eyebrow": "Private Consultation",
+    "title": "Request a yacht management consultation",
+    "subtitle": "Tell us about your vessel and our Jeddah operations desk will respond with a clear next step for management, agency or crew support.",
+    "phone": "Phone",
+    "email": "Email",
+    "location": "Address",
+    "address": "Al Murjan Tower, Prince Sultan Road, Al Rawdah, Jeddah",
+    "hours": "Daily 7:00 AM – 11:00 PM Saudi time",
+    "channels": {
+      "concierge": {
+        "label": "Concierge line",
+        "value": "531561212",
+        "note": "Daily 7:00 AM – 11:00 PM Saudi time"
+      },
+      "email": {
+        "label": "Email",
+        "value": "Info@lunayairmarina.com",
+        "note": "We reply within 24 hours"
+      },
+      "office": {
+        "label": "Head office",
+        "value": "Al Murjan Tower, Prince Sultan Road, Al Rawdah, Jeddah",
+        "note": "By prior appointment only"
+      }
+    },
+    "response": {
+      "label": "Average response",
+      "value": "13",
+      "unit": "minutes",
+      "caption": "Global fleet clients • 2025",
+      "imageAlt": "Concierge preparing a luxury yacht itinerary"
+    },
+    "pathways": {
+      "visit": {
+        "title": "Plan a visit",
+        "body": "Book a tour aboard your yacht or an in-person meeting with our engineering partners.",
+        "cta": "Reserve entry clearance"
+      },
+      "emergency": {
+        "title": "Emergency desk",
+        "body": "Around-the-clock monitoring for mechanical alerts, weather routes, and crew relief.",
+        "cta": "Contact the duty officer"
+      },
+      "charter": {
+        "title": "Charter concierge",
+        "body": "We coordinate provisioning, customs clearance, and guest experiences worldwide.",
+        "cta": "Design an itinerary"
+      }
+    },
+    "formSection": {
+      "title": "Yacht management enquiry",
+      "subtitle": "Share your vessel details and we will reply within 24 hours.",
+      "imageAlt": "Yacht at sea with hospitality crew",
+      "replyNote": "We will reply within 24 hours."
+    },
+    "info": {
+      "title": "Contact details",
+      "subtitle": "Speak with our yacht management desk through any channel below."
+    },
+    "lounge": {
+      "eyebrow": "Visit the lounge",
+      "title": "Executive lounge at Al Murjan Tower",
+      "body": "Inside Al Murjan Tower on Prince Sultan Road, our private lounge offers navigation tables, engineering displays, and a tasting corner prepared for owners. Book ahead so concierge can arrange your preferred hospitality.",
+      "imageAlt": "Aerial view of the Red Sea coastline",
+      "hours": [
+        { "day": "Monday – Thursday", "time": "08:00 – 20:00" },
+        { "day": "Friday", "time": "09:00 – 18:00" },
+        { "day": "Saturday", "time": "10:00 – 16:00" },
+        { "day": "Sunday", "time": "By appointment" }
+      ]
+    },
+    "form": {
+      "name": "Full name",
+      "namePlaceholder": "e.g. Ali",
+      "email": "Email",
+      "emailPlaceholder": "example@domain.com",
+      "phone": "Phone number",
+      "phonePlaceholder": "+966 5X XXX XXXX",
+      "yachtType": "Yacht type",
+      "yachtTypePlaceholder": "Motor yacht / sailing / explorer",
+      "yachtLength": "Yacht length",
+      "yachtLengthPlaceholder": "e.g. 42 m",
+      "yachtLocation": "Yacht location",
+      "yachtLocationPlaceholder": "Jeddah / Red Sea / Dubai",
+      "serviceNeeded": "Service required",
+      "serviceNeededPlaceholder": "360° management, agency, marina, crew…",
+      "message": "Additional notes",
+      "messagePlaceholder": "Tell us anything else our management desk should know.",
+      "submit": "Send management request",
+      "sending": "Sending...",
+      "success": "Thank you. Your management enquiry has been received.",
+      "error": "Please complete all required fields."
+    }
+  },
+  "footer": {
+    "description": "Quiet journeys, luxury yachts, and carefully managed service across the Arabian Gulf and the Red Sea.",
+    "services": "Services",
+    "links": "Quick Links",
+    "contact": "Contact",
+    "rights": "All rights reserved.",
+    "admin": "Admin Access"
+  },
+  "admin": {
+    "portal": "Admin Portal",
+    "portalSubtitle": "Manage Website Content",
+    "email": "Email",
+    "password": "Password",
+    "login": "Login",
+    "remember": "Remember me",
+    "forgot": "Forgot password?",
+    "demoHint": "Demo: admin@lunayairmarina.com or editor@lunayairmarina.com — any password works.",
+    "firebaseHint": "Uses Firebase Auth. First login with a new email creates the Super Admin if none exist. Enable Email/Password in Firebase Console.",
+    "loginFailed": "Login failed. Check email, password and Firebase Auth settings.",
+    "authCredentialsRequired": "Email and password are required.",
+    "authProviderDisabled": "Email/Password is disabled in Firebase. Open Console → Authentication → Sign-in method → Enable Email/Password for project lunayairmarina-2d694.",
+    "authInvalidCredentials": "Invalid email or password.",
+    "authUserNotFound": "User not found. Create it from Users, or first login bootstraps Super Admin.",
+    "authEmailInUse": "Email already registered. Use the correct password.",
+    "authWeakPassword": "Password is too weak (min 6 characters).",
+    "authTooManyRequests": "Too many attempts. Try again later.",
+    "authUnauthorizedDomain": "Domain not allowed. Add it in Firebase Auth → Settings → Authorized domains.",
+    "authNoProfile": "Account is inactive or has no admin profile in Firestore.",
+    "authLocalOnly": "Signed in locally only. Enable Email/Password in Firebase for cloud sync.",
+    "authPermissionDenied": "Firestore blocked the write. Publish firestore.rules from this project, then retry.",
+    "authNetwork": "Network issue reaching Firebase. Check your connection and retry.",
+    "backToSite": "Back to website",
+    "search": "Search...",
+    "nav": {
+      "dashboard": "Dashboard",
+      "pages": "Pages & Copy",
+      "content": "Website Content",
+      "services": "Services",
+      "why": "Why Choose Us",
+      "trust": "Trust Blocks",
+      "team": "Team",
+      "fleet": "Fleet",
+      "blog": "Blog",
+      "gallery": "Gallery",
+      "testimonials": "Testimonials",
+      "faq": "FAQ",
+      "messages": "Messages",
+      "seo": "SEO",
+      "users": "Users & Roles",
+      "settings": "Settings",
+      "logout": "Logout",
+      "groups": {
+        "content": "Content",
+        "system": "System"
+      }
+    },
+    "cms": {
+      "savedLocal": "Saved locally. Live on this browser.",
+      "savedSynced": "Saved and synced to Firebase.",
+      "uploadFailed": "Upload failed. Try a smaller image (JPG/PNG/WebP).",
+      "uploadDeviceHint": "Pick an image from your device. It is compressed and saved in Firestore (not Storage).",
+      "syncLocal": "Local only",
+      "syncSynced": "Synced to Firebase",
+      "syncError": "Sync error",
+      "syncUnknown": "Sync status unknown"
+    },
+    "pages": {
+      "subtitle": "Edit bilingual page copy for the public site. Changes apply immediately after save.",
+      "hint": "Update English and Arabic copy for this section.",
+      "sectionsLabel": "Sections",
+      "sections": {
+        "brand": "Brand",
+        "nav": "Navigation",
+        "hero": "Home Hero",
+        "about": "About",
+        "services": "Services",
+        "why": "Why Choose Us",
+        "trust": "Trust",
+        "gallery": "Gallery",
+        "fleet": "Fleet",
+        "testimonials": "Testimonials",
+        "faq": "FAQ",
+        "blog": "Blog",
+        "contact": "Contact",
+        "whatsapp": "WhatsApp",
+        "application": "Application",
+        "footer": "Footer"
+      }
+    },
+    "why": {
+      "items": "Reasons / cards"
+    },
+    "trust": {
+      "slots": "Trust slots",
+      "slotsCount": "slots",
+      "slotLabel": "Slot",
+      "slotAdded": "New trust slot added — scroll down to edit it, then Save."
+    },
+    "messages": {
+      "loading": "Loading inbox from Firebase…"
+    },
+    "seo": {
+      "subtitle": "Full SEO control: titles, descriptions, keywords, robots, canonicals, OG images, service pages and header images.",
+      "hint": "Aim for title 30–60 chars and description 120–160 chars. Include the focus keyword.",
+      "pagesLabel": "Main pages",
+      "servicesLabel": "Service pages",
+      "score": "SEO health score",
+      "keywords": "Keywords (comma separated)",
+      "focusKeyword": "Focus keyword",
+      "canonical": "Canonical path",
+      "robots": "Robots",
+      "title": "SEO title",
+      "description": "Meta description",
+      "ogImage": "Open Graph image",
+      "headersHint": "Replace the large header/cover images used on public pages.",
+      "tabs": {
+        "pages": "Main pages",
+        "services": "Service SEO",
+        "headers": "Page headers"
+      },
+      "pages": {
+        "home": "Home",
+        "about": "About",
+        "services": "Services",
+        "contact": "Contact",
+        "blog": "Blog",
+        "application": "Application"
+      }
+    },
+    "services": {
+      "detailEditor": "Service detail pages",
+      "detailHint": "Edit the long-form content for each public service page (current language)."
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "welcome": "Welcome back to lunayairmarina",
+      "welcomeLead": "Manage yacht management content, owner enquiries and site media from one command desk.",
+      "greeting": {
+        "morning": "Good morning",
+        "afternoon": "Good afternoon",
+        "evening": "Good evening"
+      },
+      "cms": {
+        "connected": "Firebase content connected",
+        "local": "Running on local content"
+      },
+      "stats": {
+        "yachts": "Managed Yachts",
+        "posts": "Blog Posts",
+        "postsHint": "Published and draft articles",
+        "services": "Services",
+        "servicesHint": "Yacht management offerings",
+        "images": "Gallery Images",
+        "imagesHint": "Visual assets on the site",
+        "messages": "Messages",
+        "newMessages": "{count} new",
+        "testimonials": "Testimonials",
+        "leads": "Consultation Leads",
+        "leadsHint": "Saved from the contact form"
+      },
+      "actions": {
+        "eyebrow": "Quick actions",
+        "title": "What do you want to update?",
+        "content": "Edit website content",
+        "contentHint": "Hero, about copy and homepage messaging.",
+        "blog": "Manage blog",
+        "blogHint": "Write, publish and refine yacht management articles.",
+        "messages": "Owner inbox",
+        "messagesHint": "Review consultation requests and support messages.",
+        "settings": "Company settings",
+        "settingsHint": "Phone, WhatsApp, email and social links.",
+        "reviewInbox": "Review inbox"
+      },
+      "recent": "Recent enquiries",
+      "recentHint": "Latest owner and agency messages awaiting attention.",
+      "leadsTitle": "Contact form leads",
+      "unknownLead": "Untitled lead",
+      "leadFallback": "Yacht management consultation request",
+      "health": {
+        "eyebrow": "Content map",
+        "title": "Site modules"
+      },
+      "activity": "Activity",
+      "activityTitle": "Operations snapshot",
+      "activityItems": {
+        "content": "CMS modules ready",
+        "contentMeta": "Content, services, blog, gallery and FAQ are available from the sidebar.",
+        "messages": "Inbox check",
+        "messagesMeta": "{count} unread messages need review.",
+        "firebase": "Content source",
+        "firebaseReady": "Firebase bundle detected — live content can refresh the site.",
+        "firebasePending": "Using local fallback until Firestore seed is completed."
+      },
+      "viewAll": "View all"
+    },
+    "content": {
+      "title": "Website Content",
+      "hero": "Hero Section",
+      "about": "About Section",
+      "heroTitle": "Title",
+      "heroDescription": "Description",
+      "primaryButton": "Primary Button",
+      "secondaryButton": "Secondary Button",
+      "background": "Background Image",
+      "statistics": "Statistics",
+      "save": "Save Changes",
+      "saved": "Changes saved locally."
+    },
+    "table": {
+      "image": "Image",
+      "title": "Title",
+      "description": "Description",
+      "status": "Status",
+      "actions": "Actions",
+      "name": "Name",
+      "length": "Length",
+      "category": "Category",
+      "capacity": "Capacity",
+      "position": "Position",
+      "review": "Review",
+      "question": "Question",
+      "answer": "Answer",
+      "email": "Email",
+      "phone": "Phone",
+      "message": "Message",
+      "date": "Date",
+      "empty": "No records yet."
+    },
+    "actions": {
+      "add": "Add New",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "upload": "Upload Image",
+      "confirmDelete": "Delete this record?"
+    },
+    "status": {
+      "active": "Active",
+      "draft": "Draft",
+      "new": "New",
+      "read": "Read"
+    },
+    "settings": {
+      "title": "Settings",
+      "general": "General",
+      "logo": "Logo",
+      "companyName": "Company Name",
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address",
+      "social": "Social Links"
+    },
+    "blog": {
+      "subtitle": "Publish SEO articles with headings, images, and keyword links Google can understand.",
+      "add": "New Article",
+      "edit": "Edit Article",
+      "postTitle": "Article title",
+      "slug": "URL slug",
+      "excerpt": "Short excerpt",
+      "coverImage": "Cover image URL",
+      "coverAlt": "Cover image alt text",
+      "author": "Author",
+      "seoBox": "SEO settings",
+      "seoTitle": "SEO title",
+      "seoDescription": "Meta description",
+      "focusKeyword": "Focus keyword",
+      "tags": "Tags (comma separated)",
+      "contentBlocks": "Content blocks",
+      "addParagraph": "Paragraph",
+      "addHeading": "Heading",
+      "addImage": "Image",
+      "addQuote": "Quote",
+      "paragraphPlaceholder": "Write the paragraph text…",
+      "keywordLink": "Turn a keyword into a colored SEO link",
+      "imageUrl": "Image URL",
+      "imageAlt": "Image alt (required for SEO)",
+      "imageCaption": "Optional caption"
+    },
+    "users": {
+      "subtitle": "Add team members and choose exactly which admin sections each person can edit.",
+      "add": "Add User",
+      "edit": "Edit User",
+      "role": "Role",
+      "permissions": "Permissions",
+      "permissionsCount": "sections",
+      "permissionsHint": "Select what this user can view and edit. Changing boxes switches the role to Custom.",
+      "activeAccount": "Active account",
+      "inactive": "Inactive",
+      "noAccess": "You do not have permission to manage users and roles.",
+      "roles": {
+        "super_admin": "Super Admin",
+        "editor": "Editor",
+        "gallery_manager": "Gallery Manager",
+        "support": "Support",
+        "custom": "Custom"
+      },
+      "permissionLabels": {
+        "dashboard": "Dashboard",
+        "pages": "Pages & Copy",
+        "content": "Website Content",
+        "services": "Services",
+        "why": "Why Choose Us",
+        "trust": "Trust Blocks",
+        "team": "Team",
+        "fleet": "Fleet",
+        "blog": "Blog",
+        "gallery": "Gallery",
+        "testimonials": "Testimonials",
+        "faq": "FAQ",
+        "messages": "Messages",
+        "seo": "SEO",
+        "settings": "Settings",
+        "users": "Users & Roles"
+      },
+      "protectLastSuper": "At least one Super Admin must remain active.",
+      "cannotEditSelfRole": "You cannot remove your own Super Admin role.",
+      "subtitleFirebase": "Create admins with email + password. Accounts are stored in Firebase Authentication and profiles in Firestore.",
+      "passwordRequired": "Password is required (min 6 characters) when creating a user.",
+      "passwordHint": "Password is saved securely in Firebase Auth (never stored as plain text).",
+      "newPasswordOptional": "New password (optional)",
+      "editPasswordHint": "Leave empty to keep the current password. If filled, a password-reset email is sent.",
+      "resetPassword": "Reset password email",
+      "resetSent": "Password reset email sent.",
+      "savedFirebase": "User created in Firebase Auth + Firestore.",
+      "saveFailed": "Could not save user to Firebase. Check Auth Email/Password is enabled and rules are deployed."
+    }
+  },
+  "common": {
+    "language": "Language",
+    "readMore": "Read more",
+    "loading": "Loading"
+  }
+}
