@@ -292,10 +292,10 @@ export const messageRecords: MessageRecord[] = [
 ];
 
 export const companyInfo = {
-  phone: "00966531561212",
+  phone: "966531561212",
   phoneDisplay: "+966 53 156 1212",
   whatsapp: "966531561212",
-  email: "Info@lunayairmarina.com",
+  email: "info@lunayairmarina.com",
   addressEn: "Al Murjan Tower, Prince Sultan Road, Al Rawdah, Jeddah",
   addressAr: "برج المرجان، طريق الأمير سلطان، حي الروضة، جدة",
   social: {

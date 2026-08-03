@@ -658,12 +658,12 @@
     "channels": {
       "concierge": {
         "label": "Concierge line",
-        "value": "531561212",
+        "value": "+966 53 156 1212",
         "note": "Daily 7:00 AM – 11:00 PM Saudi time"
       },
       "email": {
         "label": "Email",
-        "value": "Info@lunayairmarina.com",
+        "value": "info@lunayairmarina.com",
         "note": "We reply within 24 hours"
       },
       "office": {
