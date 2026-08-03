@@ -7,14 +7,18 @@ import { useOptionalSiteContent, localizeValue } from "@/providers/SiteContentPr
 import heroImageFallback from "@/assets/hero-yacht.jpg";
 import { resolvePublicMediaSrc } from "@/lib/media";
 
-const HERO_MP4_FALLBACK = "/videos/hero.mp4";
+const HERO_MP4_FALLBACK = "/videos/lunayair.mp4";
 
 export function Hero() {
   const { t, language } = useLanguage();
   const site = useOptionalSiteContent();
   const homepage = site?.bundle?.homepage;
   const heroImage = resolvePublicMediaSrc(homepage?.heroImage, heroImageFallback);
-  const heroVideo = homepage?.heroVideo || HERO_MP4_FALLBACK;
+  // Prefer CMS video, but migrate away from the old default hero.mp4.
+  const heroVideo =
+    homepage?.heroVideo && homepage.heroVideo !== "/videos/hero.mp4"
+      ? homepage.heroVideo
+      : HERO_MP4_FALLBACK;
   const eyebrow = homepage ? localizeValue(homepage.heroEyebrow, language) : t("hero.eyebrow");
   const title = homepage ? localizeValue(homepage.heroTitle, language) : t("hero.title");
   const subtitle = homepage
@@ -32,12 +36,11 @@ export function Hero() {
 
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const narrow = window.matchMedia("(max-width: 768px)").matches;
     const saveData = Boolean(
       (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData,
     );
 
-    if (reduceMotion || narrow || saveData) {
+    if (reduceMotion || saveData) {
       setShouldLoadVideo(false);
       return;
     }

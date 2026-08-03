@@ -32,7 +32,7 @@ function ContentPage() {
       heroTitle: { en: t("hero.title"), ar: t("hero.title") },
       heroDescription: { en: t("hero.subtitle"), ar: t("hero.subtitle") },
       heroEyebrow: { en: t("hero.eyebrow"), ar: t("hero.eyebrow") },
-      heroVideo: "/videos/hero.mp4",
+      heroVideo: "/videos/lunayair.mp4",
       heroImage,
       primaryCTA: { en: t("hero.primary"), ar: t("hero.primary") },
       secondaryCTA: { en: t("hero.secondary"), ar: t("hero.secondary") },
