@@ -32,7 +32,7 @@ export function Hero() {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const [ready, setReady] = useState(false);
-  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(true);
 
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -42,26 +42,7 @@ export function Hero() {
 
     if (reduceMotion || saveData) {
       setShouldLoadVideo(false);
-      return;
     }
-
-    let idleId: number | undefined;
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-    const enable = () => setShouldLoadVideo(true);
-
-    if ("requestIdleCallback" in window) {
-      idleId = window.requestIdleCallback(enable, { timeout: 1800 });
-    } else {
-      timeoutId = setTimeout(enable, 900);
-    }
-
-    return () => {
-      if (idleId !== undefined && "cancelIdleCallback" in window) {
-        window.cancelIdleCallback(idleId);
-      }
-      if (timeoutId !== undefined) clearTimeout(timeoutId);
-    };
   }, []);
 
   useEffect(() => {
@@ -82,8 +63,8 @@ export function Hero() {
   }, [shouldLoadVideo, heroVideo]);
 
   return (
-    <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pt-16 pb-20 sm:min-h-[640px] sm:pb-0">
-      <div className="absolute inset-0">
+    <section className="relative flex h-[100svh] min-h-[100svh] w-full items-center justify-center overflow-hidden">
+      <div className="absolute inset-0 bg-navy">
         <img
           src={heroImage}
           alt=""
@@ -102,7 +83,7 @@ export function Hero() {
             loop
             playsInline
             autoPlay
-            preload="metadata"
+            preload="auto"
             poster={heroImage}
             aria-hidden
             src={heroVideo}
@@ -112,7 +93,7 @@ export function Hero() {
         <div className="absolute inset-0 bg-gradient-to-t from-navy/75 via-navy/20 to-navy/40" />
       </div>
 
-      <div className="container-luxe relative z-10 flex w-full flex-col items-center text-center">
+      <div className="container-luxe relative z-10 flex w-full flex-col items-center pt-16 pb-10 text-center">
         <motion.span
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
