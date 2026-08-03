@@ -287,3 +287,15 @@
     letter-spacing: 0.16em;
   }
 }
+
+/* Strip any third-party "Edit with Lovable" / branding injects */
+a[href*="lovable.dev"],
+a[href*="lovable.app"],
+iframe[src*="lovable"],
+[data-lovable],
+#lovable-badge,
+.lovable-badge {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}

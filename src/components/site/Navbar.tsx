@@ -5,7 +5,6 @@ import { Menu, X } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import { Logo } from "@/components/shared/Logo";
 import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
-import { cn } from "@/lib/utils";
 
 const links = [
   { to: "/", key: "nav.home" },
@@ -16,11 +15,9 @@ const links = [
   { to: "/contact", key: "nav.cta" },
 ] as const;
 
-export function Navbar({ transparent = false }: { transparent?: boolean }) {
+export function Navbar({ transparent: _transparent = false }: { transparent?: boolean }) {
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const overHero = transparent && !scrolled && !open;
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -29,30 +26,17 @@ export function Navbar({ transparent = false }: { transparent?: boolean }) {
     };
   }, [open]);
 
-  useEffect(() => {
-    if (!transparent) return;
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [transparent]);
-
   return (
     <>
       <motion.header
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className={cn(
-          "fixed inset-x-0 top-0 z-50 h-16 overflow-visible transition-[background-color,border-color,box-shadow] duration-300",
-          overHero
-            ? "border-b border-white/10 bg-transparent"
-            : "border-b border-navy/10 bg-white shadow-card",
-        )}
+        className="fixed inset-x-0 top-0 z-50 h-16 overflow-visible border-b border-navy/10 bg-white shadow-card"
       >
         <div className="container-luxe grid h-full grid-cols-[1fr_auto] items-center gap-3 lg:grid-cols-[1fr_auto_1fr]">
           <Link to="/" className="relative z-10 min-w-0 justify-self-start" aria-label={t("brand.name")}>
-            <Logo tone={overHero ? "light" : "dark"} className="h-10 w-28 sm:h-12 sm:w-36" />
+            <Logo tone="dark" className="h-10 w-28 sm:h-12 sm:w-36" />
           </Link>
 
           <nav className="hidden items-center gap-9 lg:flex">
@@ -61,10 +45,7 @@ export function Navbar({ transparent = false }: { transparent?: boolean }) {
                 key={link.to}
                 to={link.to}
                 activeOptions={{ exact: link.to === "/" }}
-                className={cn(
-                  "nav-link transition-colors",
-                  overHero ? "text-white/85 hover:text-white" : "text-navy/75 hover:text-navy",
-                )}
+                className="nav-link text-navy/75 transition-colors hover:text-navy"
               >
                 {t(link.key)}
               </Link>
@@ -72,15 +53,10 @@ export function Navbar({ transparent = false }: { transparent?: boolean }) {
           </nav>
 
           <div className="hidden items-center justify-end gap-3 lg:flex">
-            <LanguageSwitcher tone={overHero ? "light" : "dark"} />
+            <LanguageSwitcher tone="dark" />
             <Link
               to="/contact"
-              className={cn(
-                "border px-5 py-2.5 text-[0.7rem] tracking-[0.14em] transition-all duration-500",
-                overHero
-                  ? "border-white/70 bg-white/10 text-white hover:border-gold hover:bg-gold hover:text-navy"
-                  : "border-navy bg-navy text-navy-foreground hover:border-gold hover:bg-gold hover:text-navy",
-              )}
+              className="border border-navy bg-navy px-5 py-2.5 text-[0.7rem] tracking-[0.14em] text-navy-foreground transition-all duration-500 hover:border-gold hover:bg-gold hover:text-navy"
             >
               {t("nav.contactUs")}
             </Link>
@@ -90,10 +66,7 @@ export function Navbar({ transparent = false }: { transparent?: boolean }) {
             type="button"
             onClick={() => setOpen(true)}
             aria-label="Open menu"
-            className={cn(
-              "grid size-11 place-items-center justify-self-end rounded-lg transition-colors lg:hidden",
-              overHero ? "text-white hover:bg-white/10" : "text-navy hover:bg-navy/5",
-            )}
+            className="grid size-11 place-items-center justify-self-end rounded-lg text-navy transition-colors hover:bg-navy/5 lg:hidden"
           >
             <Menu className="size-6" strokeWidth={1.5} />
           </button>

@@ -218,6 +218,11 @@ function RootShell({ children }: { children: ReactNode }) {
             __html: `(function(){try{var l=localStorage.getItem('azura.language');if(l==='ar'||l==='en'){document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';}}catch(e){}})();`,
           }}
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){function scrub(){document.querySelectorAll('a[href*="lovable.dev"],a[href*="lovable.app"],[data-lovable],#lovable-badge,.lovable-badge').forEach(function(n){n.remove();});}scrub();try{new MutationObserver(scrub).observe(document.documentElement,{childList:true,subtree:true});}catch(e){}})();`,
+          }}
+        />
         {children}
         <Scripts />
       </body>

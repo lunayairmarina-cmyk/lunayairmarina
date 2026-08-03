@@ -63,7 +63,7 @@ export function Hero() {
   }, [shouldLoadVideo, heroVideo]);
 
   return (
-    <section className="relative flex h-[100svh] min-h-[100svh] w-full items-center justify-center overflow-hidden">
+    <section className="relative mt-16 flex h-[calc(100svh-4rem)] min-h-[calc(100svh-4rem)] w-full items-center justify-center overflow-hidden">
       <div className="absolute inset-0 bg-navy">
         <img
           src={heroImage}
@@ -93,7 +93,7 @@ export function Hero() {
         <div className="absolute inset-0 bg-gradient-to-t from-navy/75 via-navy/20 to-navy/40" />
       </div>
 
-      <div className="container-luxe relative z-10 flex w-full flex-col items-center pt-16 pb-10 text-center">
+      <div className="container-luxe relative z-10 flex w-full flex-col items-center py-10 text-center">
         <motion.span
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}

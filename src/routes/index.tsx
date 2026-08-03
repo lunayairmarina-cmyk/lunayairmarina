@@ -20,7 +20,7 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   return (
-    <SiteLayout transparentNav>
+    <SiteLayout>
       <Hero />
       <AboutSection variant="home" />
       <ServicesSection variant="home" />
