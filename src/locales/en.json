@@ -5,13 +5,14 @@
   },
   "nav": {
     "home": "Home",
-    "about": "About",
-    "services": "Services",
+    "about": "About Us",
+    "services": "Our Services",
     "blog": "Blog",
     "application": "App",
     "gallery": "Gallery",
-    "contact": "Private Consultation",
-    "cta": "Request Consultation"
+    "contact": "Join Our Team",
+    "cta": "Join Our Team",
+    "contactUs": "Contact Us"
   },
   "hero": {
     "eyebrow": "Jeddah · Red Sea · Arabian Gulf",

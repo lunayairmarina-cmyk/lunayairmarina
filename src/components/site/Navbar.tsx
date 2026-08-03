@@ -8,11 +8,11 @@ import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
 
 const links = [
   { to: "/", key: "nav.home" },
-  { to: "/about", key: "nav.about" },
   { to: "/services", key: "nav.services" },
-  { to: "/application", key: "nav.application" },
+  { to: "/about", key: "nav.about" },
   { to: "/blog", key: "nav.blog" },
-  { to: "/contact", key: "nav.contact" },
+  { to: "/application", key: "nav.application" },
+  { to: "/contact", key: "nav.cta" },
 ] as const;
 
 export function Navbar({ transparent: _transparent = false }: { transparent?: boolean }) {
@@ -52,13 +52,13 @@ export function Navbar({ transparent: _transparent = false }: { transparent?: bo
             ))}
           </nav>
 
-          <div className="hidden items-center justify-end gap-6 lg:flex">
+          <div className="hidden items-center justify-end gap-3 lg:flex">
             <LanguageSwitcher tone="dark" />
             <Link
               to="/contact"
-              className="border border-navy bg-navy px-6 py-3 text-[0.7rem] tracking-[0.2em] text-navy-foreground uppercase transition-all duration-500 hover:border-gold hover:bg-gold hover:text-navy"
+              className="border border-navy bg-navy px-5 py-2.5 text-[0.7rem] tracking-[0.14em] text-navy-foreground transition-all duration-500 hover:border-gold hover:bg-gold hover:text-navy"
             >
-              {t("nav.cta")}
+              {t("nav.contactUs")}
             </Link>
           </div>
 
@@ -114,14 +114,16 @@ export function Navbar({ transparent: _transparent = false }: { transparent?: bo
             </nav>
 
             <div className="container-luxe mt-4 flex flex-col gap-4 pb-10">
-              <LanguageSwitcher tone="dark" />
-              <Link
-                to="/contact"
-                onClick={() => setOpen(false)}
-                className="border border-navy bg-navy px-6 py-4 text-center text-[0.7rem] tracking-[0.2em] text-navy-foreground uppercase"
-              >
-                {t("nav.cta")}
-              </Link>
+              <div className="flex items-center gap-3">
+                <LanguageSwitcher tone="dark" />
+                <Link
+                  to="/contact"
+                  onClick={() => setOpen(false)}
+                  className="flex-1 border border-navy bg-navy px-5 py-3 text-center text-[0.7rem] tracking-[0.14em] text-navy-foreground"
+                >
+                  {t("nav.contactUs")}
+                </Link>
+              </div>
             </div>
           </motion.div>
         )}

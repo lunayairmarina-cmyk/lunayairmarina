@@ -6,9 +6,11 @@ import { useCompanySettings } from "@/hooks/useCompanySettings";
 
 const quickLinks = [
   { to: "/", key: "nav.home" },
-  { to: "/about", key: "nav.about" },
   { to: "/services", key: "nav.services" },
+  { to: "/about", key: "nav.about" },
   { to: "/blog", key: "nav.blog" },
+  { to: "/application", key: "nav.application" },
+  { to: "/contact", key: "nav.cta" },
 ] as const;
 
 export function Footer() {
