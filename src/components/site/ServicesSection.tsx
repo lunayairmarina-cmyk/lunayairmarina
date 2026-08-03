@@ -1,10 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { Anchor, ArrowRight, Ship, UsersRound, Waves } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { staggerContainer, staggerItem } from "@/components/shared/Reveal";
-import { SERVICE_SLUGS, type ServiceSlug } from "@/data/services";
+import {
+  SERVICE_SLUGS,
+  getServiceBySlug,
+  type ServiceSlug,
+} from "@/data/services";
 import { useOptionalSiteContent, localizeValue } from "@/providers/SiteContentProvider";
 
 interface ServiceItem {
@@ -13,8 +17,6 @@ interface ServiceItem {
   features: string[];
   slug?: string;
 }
-
-const icons = [Ship, Anchor, Waves, UsersRound];
 
 function resolveSlug(item: ServiceItem, index: number): ServiceSlug {
   const candidate = item.slug ?? SERVICE_SLUGS[index];
@@ -104,54 +106,73 @@ export function ServicesSection({
   }
 
   return (
-    <section className="bg-background py-24 lg:py-32">
+    <section className="bg-background py-16 lg:py-24">
       <div className="container-luxe">
         <motion.div
           variants={staggerContainer}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-60px" }}
-          className="grid gap-8 sm:grid-cols-2"
+          className="grid gap-5 sm:grid-cols-2 sm:gap-6 lg:gap-8"
         >
           {items.map((item, index) => {
-            const Icon = icons[index % icons.length];
             const slug = resolveSlug(item, index);
+            const cover = getServiceBySlug(slug)?.coverImage;
+
             return (
-              <motion.div key={slug} variants={staggerItem}>
+              <motion.article
+                key={slug}
+                variants={staggerItem}
+                className="group flex flex-col overflow-hidden border border-navy/15 bg-[#fbfaf8] transition-colors duration-500 hover:border-gold/45"
+              >
                 <Link
                   to="/services/$slug"
                   params={{ slug }}
-                  className="group flex h-full flex-col border-b border-navy/10 pb-10 transition-colors hover:border-gold/50"
+                  className="relative block aspect-[16/10] overflow-hidden bg-navy"
                 >
-                  <span className="grid size-11 place-items-center border border-gold/50 text-gold transition-colors duration-500 group-hover:bg-gold group-hover:text-navy">
-                    <Icon className="size-5" strokeWidth={1.35} />
+                  {cover ? (
+                    <img
+                      src={cover}
+                      alt=""
+                      className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
+                    />
+                  ) : null}
+                  <div className="absolute inset-0 bg-gradient-to-t from-navy/60 via-navy/15 to-transparent" />
+                  <span className="absolute bottom-3 start-3 font-display text-2xl tracking-[0.08em] text-white/90 sm:text-3xl">
+                    {String(index + 1).padStart(2, "0")}
                   </span>
+                </Link>
 
-                  <h3 className="mt-8 font-display text-2xl text-navy transition-colors group-hover:text-gold sm:text-[1.65rem]">
+                <div className="flex flex-1 flex-col p-5 sm:p-6">
+                  <h3 className="font-display text-xl leading-snug text-navy transition-colors group-hover:text-gold sm:text-[1.35rem]">
                     {item.title}
                   </h3>
-                  <p className="mt-4 flex-1 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                  <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
                     {item.description}
                   </p>
 
-                  <ul className="mt-7 space-y-3">
-                    {item.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-3 text-sm text-navy/70">
-                        <span className="mt-2 size-1.5 shrink-0 rounded-full bg-gold" />
+                  <ul className="mt-5 space-y-2.5">
+                    {item.features.slice(0, 3).map((feature) => (
+                      <li key={feature} className="flex items-start gap-2.5 text-[0.85rem] text-navy/70">
+                        <span className="mt-1.5 size-1.5 shrink-0 bg-gold" />
                         {feature}
                       </li>
                     ))}
                   </ul>
 
-                  <span className="mt-8 inline-flex items-center gap-2 text-[0.7rem] tracking-[0.2em] text-navy uppercase transition-colors group-hover:text-gold">
+                  <Link
+                    to="/services/$slug"
+                    params={{ slug }}
+                    className="mt-6 inline-flex w-fit items-center gap-2 border-b border-navy/15 pb-1.5 text-[0.65rem] tracking-[0.18em] text-navy uppercase transition-colors hover:border-gold hover:text-gold"
+                  >
                     {t("services.cta")}
                     <ArrowRight
                       className="size-3.5 transition-transform duration-500 group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
                       strokeWidth={1.5}
                     />
-                  </span>
-                </Link>
-              </motion.div>
+                  </Link>
+                </div>
+              </motion.article>
             );
           })}
         </motion.div>
