@@ -13,6 +13,7 @@ import { fileURLToPath } from "node:url";
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { config as loadEnv } from "dotenv";
 
 import en from "../src/locales/en.json" with { type: "json" };
@@ -36,11 +37,24 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
+const auth = getAuth(app);
 
 type L = { en: string; ar: string };
 const L = (english: string, arabic: string): L => ({ en: english, ar: arabic });
 
 let storageAvailable = true;
+
+async function ensureSeedAuth() {
+  const email = process.env.SEED_ADMIN_EMAIL?.trim();
+  const password = process.env.SEED_ADMIN_PASSWORD?.trim();
+  if (!email || !password) {
+    throw new Error(
+      "Missing SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD in .env. Sign in as Super Admin is required because Firestore write rules only allow active admins.",
+    );
+  }
+  await signInWithEmailAndPassword(auth, email, password);
+  console.log(`✓ signed in as ${email}`);
+}
 
 function contentType(path: string) {
   if (path.endsWith(".mp4")) return "video/mp4";
@@ -79,6 +93,7 @@ async function uploadOrMirror(localRelative: string, storagePath: string): Promi
 
 async function main() {
   console.log("Seeding Firebase project:", firebaseConfig.projectId);
+  await ensureSeedAuth();
 
   const media = {
     heroImage: await uploadOrMirror("src/assets/hero-yacht.jpg", "images/hero/hero-yacht.jpg"),
@@ -400,7 +415,7 @@ async function main() {
 main().catch((error) => {
   console.error("\nSeed failed:", error);
   console.error(
-    "\nEnable Cloud Firestore in Firebase Console, allow temporary write in rules, then re-run: npm run seed:firebase",
+    "\nChecklist:\n1) Enable Email/Password in Firebase Authentication\n2) Create/login Super Admin at /admin/login\n3) Put that email/password in .env as SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD\n4) Publish current firestore.rules\n5) Re-run: npm run seed:firebase",
   );
   process.exit(1);
 });

@@ -63,12 +63,13 @@ async function tryFirebaseWrite(task: () => Promise<void>): Promise<FirebaseSync
     await task();
     try {
       await mirrorFullCmsStore();
-    } catch {
-      // Collection write succeeded; mirror is best-effort.
+    } catch (mirrorError) {
+      console.warn("[firebase] cms mirror failed", mirrorError);
     }
     return "synced";
-  } catch {
-    return "local";
+  } catch (error) {
+    console.error("[firebase] write failed", error);
+    return "error";
   }
 }
 
