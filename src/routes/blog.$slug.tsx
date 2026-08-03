@@ -97,7 +97,7 @@ function BlogPostPage() {
   return (
     <SiteLayout>
       <article className="bg-background pb-24">
-        <header className="relative overflow-hidden pt-28">
+        <header className="relative overflow-hidden pt-12">
           <div className="absolute inset-0">
             <img
               src={post.coverImage}

@@ -208,7 +208,7 @@ export function ApplicationSections() {
   return (
     <>
       {/* HERO */}
-      <section className="relative flex min-h-svh items-center overflow-hidden pt-24 pb-16">
+      <section className="relative flex min-h-[calc(100svh-4rem)] items-center overflow-hidden pt-12 pb-16">
         <div className="absolute inset-0">
           <img src={aboutMarina} alt="" aria-hidden className="size-full object-cover scale-110 blur-sm" />
           <div className="absolute inset-0 bg-gradient-to-br from-[#03111f]/95 via-[#07263a]/80 to-[#0a3a4a]/70" />

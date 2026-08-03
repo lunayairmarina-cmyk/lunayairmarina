@@ -89,7 +89,7 @@ function ServiceDetailPage() {
   return (
     <SiteLayout>
       {/* Hero */}
-      <section className="relative overflow-hidden pt-28 pb-16 lg:pb-24">
+      <section className="relative overflow-hidden pt-12 pb-16 lg:pb-24">
         <div className="absolute inset-0">
           <img src={coverImage} alt="" className="size-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/70 to-navy/35" />

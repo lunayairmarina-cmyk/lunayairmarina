@@ -26,7 +26,7 @@ export function PageHeader({
   return (
     <section
       className={cn(
-        "relative flex items-end overflow-hidden pt-32",
+        "relative flex items-end overflow-hidden pt-16",
         compact
           ? "min-h-[46vh] pb-14 sm:min-h-[50vh] sm:pb-16"
           : "min-h-[58vh] pb-20 sm:min-h-[64vh] sm:pb-24",

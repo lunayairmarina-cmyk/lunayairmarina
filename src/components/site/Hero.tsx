@@ -63,7 +63,7 @@ export function Hero() {
   }, [shouldLoadVideo, heroVideo]);
 
   return (
-    <section className="relative mt-16 flex h-[calc(100svh-4rem)] min-h-[calc(100svh-4rem)] w-full items-center justify-center overflow-hidden">
+    <section className="relative flex h-[calc(100svh-4rem)] min-h-[calc(100svh-4rem)] w-full items-center justify-center overflow-hidden">
       <div className="absolute inset-0 bg-navy">
         <img
           src={heroImage}
