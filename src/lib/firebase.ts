@@ -3,16 +3,22 @@ import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 import { getAuth, type Auth } from "firebase/auth";
 
+function requiredEnv(name: string): string {
+  const value = (import.meta.env as Record<string, string | undefined>)[name];
+  if (typeof value === "string" && value.trim()) return value.trim();
+  throw new Error(
+    `[firebase] Missing ${name}. Set it in .env (see .env.example). Hardcoded Firebase fallbacks were removed.`,
+  );
+}
+
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY ?? "AIzaSyA6rTHWzaQJVPxI9hyViPIv3g0R6d7f6O8",
-  authDomain:
-    import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ?? "lunayairmarina-2d694.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID ?? "lunayairmarina-2d694",
-  storageBucket:
-    import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ?? "lunayairmarina-2d694.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ?? "640687266007",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID ?? "1:640687266007:web:3effccbfa5897130277892",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID ?? "G-VB6Y6RRZFL",
+  apiKey: requiredEnv("VITE_FIREBASE_API_KEY"),
+  authDomain: requiredEnv("VITE_FIREBASE_AUTH_DOMAIN"),
+  projectId: requiredEnv("VITE_FIREBASE_PROJECT_ID"),
+  storageBucket: requiredEnv("VITE_FIREBASE_STORAGE_BUCKET"),
+  messagingSenderId: requiredEnv("VITE_FIREBASE_MESSAGING_SENDER_ID"),
+  appId: requiredEnv("VITE_FIREBASE_APP_ID"),
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID?.trim() || undefined,
 };
 
 let app: FirebaseApp | undefined;

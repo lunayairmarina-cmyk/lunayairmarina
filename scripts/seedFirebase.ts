@@ -22,15 +22,22 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
 loadEnv({ path: resolve(root, ".env") });
 
+function requiredEnv(name: string): string {
+  const value = process.env[name];
+  if (typeof value === "string" && value.trim()) return value.trim();
+  throw new Error(
+    `[seedFirebase] Missing ${name}. Copy .env.example → .env and fill Firebase web config values.`,
+  );
+}
+
 const firebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY ?? "AIzaSyA6rTHWzaQJVPxI9hyViPIv3g0R6d7f6O8",
-  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN ?? "lunayairmarina-2d694.firebaseapp.com",
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID ?? "lunayairmarina-2d694",
-  storageBucket:
-    process.env.VITE_FIREBASE_STORAGE_BUCKET ?? "lunayairmarina-2d694.firebasestorage.app",
-  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID ?? "640687266007",
-  appId: process.env.VITE_FIREBASE_APP_ID ?? "1:640687266007:web:3effccbfa5897130277892",
-  measurementId: process.env.VITE_FIREBASE_MEASUREMENT_ID ?? "G-VB6Y6RRZFL",
+  apiKey: requiredEnv("VITE_FIREBASE_API_KEY"),
+  authDomain: requiredEnv("VITE_FIREBASE_AUTH_DOMAIN"),
+  projectId: requiredEnv("VITE_FIREBASE_PROJECT_ID"),
+  storageBucket: requiredEnv("VITE_FIREBASE_STORAGE_BUCKET"),
+  messagingSenderId: requiredEnv("VITE_FIREBASE_MESSAGING_SENDER_ID"),
+  appId: requiredEnv("VITE_FIREBASE_APP_ID"),
+  measurementId: process.env.VITE_FIREBASE_MEASUREMENT_ID?.trim() || undefined,
 };
 
 const app = initializeApp(firebaseConfig);

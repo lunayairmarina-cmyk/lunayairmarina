@@ -71,42 +71,46 @@ const AdminBlogRoute = AdminBlogRouteImport.update({
   id: '/admin/blog',
   path: '/admin/blog',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/admin.blog.lazy').then((d) => d.Route))
 const AdminContentRoute = AdminContentRouteImport.update({
   id: '/admin/content',
   path: '/admin/content',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/admin.content.lazy').then((d) => d.Route))
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/admin/dashboard',
   path: '/admin/dashboard',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() =>
+  import('./routes/admin.dashboard.lazy').then((d) => d.Route),
+)
 const AdminFaqRoute = AdminFaqRouteImport.update({
   id: '/admin/faq',
   path: '/admin/faq',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/admin.faq.lazy').then((d) => d.Route))
 const AdminFleetRoute = AdminFleetRouteImport.update({
   id: '/admin/fleet',
   path: '/admin/fleet',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/admin.fleet.lazy').then((d) => d.Route))
 const AdminGalleryRoute = AdminGalleryRouteImport.update({
   id: '/admin/gallery',
   path: '/admin/gallery',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/admin.gallery.lazy').then((d) => d.Route))
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/admin.login.lazy').then((d) => d.Route))
 const AdminMessagesRoute = AdminMessagesRouteImport.update({
   id: '/admin/messages',
   path: '/admin/messages',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() =>
+  import('./routes/admin.messages.lazy').then((d) => d.Route),
+)
 const AdminPagesRoute = AdminPagesRouteImport.update({
   id: '/admin/pages',
   path: '/admin/pages',
@@ -116,42 +120,48 @@ const AdminSeoRoute = AdminSeoRouteImport.update({
   id: '/admin/seo',
   path: '/admin/seo',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/admin.seo.lazy').then((d) => d.Route))
 const AdminServicesRoute = AdminServicesRouteImport.update({
   id: '/admin/services',
   path: '/admin/services',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() =>
+  import('./routes/admin.services.lazy').then((d) => d.Route),
+)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/admin/settings',
   path: '/admin/settings',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() =>
+  import('./routes/admin.settings.lazy').then((d) => d.Route),
+)
 const AdminTeamRoute = AdminTeamRouteImport.update({
   id: '/admin/team',
   path: '/admin/team',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/admin.team.lazy').then((d) => d.Route))
 const AdminTestimonialsRoute = AdminTestimonialsRouteImport.update({
   id: '/admin/testimonials',
   path: '/admin/testimonials',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() =>
+  import('./routes/admin.testimonials.lazy').then((d) => d.Route),
+)
 const AdminTrustRoute = AdminTrustRouteImport.update({
   id: '/admin/trust',
   path: '/admin/trust',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/admin.trust.lazy').then((d) => d.Route))
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/admin/users',
   path: '/admin/users',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/admin.users.lazy').then((d) => d.Route))
 const AdminWhyRoute = AdminWhyRouteImport.update({
   id: '/admin/why',
   path: '/admin/why',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/admin.why.lazy').then((d) => d.Route))
 const BlogIndexRoute = BlogIndexRouteImport.update({
   id: '/',
   path: '/',
