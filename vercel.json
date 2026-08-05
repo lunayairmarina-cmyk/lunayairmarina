@@ -5,12 +5,6 @@
       "has": [{ "type": "host", "value": "lunayairmarina.com" }],
       "destination": "https://www.lunayairmarina.com/:path*",
       "permanent": true
-    },
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "lunayairmarina.vercel.app" }],
-      "destination": "https://www.lunayairmarina.com/:path*",
-      "permanent": true
     }
   ]
 }
