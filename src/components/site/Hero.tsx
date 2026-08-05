@@ -4,17 +4,17 @@ import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/lib/i18n";
 import { useOptionalSiteContent, localizeOrFallback } from "@/providers/SiteContentProvider";
-import heroImageFallback from "@/assets/hero/hero-main.jpg";
 import { resolvePublicMediaSrc } from "@/lib/media";
 
 const HERO_MP4_FALLBACK = "/videos/lunayair.mp4";
+/** Stable public URL — matches homepage `<link rel="preload">` for LCP. */
+const HERO_POSTER_FALLBACK = "/images/hero/hero-main.webp";
 
 export function Hero() {
   const { t, language } = useLanguage();
   const site = useOptionalSiteContent();
   const homepage = site?.bundle?.homepage;
-  const heroImage = resolvePublicMediaSrc(homepage?.heroImage, heroImageFallback);
-  // Prefer CMS video, but migrate away from the old default hero.mp4.
+  const heroImage = resolvePublicMediaSrc(homepage?.heroImage, HERO_POSTER_FALLBACK);
   const heroVideo =
     homepage?.heroVideo && homepage.heroVideo !== "/videos/hero.mp4"
       ? homepage.heroVideo
@@ -38,19 +38,50 @@ export function Hero() {
     ? localizeOrFallback(homepage.scrollLabel, language, t("hero.scroll"))
     : t("hero.scroll");
 
+  const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [ready, setReady] = useState(false);
-  const [shouldLoadVideo, setShouldLoadVideo] = useState(true);
+  const [videoReady, setVideoReady] = useState(false);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
+  // Poster-first: never auto-download the ~28MB MP4 on first paint.
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const saveData = Boolean(
-      (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData,
-    );
+    const connection = (navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }).connection;
+    const saveData = Boolean(connection?.saveData);
+    const slowNet = connection?.effectiveType === "2g" || connection?.effectiveType === "slow-2g";
 
-    if (reduceMotion || saveData) {
-      setShouldLoadVideo(false);
+    if (reduceMotion || saveData || slowNet) return;
+
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      const id = window.setTimeout(() => setShouldLoadVideo(true), 2500);
+      return () => window.clearTimeout(id);
     }
+
+    let idleId: number | undefined;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        observer.disconnect();
+        const start = () => setShouldLoadVideo(true);
+        if (typeof window.requestIdleCallback === "function") {
+          idleId = window.requestIdleCallback(start, { timeout: 3000 });
+        } else {
+          idleId = window.setTimeout(start, 1800);
+        }
+      },
+      { rootMargin: "0px", threshold: 0.2 },
+    );
+    observer.observe(el);
+
+    return () => {
+      observer.disconnect();
+      if (idleId == null) return;
+      if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(idleId);
+      else window.clearTimeout(idleId);
+    };
   }, []);
 
   useEffect(() => {
@@ -60,19 +91,21 @@ export function Hero() {
 
     const onCanPlay = () => {
       void video.play().catch(() => undefined);
-      setReady(true);
+      setVideoReady(true);
     };
 
     video.addEventListener("canplay", onCanPlay);
-    video.load();
     if (video.readyState >= 3) onCanPlay();
-
     return () => video.removeEventListener("canplay", onCanPlay);
   }, [shouldLoadVideo, heroVideo]);
 
   return (
-    <section className="relative flex min-h-[calc(100svh-4rem-env(safe-area-inset-top))] w-full items-center justify-center overflow-hidden max-sm:items-end max-sm:pb-16">
+    <section
+      ref={sectionRef}
+      className="relative flex min-h-[calc(100svh-4rem-env(safe-area-inset-top))] w-full items-center justify-center overflow-hidden max-sm:items-end max-sm:pb-16"
+    >
       <div className="absolute inset-0 bg-navy">
+        {/* LCP poster — always visible immediately */}
         <img
           src={heroImage}
           alt=""
@@ -81,17 +114,20 @@ export function Hero() {
           height={1088}
           fetchPriority="high"
           decoding="async"
-          className={`absolute inset-0 size-full object-cover object-center transition-opacity duration-700 ${ready ? "opacity-0" : "opacity-100"}`}
+          className={`absolute inset-0 size-full object-cover object-center transition-opacity duration-700 ${
+            videoReady ? "opacity-0" : "opacity-100"
+          }`}
         />
         {shouldLoadVideo ? (
           <video
             ref={videoRef}
-            className={`absolute inset-0 size-full object-cover object-center transition-opacity duration-700 ${ready ? "opacity-100" : "opacity-0"}`}
+            className={`absolute inset-0 size-full object-cover object-center transition-opacity duration-700 ${
+              videoReady ? "opacity-100" : "opacity-0"
+            }`}
             muted
             loop
             playsInline
-            autoPlay
-            preload="auto"
+            preload="none"
             poster={heroImage}
             aria-hidden
             src={heroVideo}
@@ -101,49 +137,28 @@ export function Hero() {
         <div className="absolute inset-0 bg-gradient-to-t from-navy/70 via-navy/20 to-transparent sm:from-navy/55 sm:via-transparent" />
       </div>
 
+      {/* Visible immediately — Motion only does a soft lift after paint (no opacity:0 gate). */}
       <div className="container-luxe relative z-10 flex w-full flex-col items-center px-1 py-8 text-center sm:py-10">
         <motion.span
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.8 }}
+          initial={false}
+          animate={{ y: 0 }}
           className="eyebrow"
         >
           {eyebrow}
         </motion.span>
 
         <motion.h1
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 1, ease: [0.22, 1, 0.36, 1] }}
+          initial={false}
+          animate={{ y: 0 }}
           className="font-display type-display-xl mt-4 text-balance text-white uppercase sm:mt-6"
         >
           {t("brand.name")}
         </motion.h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.55, duration: 0.85 }}
-          className="type-body mt-4 max-w-2xl text-white/90 sm:mt-7"
-        >
-          {title}
-        </motion.p>
+        <p className="type-body mt-4 max-w-2xl text-white/90 sm:mt-7">{title}</p>
+        <p className="type-body-sm mt-2 max-w-xl text-white/70 sm:mt-3">{subtitle}</p>
 
-        <motion.p
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.65, duration: 0.8 }}
-          className="type-body-sm mt-2 max-w-xl text-white/70 sm:mt-3"
-        >
-          {subtitle}
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.8 }}
-          className="mt-8 flex w-full max-w-sm flex-col gap-3 sm:mt-12 sm:max-w-none sm:flex-row sm:justify-center"
-        >
+        <div className="mt-8 flex w-full max-w-sm flex-col gap-3 sm:mt-12 sm:max-w-none sm:flex-row sm:justify-center">
           <Link
             to="/contact"
             className="type-cta border border-gold bg-gold px-6 py-3.5 text-center text-navy transition-all duration-500 hover:bg-transparent hover:text-gold sm:px-8 sm:py-4"
@@ -156,15 +171,10 @@ export function Hero() {
           >
             {secondary}
           </Link>
-        </motion.div>
+        </div>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 0.8 }}
-        className="absolute inset-x-0 bottom-4 z-10 hidden flex-col items-center gap-2 sm:bottom-7 sm:flex"
-      >
+      <div className="absolute inset-x-0 bottom-4 z-10 hidden flex-col items-center gap-2 sm:bottom-7 sm:flex">
         <span className="text-[0.6rem] tracking-[0.3em] text-white/55 uppercase">{scroll}</span>
         <motion.span
           animate={{ y: [0, 8, 0] }}
@@ -173,7 +183,7 @@ export function Hero() {
         >
           <ChevronDown className="size-5" strokeWidth={1.5} />
         </motion.span>
-      </motion.div>
+      </div>
     </section>
   );
 }

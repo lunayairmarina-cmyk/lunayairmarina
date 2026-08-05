@@ -4,7 +4,7 @@ import { useLanguage } from "@/lib/i18n";
 import { Reveal } from "@/components/shared/Reveal";
 import { Counter } from "@/components/shared/Counter";
 import { useOptionalSiteContent, localizeOrFallback } from "@/providers/SiteContentProvider";
-import aboutImageFallback from "@/assets/about/about-marina.jpg";
+import aboutImageFallback from "@/assets/about/about-marina.webp";
 
 interface Stat {
   value: number;

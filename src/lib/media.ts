@@ -2,8 +2,8 @@
  * Central media helpers + filename aliases for CMS/legacy paths.
  * Physical files live under src/assets/{brand,hero,about,headers,gallery,fleet,admin}/
  */
-import heroMain from "@/assets/hero/hero-main.jpg";
-import aboutMarina from "@/assets/about/about-marina.jpg";
+import heroMain from "@/assets/hero/hero-main.webp";
+import aboutMarina from "@/assets/about/about-marina.webp";
 import adminLoginBg from "@/assets/admin/admin-login-bg.jpg";
 import fleet01 from "@/assets/fleet/fleet-01.jpg";
 import fleet02 from "@/assets/fleet/fleet-02.jpg";
@@ -12,16 +12,18 @@ import gallery01 from "@/assets/gallery/gallery-01-marina.jpg";
 import gallery02 from "@/assets/gallery/gallery-02-deck.jpg";
 import gallery03 from "@/assets/gallery/gallery-03-lounge.jpg";
 import gallery04 from "@/assets/gallery/gallery-04-sunset.jpg";
-import headerAbout from "@/assets/headers/header-about.jpg";
-import headerBlog from "@/assets/headers/header-blog.jpg";
-import headerContact from "@/assets/headers/header-contact.jpg";
-import headerServices from "@/assets/headers/header-services.jpg";
+import headerAbout from "@/assets/headers/header-about.webp";
+import headerBlog from "@/assets/headers/header-blog.webp";
+import headerContact from "@/assets/headers/header-contact.webp";
+import headerServices from "@/assets/headers/header-services.webp";
 import logo from "@/assets/brand/logo.png";
 
 /** New canonical filenames */
 const ASSET_BY_FILENAME: Record<string, string> = {
   "hero-main.jpg": heroMain,
+  "hero-main.webp": heroMain,
   "about-marina.jpg": aboutMarina,
+  "about-marina.webp": aboutMarina,
   "fleet-01.jpg": fleet01,
   "fleet-02.jpg": fleet02,
   "fleet-03.jpg": fleet03,
@@ -49,6 +51,10 @@ const ASSET_BY_FILENAME: Record<string, string> = {
   "header-blog.jpg": headerBlog,
   "header-contact.jpg": headerContact,
   "header-services.jpg": headerServices,
+  "header-about.webp": headerAbout,
+  "header-blog.webp": headerBlog,
+  "header-contact.webp": headerContact,
+  "header-services.webp": headerServices,
   "admin-bg.jpg": adminLoginBg,
   "admin-login-bg.jpg": adminLoginBg,
 };
@@ -72,7 +78,17 @@ export function resolvePublicMediaSrc(src: string | undefined | null, fallback =
 
   if (value.startsWith("/assets/")) return value;
 
-  if (value.startsWith("/images/") || value.startsWith("/videos/")) return value;
+  if (value.startsWith("/images/") || value.startsWith("/videos/")) {
+    // Prefer WebP siblings for known optimized folders (hero/headers/about).
+    if (
+      value.startsWith("/images/hero/") ||
+      value.startsWith("/images/headers/") ||
+      value.startsWith("/images/about/")
+    ) {
+      return value.replace(/\.jpe?g(\?.*)?$/i, ".webp$1");
+    }
+    return value;
+  }
 
   const fileName = value.split(/[/\\]/).pop()?.split("?")[0]?.toLowerCase() ?? "";
   if (fileName && ASSET_BY_FILENAME[fileName]) {

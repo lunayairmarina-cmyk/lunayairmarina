@@ -33,10 +33,11 @@ export function Reveal({
   return (
     <MotionTag
       className={className}
-      initial={{ opacity: 0, ...offset }}
+      // Below-the-fold only: keep content readable if JS is slow (start nearly visible).
+      initial={{ opacity: 0.55, ...offset }}
       whileInView={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: true, margin: "-40px", amount: 0.15 }}
+      transition={{ duration: 0.45, delay: Math.min(delay, 0.08), ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </MotionTag>
@@ -45,12 +46,12 @@ export function Reveal({
 
 export const staggerContainer: Variants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.12, delayChildren: 0.08 } },
+  show: { transition: { staggerChildren: 0.05, delayChildren: 0 } },
 };
 
 export const staggerItem: Variants = {
-  hidden: { opacity: 0, y: 26 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
+  hidden: { opacity: 0.55, y: 14 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
 };
 
 export function StaggerGroup({

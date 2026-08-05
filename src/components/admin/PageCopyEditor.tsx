@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { ModalField } from "@/components/admin/Modal";
 import { MediaUploader } from "@/components/admin/MediaUploader";
 import type { AboutContent, HomepageContent } from "@/types/content";
-import heroImage from "@/assets/hero/hero-main.jpg";
+import heroImage from "@/assets/hero/hero-main.webp";
 import aboutImage from "@/assets/about/about-marina.jpg";
 
 type Field = { path: string; label: string; textarea?: boolean };

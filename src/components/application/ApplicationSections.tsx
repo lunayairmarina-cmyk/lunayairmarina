@@ -23,7 +23,7 @@ import {
   featureSlides,
   galleryScreens,
 } from "@/data/application";
-import aboutMarina from "@/assets/about/about-marina.jpg";
+import aboutMarina from "@/assets/about/about-marina.webp";
 import { cn } from "@/lib/utils";
 
 const overviewIcons = {
@@ -192,10 +192,9 @@ function HeroPhones() {
   return (
     <div className="relative mx-auto flex w-full max-w-[300px] items-end justify-center pt-6 pb-2 sm:max-w-[320px] sm:pt-8">
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: [0, -8, 0] }}
+        initial={false}
+        animate={{ y: [0, -8, 0] }}
         transition={{
-          opacity: { duration: 0.85 },
           y: { duration: 5, repeat: Infinity, ease: "easeInOut" },
         }}
         className="relative z-10"
@@ -288,42 +287,30 @@ export function ApplicationSections() {
       {/* HERO */}
       <section className="relative flex min-h-[calc(100svh-4rem)] w-full items-center py-10 sm:py-14 lg:py-12">
         <div className="absolute inset-0 overflow-hidden">
-          <img src={aboutMarina} alt="" aria-hidden className="size-full object-cover" />
+          <img
+            src={aboutMarina}
+            alt=""
+            aria-hidden
+            fetchPriority="high"
+            decoding="async"
+            className="size-full object-cover"
+          />
           <div className="absolute inset-0 bg-[#03111f]/35" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#03111f]/88 via-[#03111f]/40 to-transparent rtl:bg-gradient-to-l" />
         </div>
 
         <div className="container-luxe relative z-10 grid items-center gap-8 lg:grid-cols-2 lg:gap-10">
           <div className="max-w-xl text-white">
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-[0.7rem] tracking-[0.28em] text-gold uppercase"
-            >
+            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
               {t("application.hero.eyebrow")}
-            </motion.p>
-            <motion.h1
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="mt-5 whitespace-pre-line font-display text-[1.85rem] leading-[1.15] sm:text-5xl lg:text-6xl"
-            >
+            </p>
+            <h1 className="mt-5 whitespace-pre-line font-display text-[1.85rem] leading-[1.15] sm:text-5xl lg:text-6xl">
               {t("application.hero.title")}
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="mt-6 text-base leading-relaxed text-white/75 sm:text-lg"
-            >
+            </h1>
+            <p className="mt-6 text-base leading-relaxed text-white/75 sm:text-lg">
               {t("application.hero.description")}
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="mt-8 flex w-full max-w-md flex-col gap-3 sm:mt-10"
-            >
+            </p>
+            <div className="mt-8 flex w-full max-w-md flex-col gap-3 sm:mt-10">
               <ComingSoonStores light />
               <Link
                 to="/contact"
@@ -331,7 +318,7 @@ export function ApplicationSections() {
               >
                 {t("application.hero.ask")}
               </Link>
-            </motion.div>
+            </div>
           </div>
 
           <div className="flex justify-center lg:justify-end">
@@ -520,7 +507,14 @@ export function ApplicationSections() {
       {/* DOWNLOAD CTA */}
       <section id="download" className="relative overflow-hidden py-24 lg:py-32">
         <div className="absolute inset-0">
-          <img src={aboutMarina} alt="" aria-hidden className="size-full object-cover" />
+          <img
+            src={aboutMarina}
+            alt=""
+            aria-hidden
+            fetchPriority="high"
+            decoding="async"
+            className="size-full object-cover"
+          />
           <div className="absolute inset-0 bg-navy/82" />
           <motion.div
             aria-hidden

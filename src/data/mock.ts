@@ -1,4 +1,4 @@
-import heroYacht from "@/assets/hero/hero-main.jpg";
+import heroYacht from "@/assets/hero/hero-main.webp";
 import aboutMarina from "@/assets/about/about-marina.jpg";
 import yacht1 from "@/assets/fleet/fleet-01.jpg";
 import yacht2 from "@/assets/fleet/fleet-02.jpg";

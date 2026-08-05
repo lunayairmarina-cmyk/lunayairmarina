@@ -14,7 +14,22 @@ import { TeamSection } from "@/components/site/TeamSection";
 import { buildSeoHead } from "@/services/seoService";
 
 export const Route = createFileRoute("/")({
-  head: () => buildSeoHead("home", "/"),
+  head: () => {
+    const seo = buildSeoHead("home", "/");
+    return {
+      ...seo,
+      links: [
+        ...(seo.links ?? []),
+        {
+          rel: "preload",
+          as: "image",
+          href: "/images/hero/hero-main.webp",
+          type: "image/webp",
+          fetchPriority: "high",
+        },
+      ],
+    };
+  },
   component: HomePage,
 });
 
