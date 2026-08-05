@@ -6,7 +6,7 @@ import { useLanguage } from "@/lib/i18n";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
 import { Logo } from "@/components/shared/Logo";
-import adminBg from "@/assets/admin-bg.jpg";
+import adminBg from "@/assets/admin/admin-login-bg.jpg";
 
 export const Route = createFileRoute("/admin/login")({
   head: () => ({

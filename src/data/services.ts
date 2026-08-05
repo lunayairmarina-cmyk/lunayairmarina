@@ -1,9 +1,9 @@
-import yacht1 from "@/assets/yacht-1.jpg";
-import yacht2 from "@/assets/yacht-2.jpg";
-import aboutMarina from "@/assets/about-marina.jpg";
-import gallery1 from "@/assets/gallery-1.jpg";
-import gallery2 from "@/assets/gallery-2.jpg";
-import gallery3 from "@/assets/gallery-3.jpg";
+import yacht1 from "@/assets/fleet/fleet-01.jpg";
+import yacht2 from "@/assets/fleet/fleet-02.jpg";
+import aboutMarina from "@/assets/about/about-marina.jpg";
+import gallery1 from "@/assets/gallery/gallery-01-marina.jpg";
+import gallery2 from "@/assets/gallery/gallery-02-deck.jpg";
+import gallery3 from "@/assets/gallery/gallery-03-lounge.jpg";
 
 export const SERVICE_SLUGS = [
   "yacht-management-360",

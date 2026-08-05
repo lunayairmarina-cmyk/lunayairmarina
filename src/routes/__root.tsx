@@ -14,6 +14,7 @@ import { LanguageProvider } from "@/lib/i18n";
 import { SiteContentProvider } from "@/providers/SiteContentProvider";
 import { companyInfo } from "@/data/mock";
 import { absoluteUrl, DEFAULT_LOGO_PATH, DEFAULT_OG_IMAGE_PATH, getSiteUrl } from "@/lib/site";
+import { ScrollToTop } from "@/components/shared/ScrollToTop";
 
 const siteUrl = getSiteUrl();
 const ogCover = absoluteUrl(DEFAULT_OG_IMAGE_PATH, siteUrl);
@@ -30,7 +31,7 @@ const organizationSchema = {
       email: companyInfo.email,
       telephone: companyInfo.phoneDisplay,
       logo: brandLogo,
-      sameAs: Object.values(companyInfo.social),
+      sameAs: Object.values(companyInfo.social).filter(Boolean),
       areaServed: ["SA", "AE", "BH", "QA", "KW", "OM"],
     },
     {
@@ -237,6 +238,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <SiteContentProvider>
         <LanguageProvider>
+          <ScrollToTop />
           <Outlet />
         </LanguageProvider>
       </SiteContentProvider>

@@ -1,10 +1,21 @@
-import { useMemo, useState } from "react";
-import { getCopyPath, loadCmsStore, setCopyPath } from "@/lib/cms-store";
-import { describeSaveResult, saveCopyBundle } from "@/services/adminCmsService";
+import { useEffect, useMemo, useState } from "react";
+import { getCopyPath, loadCmsStore, setCopyPath, deepMergeCopy } from "@/lib/cms-store";
+import {
+  describeSaveResult,
+  saveAbout,
+  saveCopyBundle,
+  saveHomepage,
+  type SaveResult,
+} from "@/services/adminCmsService";
 import { useLanguage } from "@/lib/i18n";
 import enLocale from "@/locales/en.json";
 import arLocale from "@/locales/ar.json";
 import { cn } from "@/lib/utils";
+import { ModalField } from "@/components/admin/Modal";
+import { MediaUploader } from "@/components/admin/MediaUploader";
+import type { AboutContent, HomepageContent } from "@/types/content";
+import heroImage from "@/assets/hero/hero-main.jpg";
+import aboutImage from "@/assets/about/about-marina.jpg";
 
 type Field = { path: string; label: string; textarea?: boolean };
 type Section = { id: string; labelKey: string; fields: Field[] };
@@ -30,6 +41,7 @@ const SECTIONS: Section[] = [
       { path: "nav.gallery", label: "Gallery" },
       { path: "nav.contact", label: "Contact" },
       { path: "nav.cta", label: "CTA" },
+      { path: "nav.contactUs", label: "Contact Us" },
     ],
   },
   {
@@ -198,15 +210,15 @@ const SECTIONS: Section[] = [
       { path: "application.hero.googlePlay", label: "Google Play label" },
       { path: "application.overview.eyebrow", label: "Overview eyebrow" },
       { path: "application.overview.title", label: "Overview title", textarea: true },
-      { path: "application.tanks.eyebrow", label: "Tanks eyebrow" },
-      { path: "application.tanks.title", label: "Tanks title", textarea: true },
-      { path: "application.tanks.description", label: "Tanks description", textarea: true },
-      { path: "application.checklist.eyebrow", label: "Checklist eyebrow" },
-      { path: "application.checklist.title", label: "Checklist title", textarea: true },
-      { path: "application.checklist.description", label: "Checklist description", textarea: true },
-      { path: "application.services.eyebrow", label: "Services eyebrow" },
-      { path: "application.services.title", label: "Services title", textarea: true },
-      { path: "application.services.description", label: "Services description", textarea: true },
+      { path: "application.tanks.eyebrow", label: "Fleet eyebrow" },
+      { path: "application.tanks.title", label: "Fleet title", textarea: true },
+      { path: "application.tanks.description", label: "Fleet description", textarea: true },
+      { path: "application.checklist.eyebrow", label: "Schedule eyebrow" },
+      { path: "application.checklist.title", label: "Schedule title", textarea: true },
+      { path: "application.checklist.description", label: "Schedule description", textarea: true },
+      { path: "application.services.eyebrow", label: "Bookings eyebrow" },
+      { path: "application.services.title", label: "Bookings title", textarea: true },
+      { path: "application.services.description", label: "Bookings description", textarea: true },
     ],
   },
   {
@@ -228,27 +240,114 @@ function readString(dict: Record<string, unknown>, path: string): string {
   return typeof value === "string" ? value : "";
 }
 
+function defaultHomepage(): HomepageContent {
+  return {
+    heroTitle: { en: enLocale.hero.title, ar: arLocale.hero.title },
+    heroDescription: { en: enLocale.hero.subtitle, ar: arLocale.hero.subtitle },
+    heroEyebrow: { en: enLocale.hero.eyebrow, ar: arLocale.hero.eyebrow },
+    heroVideo: "/videos/lunayair.mp4",
+    heroImage,
+    primaryCTA: { en: enLocale.hero.primary, ar: arLocale.hero.primary },
+    secondaryCTA: { en: enLocale.hero.secondary, ar: arLocale.hero.secondary },
+    scrollLabel: { en: enLocale.hero.scroll, ar: arLocale.hero.scroll },
+  };
+}
+
+function defaultAbout(): AboutContent {
+  return {
+    title: { en: enLocale.about.title, ar: arLocale.about.title },
+    description: { en: enLocale.about.lead, ar: arLocale.about.lead },
+    lead: { en: enLocale.about.lead, ar: arLocale.about.lead },
+    body: { en: enLocale.about.body, ar: arLocale.about.body },
+    eyebrow: { en: enLocale.about.eyebrow, ar: arLocale.about.eyebrow },
+    mission: { en: enLocale.about.mission.body, ar: arLocale.about.mission.body },
+    vision: { en: enLocale.about.vision.body, ar: arLocale.about.vision.body },
+    values: [],
+    image: aboutImage,
+    points: [],
+    stats: [
+      { value: 42, suffix: "", label: { en: "Yachts", ar: "يخوت" } },
+      { value: 78, suffix: "", label: { en: "Partners", ar: "شركاء" } },
+      { value: 13, suffix: "", label: { en: "Minutes", ar: "دقائق" } },
+    ],
+  };
+}
+
+function sanitizeLocalized(
+  value: { en: string; ar: string } | undefined,
+  fallback: { en: string; ar: string },
+): { en: string; ar: string } {
+  if (!value) return fallback;
+  const looksLikeKey = (text: string) =>
+    !text.trim() || /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/i.test(text.trim());
+  return {
+    en: looksLikeKey(value.en) ? fallback.en : value.en,
+    ar: looksLikeKey(value.ar) ? fallback.ar : value.ar,
+  };
+}
+
+function sanitizeHomepage(homepage: HomepageContent | null | undefined): HomepageContent {
+  const defaults = defaultHomepage();
+  if (!homepage) return defaults;
+  return {
+    ...homepage,
+    heroTitle: sanitizeLocalized(homepage.heroTitle, defaults.heroTitle),
+    heroDescription: sanitizeLocalized(homepage.heroDescription, defaults.heroDescription),
+    heroEyebrow: sanitizeLocalized(homepage.heroEyebrow, defaults.heroEyebrow),
+    primaryCTA: sanitizeLocalized(homepage.primaryCTA, defaults.primaryCTA),
+    secondaryCTA: sanitizeLocalized(homepage.secondaryCTA, defaults.secondaryCTA),
+    scrollLabel: sanitizeLocalized(homepage.scrollLabel, defaults.scrollLabel),
+    heroVideo: homepage.heroVideo || defaults.heroVideo,
+    heroImage: homepage.heroImage || defaults.heroImage,
+  };
+}
+
+function sanitizeAbout(about: AboutContent | null | undefined): AboutContent {
+  const defaults = defaultAbout();
+  if (!about) return defaults;
+  return {
+    ...about,
+    title: sanitizeLocalized(about.title, defaults.title),
+    description: sanitizeLocalized(about.description, defaults.description),
+    lead: sanitizeLocalized(about.lead, defaults.lead),
+    body: sanitizeLocalized(about.body, defaults.body),
+    eyebrow: sanitizeLocalized(about.eyebrow, defaults.eyebrow),
+    mission: sanitizeLocalized(about.mission, defaults.mission),
+    vision: sanitizeLocalized(about.vision, defaults.vision),
+    image: about.image || defaults.image,
+    points: about.points?.length ? about.points : defaults.points,
+    stats: about.stats?.length ? about.stats : defaults.stats,
+    values: about.values ?? [],
+  };
+}
+
 export function PageCopyEditor() {
-  const { t } = useLanguage();
-  const baseCopy = useMemo(() => {
+  const { t, language } = useLanguage();
+  const cmsDefaults = useMemo(() => {
     const cms = loadCmsStore();
     return {
-      en: {
-        ...(enLocale as Record<string, unknown>),
-        ...(cms.copy?.en ?? {}),
+      copy: {
+        en: deepMergeCopy(enLocale as Record<string, unknown>, cms.copy?.en ?? null),
+        ar: deepMergeCopy(arLocale as Record<string, unknown>, cms.copy?.ar ?? null),
       },
-      ar: {
-        ...(arLocale as Record<string, unknown>),
-        ...(cms.copy?.ar ?? {}),
-      },
+      homepage: sanitizeHomepage(cms.homepage),
+      about: sanitizeAbout(cms.about),
     };
   }, []);
 
-  const [copy, setCopy] = useState(baseCopy);
+  const [copy, setCopy] = useState(cmsDefaults.copy);
+  const [homepage, setHomepage] = useState(cmsDefaults.homepage);
+  const [about, setAbout] = useState(cmsDefaults.about);
   const [sectionId, setSectionId] = useState(SECTIONS[0]!.id);
   const [status, setStatus] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState("");
+
+  useEffect(() => {
+    setCopy(cmsDefaults.copy);
+    setHomepage(cmsDefaults.homepage);
+    setAbout(cmsDefaults.about);
+  }, [cmsDefaults]);
 
   const section = SECTIONS.find((item) => item.id === sectionId) ?? SECTIONS[0]!;
   const visibleSections = SECTIONS.filter((item) => {
@@ -257,18 +356,25 @@ export function PageCopyEditor() {
     return label.includes(filter.trim().toLowerCase()) || item.id.includes(filter.trim().toLowerCase());
   });
 
-  const setField = (language: "en" | "ar", path: string, value: string) => {
-    setCopy((current) => setCopyPath(current, language, path, value));
+  const setField = (lang: "en" | "ar", path: string, value: string) => {
+    setCopy((current) => setCopyPath(current, lang, path, value));
   };
 
   const save = async () => {
     setSaving(true);
-    const result = await saveCopyBundle(copy);
+    const results: SaveResult[] = await Promise.all([
+      saveCopyBundle(copy),
+      saveHomepage(homepage),
+      saveAbout(about),
+    ]);
+    const synced = results.every((item) => item.ok && item.sync === "synced");
     setStatus(
-      describeSaveResult(result, {
-        synced: t("admin.cms.savedSynced"),
-        local: t("admin.cms.savedLocal"),
-      }),
+      synced
+        ? t("admin.cms.savedSynced")
+        : describeSaveResult(results[0]!, {
+            synced: t("admin.cms.savedSynced"),
+            local: t("admin.cms.savedLocal"),
+          }),
     );
     setSaving(false);
   };
@@ -327,31 +433,94 @@ export function PageCopyEditor() {
         <div className="space-y-6">
           {section.fields.map((field) => (
             <div key={field.path} className="grid gap-4 lg:grid-cols-2">
-              {(["en", "ar"] as const).map((language) => (
-                <label key={language} className="flex flex-col gap-2">
+              {(["en", "ar"] as const).map((lang) => (
+                <label key={lang} className="flex flex-col gap-2">
                   <span className="text-[0.6rem] tracking-[0.22em] text-muted-foreground uppercase">
-                    {field.label} · {language.toUpperCase()}
+                    {field.label} · {lang.toUpperCase()}
                   </span>
                   {field.textarea ? (
                     <textarea
                       rows={3}
-                      value={readString(copy[language], field.path)}
-                      onChange={(event) => setField(language, field.path, event.target.value)}
+                      value={readString(copy[lang], field.path)}
+                      onChange={(event) => setField(lang, field.path, event.target.value)}
                       className="rounded-md border border-navy/10 bg-[#faf8f4] px-4 py-3 text-sm outline-none transition-colors focus:border-navy/30"
-                      dir={language === "ar" ? "rtl" : "ltr"}
+                      dir={lang === "ar" ? "rtl" : "ltr"}
                     />
                   ) : (
                     <input
-                      value={readString(copy[language], field.path)}
-                      onChange={(event) => setField(language, field.path, event.target.value)}
+                      value={readString(copy[lang], field.path)}
+                      onChange={(event) => setField(lang, field.path, event.target.value)}
                       className="rounded-md border border-navy/10 bg-[#faf8f4] px-4 py-3 text-sm outline-none transition-colors focus:border-navy/30"
-                      dir={language === "ar" ? "rtl" : "ltr"}
+                      dir={lang === "ar" ? "rtl" : "ltr"}
                     />
                   )}
                 </label>
               ))}
             </div>
           ))}
+
+          {sectionId === "hero" ? (
+            <div className="space-y-5 border-t border-navy/8 pt-6">
+              <p className="text-[0.6rem] tracking-[0.22em] text-navy/40 uppercase">
+                {t("admin.content.media")}
+              </p>
+              <ModalField
+                label="Hero video URL"
+                value={homepage.heroVideo}
+                onChange={(value) => setHomepage({ ...homepage, heroVideo: value })}
+              />
+              <MediaUploader
+                label={t("admin.content.background")}
+                value={homepage.heroImage}
+                pathPrefix="images/hero"
+                onChange={(url) => setHomepage({ ...homepage, heroImage: url })}
+              />
+            </div>
+          ) : null}
+
+          {sectionId === "about" ? (
+            <div className="space-y-5 border-t border-navy/8 pt-6">
+              <p className="text-[0.6rem] tracking-[0.22em] text-navy/40 uppercase">
+                {t("admin.content.media")}
+              </p>
+              <MediaUploader
+                label={t("admin.table.image")}
+                value={about.image}
+                pathPrefix="images/about"
+                onChange={(url) => setAbout({ ...about, image: url })}
+              />
+              <p className="text-[0.6rem] tracking-[0.22em] text-navy/40 uppercase">
+                {t("admin.content.statistics")}
+              </p>
+              <div className="grid gap-4 sm:grid-cols-3">
+                {about.stats.map((stat, index) => (
+                  <div key={index} className="space-y-3">
+                    <ModalField
+                      label={`Value 0${index + 1}`}
+                      value={String(stat.value)}
+                      onChange={(value) => {
+                        const stats = [...about.stats];
+                        stats[index] = { ...stat, value: Number(value) || 0 };
+                        setAbout({ ...about, stats });
+                      }}
+                    />
+                    <ModalField
+                      label={`Label 0${index + 1}`}
+                      value={stat.label[language]}
+                      onChange={(value) => {
+                        const stats = [...about.stats];
+                        stats[index] = {
+                          ...stat,
+                          label: { ...stat.label, [language]: value },
+                        };
+                        setAbout({ ...about, stats });
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

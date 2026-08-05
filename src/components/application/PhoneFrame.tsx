@@ -22,7 +22,7 @@ export function PhoneFrame({
         <div className="absolute inset-x-0 top-0 z-20 flex justify-center pt-3">
           <div className="h-6 w-28 rounded-full bg-black/90" />
         </div>
-        <div className="relative aspect-[9/19.5] overflow-hidden rounded-[1.9rem] bg-gradient-to-b from-[#102033] to-[#07111d]">
+        <div className="relative aspect-[9/19] overflow-hidden rounded-[1.9rem] bg-[#07111d]">
           {children}
         </div>
       </div>
@@ -30,42 +30,20 @@ export function PhoneFrame({
   );
 }
 
-export function TankRing({
-  value,
-  color,
-  label,
+export function PhoneScreenshot({
+  src,
+  alt = "",
 }: {
-  value: number;
-  color: string;
-  label: string;
+  src: string;
+  alt?: string;
 }) {
-  const radius = 28;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (value / 100) * circumference;
-
   return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="relative size-20">
-        <svg viewBox="0 0 72 72" className="size-full -rotate-90">
-          <circle cx="36" cy="36" r={radius} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="6" />
-          <circle
-            cx="36"
-            cy="36"
-            r={radius}
-            fill="none"
-            stroke={color}
-            strokeWidth="6"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={offset}
-            className="transition-[stroke-dashoffset] duration-1000 ease-out"
-          />
-        </svg>
-        <span className="absolute inset-0 grid place-items-center text-sm font-medium text-white">
-          {value}%
-        </span>
-      </div>
-      <span className="text-[0.65rem] tracking-[0.14em] text-white/60 uppercase">{label}</span>
-    </div>
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+      className="absolute inset-0 size-full object-cover object-top"
+    />
   );
 }

@@ -14,7 +14,6 @@ import {
   HelpCircle,
   Users,
   Newspaper,
-  Layers,
   Ship,
   ShieldCheck,
   UserRound,
@@ -33,7 +32,6 @@ const navItems: {
   permission: AdminPermission;
 }[] = [
   { to: "/admin/dashboard", key: "admin.nav.dashboard", icon: LayoutDashboard, permission: "dashboard" },
-  { to: "/admin/pages", key: "admin.nav.pages", icon: Layers, permission: "pages" },
   { to: "/admin/content", key: "admin.nav.content", icon: FileText, permission: "content" },
   { to: "/admin/services", key: "admin.nav.services", icon: Anchor, permission: "services" },
   { to: "/admin/why", key: "admin.nav.why", icon: Award, permission: "why" },
@@ -61,7 +59,10 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
   const { t } = useLanguage();
   const { logout, can, user } = useAdminAuth();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const visibleItems = navItems.filter((item) => can(item.permission));
+  const visibleItems = navItems.filter((item) => {
+    if (item.permission === "content") return can("content") || can("pages");
+    return can(item.permission);
+  });
   const roleLabel = user ? t(`admin.users.roles.${user.role}`) : t("admin.portal");
 
   return (
@@ -77,7 +78,9 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
       <nav className="admin-hide-scrollbar flex-1 overflow-y-auto px-3 py-4">
         <ul className="space-y-1">
           {visibleItems.map((item) => {
-            const active = pathname === item.to;
+            const active =
+              pathname === item.to ||
+              (item.to === "/admin/content" && pathname.startsWith("/admin/pages"));
             const Icon = item.icon;
             return (
               <li key={item.to}>

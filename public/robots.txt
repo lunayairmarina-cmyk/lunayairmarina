@@ -15,4 +15,4 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 
-Sitemap: https://lunayairmarina.com/sitemap.xml
+Sitemap: https://www.lunayairmarina.com/sitemap.xml

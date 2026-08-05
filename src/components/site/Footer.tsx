@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, Facebook, Instagram, Linkedin, Lock, Youtube } from "lucide-react";
+import { ArrowLeft, ArrowRight, Instagram, Linkedin, type LucideProps } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import { Logo } from "@/components/shared/Logo";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
@@ -13,16 +13,51 @@ const quickLinks = [
   { to: "/contact", key: "nav.cta" },
 ] as const;
 
+function TikTokIcon({ className, strokeWidth = 1.7, ...props }: LucideProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+      {...props}
+    >
+      <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+    </svg>
+  );
+}
+
+function XIcon({ className, ...props }: LucideProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden {...props}>
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
+function isUsableSocialUrl(href?: string) {
+  const value = href?.trim() ?? "";
+  if (!value) return false;
+  const lower = value.toLowerCase().replace(/\/$/, "");
+  if (lower === "https://facebook.com" || lower === "https://www.facebook.com") return false;
+  if (lower === "https://youtube.com" || lower === "https://www.youtube.com") return false;
+  return true;
+}
+
 export function Footer() {
   const { t, isRTL } = useLanguage();
   const settings = useCompanySettings();
   const CtaArrow = isRTL ? ArrowLeft : ArrowRight;
   const socials = [
     { icon: Instagram, href: settings.socialLinks.instagram, label: "Instagram" },
+    { icon: TikTokIcon, href: settings.socialLinks.tiktok, label: "TikTok" },
+    { icon: XIcon, href: settings.socialLinks.x, label: "X" },
     { icon: Linkedin, href: settings.socialLinks.linkedin, label: "LinkedIn" },
-    { icon: Facebook, href: settings.socialLinks.facebook, label: "Facebook" },
-    { icon: Youtube, href: settings.socialLinks.youtube, label: "YouTube" },
-  ];
+  ].filter((social) => isUsableSocialUrl(social.href));
 
   return (
     <footer className="relative overflow-hidden bg-[#050d18] text-navy-foreground">
@@ -89,33 +124,10 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center gap-2 border-t border-white/10 py-5 text-center text-[0.7rem] text-white/35">
+        <div className="border-t border-white/10 py-5 text-center text-[0.7rem] text-white/35">
           <p>
             © {new Date().getFullYear()} {t("brand.name")}. {t("footer.rights")}
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-            <a
-              href={`mailto:${settings.email}`}
-              className="transition-colors hover:text-gold"
-              dir="ltr"
-            >
-              {settings.email}
-            </a>
-            <a
-              href={`tel:${settings.phone.replace(/\s/g, "")}`}
-              className="transition-colors hover:text-gold"
-              dir="ltr"
-            >
-              {settings.phoneDisplay ?? settings.phone}
-            </a>
-            <Link
-              to="/admin/login"
-              className="inline-flex items-center gap-1.5 tracking-[0.14em] uppercase transition-colors hover:text-gold"
-            >
-              <Lock className="size-3" strokeWidth={1.5} />
-              {t("footer.admin")}
-            </Link>
-          </div>
         </div>
       </div>
     </footer>

@@ -12,6 +12,8 @@ export interface SiteSettings {
     linkedin: string;
     facebook: string;
     youtube: string;
+    tiktok: string;
+    x: string;
   };
 }
 

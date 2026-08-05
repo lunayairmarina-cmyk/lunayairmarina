@@ -19,7 +19,7 @@ import {
 import { saveBlogPosts as saveCmsBlogPosts } from "@/services/adminCmsService";
 import type { BlogContent } from "@/types/content";
 import { cn } from "@/lib/utils";
-import gallery1 from "@/assets/gallery-1.jpg";
+import gallery1 from "@/assets/gallery/gallery-01-marina.jpg";
 
 export const Route = createFileRoute("/admin/blog")({
   head: () => ({

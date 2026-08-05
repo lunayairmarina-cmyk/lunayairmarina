@@ -1,12 +1,12 @@
-import heroYacht from "@/assets/hero-yacht.jpg";
-import aboutMarina from "@/assets/about-marina.jpg";
-import yacht1 from "@/assets/yacht-1.jpg";
-import yacht2 from "@/assets/yacht-2.jpg";
-import yacht3 from "@/assets/yacht-3.jpg";
-import gallery1 from "@/assets/gallery-1.jpg";
-import gallery2 from "@/assets/gallery-2.jpg";
-import gallery3 from "@/assets/gallery-3.jpg";
-import gallery4 from "@/assets/gallery-4.jpg";
+import heroYacht from "@/assets/hero/hero-main.jpg";
+import aboutMarina from "@/assets/about/about-marina.jpg";
+import yacht1 from "@/assets/fleet/fleet-01.jpg";
+import yacht2 from "@/assets/fleet/fleet-02.jpg";
+import yacht3 from "@/assets/fleet/fleet-03.jpg";
+import gallery1 from "@/assets/gallery/gallery-01-marina.jpg";
+import gallery2 from "@/assets/gallery/gallery-02-deck.jpg";
+import gallery3 from "@/assets/gallery/gallery-03-lounge.jpg";
+import gallery4 from "@/assets/gallery/gallery-04-sunset.jpg";
 
 export const images = {
   heroYacht,
@@ -299,9 +299,11 @@ export const companyInfo = {
   addressEn: "Al Murjan Tower, Prince Sultan Road, Al Rawdah, Jeddah",
   addressAr: "برج المرجان، طريق الأمير سلطان، حي الروضة، جدة",
   social: {
-    instagram: "https://instagram.com",
-    linkedin: "https://linkedin.com",
-    facebook: "https://facebook.com",
-    youtube: "https://youtube.com",
+    instagram: "https://www.instagram.com/lunayairmarina",
+    linkedin: "https://www.linkedin.com/company/lunayairmarina",
+    facebook: "",
+    youtube: "",
+    tiktok: "https://vt.tiktok.com/ZSHVceVcD/",
+    x: "https://x.com/lunayairmarina",
   },
 };

@@ -1,32 +1,63 @@
-import heroYacht from "@/assets/hero-yacht.jpg";
-import aboutMarina from "@/assets/about-marina.jpg";
-import yacht1 from "@/assets/yacht-1.jpg";
-import yacht2 from "@/assets/yacht-2.jpg";
-import yacht3 from "@/assets/yacht-3.jpg";
-import gallery1 from "@/assets/gallery-1.jpg";
-import gallery2 from "@/assets/gallery-2.jpg";
-import gallery3 from "@/assets/gallery-3.jpg";
-import gallery4 from "@/assets/gallery-4.jpg";
-import logo from "@/assets/lunayairmarina.png";
+/**
+ * Central media helpers + filename aliases for CMS/legacy paths.
+ * Physical files live under src/assets/{brand,hero,about,headers,gallery,fleet,admin}/
+ */
+import heroMain from "@/assets/hero/hero-main.jpg";
+import aboutMarina from "@/assets/about/about-marina.jpg";
+import adminLoginBg from "@/assets/admin/admin-login-bg.jpg";
+import fleet01 from "@/assets/fleet/fleet-01.jpg";
+import fleet02 from "@/assets/fleet/fleet-02.jpg";
+import fleet03 from "@/assets/fleet/fleet-03.jpg";
+import gallery01 from "@/assets/gallery/gallery-01-marina.jpg";
+import gallery02 from "@/assets/gallery/gallery-02-deck.jpg";
+import gallery03 from "@/assets/gallery/gallery-03-lounge.jpg";
+import gallery04 from "@/assets/gallery/gallery-04-sunset.jpg";
+import headerAbout from "@/assets/headers/header-about.jpg";
+import headerBlog from "@/assets/headers/header-blog.jpg";
+import headerContact from "@/assets/headers/header-contact.jpg";
+import headerServices from "@/assets/headers/header-services.jpg";
+import logo from "@/assets/brand/logo.png";
 
+/** New canonical filenames */
 const ASSET_BY_FILENAME: Record<string, string> = {
-  "hero-yacht.jpg": heroYacht,
+  "hero-main.jpg": heroMain,
   "about-marina.jpg": aboutMarina,
-  "yacht-1.jpg": yacht1,
-  "yacht-2.jpg": yacht2,
-  "yacht-3.jpg": yacht3,
-  "gallery-1.jpg": gallery1,
-  "gallery-2.jpg": gallery2,
-  "gallery-3.jpg": gallery3,
-  "gallery-4.jpg": gallery4,
+  "fleet-01.jpg": fleet01,
+  "fleet-02.jpg": fleet02,
+  "fleet-03.jpg": fleet03,
+  "gallery-01-marina.jpg": gallery01,
+  "gallery-02-deck.jpg": gallery02,
+  "gallery-03-lounge.jpg": gallery03,
+  "gallery-04-sunset.jpg": gallery04,
+  "logo.png": logo,
+
+  // Legacy aliases (CMS / older Firestore paths)
+  "hero-yacht.jpg": heroMain,
+  "yacht-1.jpg": fleet01,
+  "yacht-2.jpg": fleet02,
+  "yacht-3.jpg": fleet03,
+  "gallery-1.jpg": gallery01,
+  "gallery-2.jpg": gallery02,
+  "gallery-3.jpg": gallery03,
+  "gallery-4.jpg": gallery04,
   "lunayairmarina.png": logo,
+  "page-header-about.jpg": headerAbout,
+  "page-header-blog.jpg": headerBlog,
+  "page-header-contact.jpg": headerContact,
+  "page-header-services.jpg": headerServices,
+  "header-about.jpg": headerAbout,
+  "header-blog.jpg": headerBlog,
+  "header-contact.jpg": headerContact,
+  "header-services.jpg": headerServices,
+  "admin-bg.jpg": adminLoginBg,
+  "admin-login-bg.jpg": adminLoginBg,
 };
 
 /**
  * Normalize CMS/Firestore media URLs.
  * Fixes legacy `/src/assets/...` paths that break in the browser.
  */
-export function resolvePublicMediaSrc(src: string | undefined | null, fallback = gallery1): string {
+export function resolvePublicMediaSrc(src: string | undefined | null, fallback = gallery01): string {
   if (!src || !src.trim()) return fallback;
   const value = src.trim();
 
@@ -39,10 +70,8 @@ export function resolvePublicMediaSrc(src: string | undefined | null, fallback =
     return value;
   }
 
-  // Already a Vite-bundled asset URL
   if (value.startsWith("/assets/")) return value;
 
-  // Public mirrored seed paths — keep as-is when present under /public
   if (value.startsWith("/images/") || value.startsWith("/videos/")) return value;
 
   const fileName = value.split(/[/\\]/).pop()?.split("?")[0]?.toLowerCase() ?? "";
@@ -50,7 +79,6 @@ export function resolvePublicMediaSrc(src: string | undefined | null, fallback =
     return ASSET_BY_FILENAME[fileName];
   }
 
-  // Legacy absolute-ish source paths
   if (value.includes("/src/assets/") || value.startsWith("src/assets/")) {
     return ASSET_BY_FILENAME[fileName] ?? fallback;
   }

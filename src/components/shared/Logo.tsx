@@ -3,8 +3,8 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n";
 import { loadCmsStore } from "@/lib/cms-store";
 import { useOptionalSiteContent } from "@/providers/SiteContentProvider";
-import logoOnLight from "@/assets/lunayairmarina.png";
-import logoOnDark from "@/assets/lunayairmarina-on-dark.png";
+import logoOnLight from "@/assets/brand/logo.png";
+import logoOnDark from "@/assets/brand/logo-on-dark.png";
 
 interface LogoProps {
   /** `dark` = on light surfaces (navbar). `light` = on dark surfaces (footer/admin). */

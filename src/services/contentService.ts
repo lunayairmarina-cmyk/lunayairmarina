@@ -7,7 +7,9 @@ import {
   query,
 } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
-import { deepMergeCopy, emptyCmsStore, loadCmsStore, saveCmsStore } from "@/lib/cms-store";
+import { deepMergeCopy, emptyCmsStore, loadCmsStore, repairWrongLanguageCopy, saveCmsStore } from "@/lib/cms-store";
+import enLocale from "@/locales/en.json";
+import arLocale from "@/locales/ar.json";
 import type {
   AboutContent,
   BlogContent,
@@ -25,7 +27,7 @@ import type {
   WhyContent,
 } from "@/types/content";
 
-const CACHE_KEY = "lunayairmarina.content.bundle.v1";
+const CACHE_KEY = "lunayairmarina.content.bundle.v3";
 const CACHE_TTL_MS = 1000 * 60 * 10;
 
 let memoryCache: SiteBundle | null = null;
@@ -190,19 +192,78 @@ async function fetchBundleFromFirebase(): Promise<SiteBundle> {
 }
 
 /** CMS local store wins over Firebase (Super Admin edits). */
+function looksLikeI18nKey(value: string | undefined): boolean {
+  if (!value?.trim()) return true;
+  return /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/i.test(value.trim());
+}
+
+function isCorruptedLocalized(value: { en?: string; ar?: string } | undefined): boolean {
+  if (!value) return true;
+  return looksLikeI18nKey(value.en) || looksLikeI18nKey(value.ar);
+}
+
+function sanitizeHomepageForBundle(
+  homepage: HomepageContent | null,
+): HomepageContent | null {
+  if (!homepage) return null;
+  if (
+    isCorruptedLocalized(homepage.heroTitle) ||
+    isCorruptedLocalized(homepage.heroEyebrow) ||
+    isCorruptedLocalized(homepage.heroDescription)
+  ) {
+    return null;
+  }
+  return homepage;
+}
+
 function mergeCmsOverFirebase(remote: SiteBundle): SiteBundle {
   const cms = loadCmsStore();
-  const copy =
+  const enLocaleDict = enLocale as Record<string, unknown>;
+  const arLocaleDict = arLocale as Record<string, unknown>;
+
+  let copy =
     cms.copy || remote.copy
       ? {
-          en: deepMergeCopy(remote.copy?.en, cms.copy?.en),
-          ar: deepMergeCopy(remote.copy?.ar, cms.copy?.ar),
+          en: repairWrongLanguageCopy(
+            deepMergeCopy(remote.copy?.en, cms.copy?.en),
+            enLocaleDict,
+            arLocaleDict,
+          ),
+          ar: repairWrongLanguageCopy(
+            deepMergeCopy(remote.copy?.ar, cms.copy?.ar),
+            arLocaleDict,
+            enLocaleDict,
+          ),
         }
       : null;
 
+  // Persist repaired Arabic/English copy so the UI stops flipping languages.
+  if (copy && cms.copy) {
+    const arWasContaminated =
+      JSON.stringify(cms.copy.ar ?? {}) !== JSON.stringify(copy.ar);
+    const enWasContaminated =
+      JSON.stringify(cms.copy.en ?? {}) !== JSON.stringify(copy.en);
+    if (arWasContaminated || enWasContaminated) {
+      saveCmsStore({ ...cms, copy, homepage: sanitizeHomepageForBundle(cms.homepage) });
+      copy = {
+        en: repairWrongLanguageCopy(copy.en, enLocaleDict, arLocaleDict),
+        ar: repairWrongLanguageCopy(copy.ar, arLocaleDict, enLocaleDict),
+      };
+    }
+  }
+
+  const homepage =
+    sanitizeHomepageForBundle(cms.homepage) ??
+    sanitizeHomepageForBundle(remote.homepage);
+
+  // Drop corrupted homepage from local CMS so it stops overriding locales.
+  if (cms.homepage && !sanitizeHomepageForBundle(cms.homepage)) {
+    saveCmsStore({ ...loadCmsStore(), homepage: null });
+  }
+
   return {
     settings: cms.settings ?? remote.settings,
-    homepage: cms.homepage ?? remote.homepage,
+    homepage,
     about: cms.about ?? remote.about,
     why: cms.why ?? remote.why,
     trust: cms.trust ?? remote.trust,

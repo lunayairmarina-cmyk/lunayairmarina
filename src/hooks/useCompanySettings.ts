@@ -19,7 +19,20 @@ const fallbackSettings: SiteSettings = {
 /** Settings from Firebase with local fallback until seed/CMS is ready. */
 export function useCompanySettings(): SiteSettings {
   const site = useOptionalSiteContent();
-  return site?.bundle?.settings ?? fallbackSettings;
+  const remote = site?.bundle?.settings;
+  if (!remote) return fallbackSettings;
+  return {
+    ...fallbackSettings,
+    ...remote,
+    socialLinks: {
+      ...fallbackSettings.socialLinks,
+      ...remote.socialLinks,
+    },
+    address: {
+      ...fallbackSettings.address,
+      ...remote.address,
+    },
+  };
 }
 
 export function useCompanyAddress(): string {

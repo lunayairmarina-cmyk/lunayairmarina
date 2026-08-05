@@ -3,8 +3,8 @@ import { motion } from "motion/react";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/lib/i18n";
-import { useOptionalSiteContent, localizeValue } from "@/providers/SiteContentProvider";
-import heroImageFallback from "@/assets/hero-yacht.jpg";
+import { useOptionalSiteContent, localizeOrFallback } from "@/providers/SiteContentProvider";
+import heroImageFallback from "@/assets/hero/hero-main.jpg";
 import { resolvePublicMediaSrc } from "@/lib/media";
 
 const HERO_MP4_FALLBACK = "/videos/lunayair.mp4";
@@ -19,16 +19,24 @@ export function Hero() {
     homepage?.heroVideo && homepage.heroVideo !== "/videos/hero.mp4"
       ? homepage.heroVideo
       : HERO_MP4_FALLBACK;
-  const eyebrow = homepage ? localizeValue(homepage.heroEyebrow, language) : t("hero.eyebrow");
-  const title = homepage ? localizeValue(homepage.heroTitle, language) : t("hero.title");
+  const eyebrow = homepage
+    ? localizeOrFallback(homepage.heroEyebrow, language, t("hero.eyebrow"))
+    : t("hero.eyebrow");
+  const title = homepage
+    ? localizeOrFallback(homepage.heroTitle, language, t("hero.title"))
+    : t("hero.title");
   const subtitle = homepage
-    ? localizeValue(homepage.heroDescription, language)
+    ? localizeOrFallback(homepage.heroDescription, language, t("hero.subtitle"))
     : t("hero.subtitle");
-  const primary = homepage ? localizeValue(homepage.primaryCTA, language) : t("hero.primary");
+  const primary = homepage
+    ? localizeOrFallback(homepage.primaryCTA, language, t("hero.primary"))
+    : t("hero.primary");
   const secondary = homepage
-    ? localizeValue(homepage.secondaryCTA, language)
+    ? localizeOrFallback(homepage.secondaryCTA, language, t("hero.secondary"))
     : t("hero.secondary");
-  const scroll = homepage ? localizeValue(homepage.scrollLabel, language) : t("hero.scroll");
+  const scroll = homepage
+    ? localizeOrFallback(homepage.scrollLabel, language, t("hero.scroll"))
+    : t("hero.scroll");
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const [ready, setReady] = useState(false);
@@ -107,7 +115,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 1, ease: [0.22, 1, 0.36, 1] }}
-          className="type-display-xl mt-4 text-balance text-white uppercase sm:mt-6"
+          className="font-display type-display-xl mt-4 text-balance text-white uppercase sm:mt-6"
         >
           {t("brand.name")}
         </motion.h1>

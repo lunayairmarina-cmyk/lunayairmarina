@@ -21,6 +21,7 @@
   --font-display: "Playfair Display", "Cormorant Garamond", serif;
   --font-sans: "Inter", system-ui, sans-serif;
   --font-arabic: "Noto Kufi Arabic", "Inter", sans-serif;
+  --font-arabic-display: "Noto Kufi Arabic", "Inter", sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -169,12 +170,29 @@
     font-weight: 500;
   }
 
+  /* Arabic headings: modern Kufi for clearer RTL display titles */
   html[dir="rtl"] h1,
   html[dir="rtl"] h2,
   html[dir="rtl"] h3,
   html[dir="rtl"] h4 {
-    font-family: var(--font-arabic);
+    font-family: var(--font-arabic-display);
     font-weight: 700;
+  }
+
+  /* In RTL, display titles also use Kufi — Playfair has no Arabic glyphs */
+  html[dir="rtl"] .font-display,
+  html[dir="rtl"] h1.font-display,
+  html[dir="rtl"] h2.font-display,
+  html[dir="rtl"] h3.font-display,
+  html[dir="rtl"] h4.font-display {
+    font-family: var(--font-arabic-display);
+    font-weight: 700;
+  }
+
+  /* Explicit Latin display (brand / EN titles) when needed in RTL */
+  html[dir="rtl"] .font-latin-display {
+    font-family: var(--font-display);
+    font-weight: 500;
   }
 
   ::selection {

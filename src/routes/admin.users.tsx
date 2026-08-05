@@ -115,10 +115,12 @@ function AdminUsersPage() {
 
   const togglePermission = (permission: AdminPermission) => {
     setDraft((current) => {
-      const exists = current.permissions.includes(permission);
+      const linked: AdminPermission[] =
+        permission === "content" ? ["content", "pages"] : [permission];
+      const exists = linked.every((item) => current.permissions.includes(item));
       const permissions = exists
-        ? current.permissions.filter((item) => item !== permission)
-        : [...current.permissions, permission];
+        ? current.permissions.filter((item) => !linked.includes(item))
+        : Array.from(new Set([...current.permissions, ...linked]));
       return { ...current, role: "custom", permissions };
     });
   };
@@ -369,8 +371,11 @@ function AdminUsersPage() {
           </p>
           <p className="mt-1 text-xs text-muted-foreground">{t("admin.users.permissionsHint")}</p>
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
-            {ADMIN_PERMISSIONS.map((permission) => {
-              const checked = draft.permissions.includes(permission);
+            {ADMIN_PERMISSIONS.filter((permission) => permission !== "pages").map((permission) => {
+              const checked =
+                permission === "content"
+                  ? draft.permissions.includes("content") || draft.permissions.includes("pages")
+                  : draft.permissions.includes(permission);
               return (
                 <label
                   key={permission}

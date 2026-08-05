@@ -1,137 +1,185 @@
-import { motion } from "motion/react";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { Link } from "@tanstack/react-router";
 import {
-  Bell,
-  CheckCircle2,
-  Cpu,
-  Droplets,
+  Anchor,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Compass,
+  Crown,
   FileText,
-  History,
-  Info,
-  ListChecks,
-  ShieldCheck,
+  LifeBuoy,
+  Ship,
+  UserRound,
   Users,
-  Wrench,
 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
-import { Reveal } from "@/components/shared/Reveal";
-import { PhoneFrame, TankRing } from "@/components/application/PhoneFrame";
+import { Reveal, staggerContainer, staggerItem } from "@/components/shared/Reveal";
+import { PhoneFrame, PhoneScreenshot } from "@/components/application/PhoneFrame";
 import {
-  appFeatureCards,
+  appFeaturedScreens,
   appOverviewCards,
-  checklistGroups,
+  featureSlides,
   galleryScreens,
-  tankLevels,
-  upcomingServices,
 } from "@/data/application";
-import aboutMarina from "@/assets/about-marina.jpg";
+import aboutMarina from "@/assets/about/about-marina.jpg";
 import { cn } from "@/lib/utils";
 
 const overviewIcons = {
-  Droplets,
-  ListChecks,
-  ShieldCheck,
-  Cpu,
+  Ship,
+  CalendarDays,
+  Anchor,
+  Compass,
   FileText,
   Users,
-  Wrench,
-  History,
-  Info,
+  LifeBuoy,
+  Crown,
+  UserRound,
 } as const;
 
-const featureIcons = [
-  Bell,
-  ShieldCheck,
-  Wrench,
-  Users,
-  FileText,
-  CheckCircle2,
-  Droplets,
-  History,
-  FileText,
-  Wrench,
-  Cpu,
-  History,
-];
+const overviewStagger: typeof staggerContainer = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.15,
+    },
+  },
+};
 
-function DashboardScreen() {
-  const { t, language } = useLanguage();
-  const tiles =
-    language === "ar"
-      ? ["٧٥٪ ديزل", "٩٢٪ مياه", "الطاقم جاهز", "٢ تنبيه"]
-      : ["75% Diesel", "92% Water", "Crew OK", "2 Alerts"];
-  return (
-    <div className="flex h-full flex-col px-4 pb-5 pt-10 text-white">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-[0.6rem] tracking-[0.2em] text-gold uppercase">{t("application.tanks.brand")}</p>
-          <p className="mt-1 text-lg font-medium">
-            {language === "ar" ? "لوحة التحكم" : "Dashboard"}
-          </p>
-        </div>
-        <Bell className="size-4 text-white/70" />
-      </div>
-      <div className="mt-5 grid grid-cols-2 gap-2">
-        {tiles.map((item) => (
-          <div
-            key={item}
-            className="rounded-2xl border border-white/10 bg-white/5 p-3 text-[0.7rem] text-white/80 backdrop-blur"
-          >
-            {item}
-          </div>
-        ))}
-      </div>
-      <div className="mt-4 flex-1 rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur">
-        <p className="text-[0.65rem] tracking-[0.16em] text-white/50 uppercase">
-          {language === "ar" ? "الخدمة التالية" : "Next service"}
-        </p>
-        <p className="mt-2 text-sm">
-          {language === "ar" ? "خدمة المحرك · ١٤ أغسطس" : "Engine Service · Aug 14"}
-        </p>
-        <div className="mt-4 h-24 rounded-xl bg-gradient-to-br from-gold/30 to-sky-500/20" />
-      </div>
-    </div>
-  );
-}
+const overviewItem: typeof staggerItem = {
+  hidden: { opacity: 0, y: 14, filter: "blur(4px)" },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+  },
+};
 
-function OverviewCard({
+function OverviewFeature({
   card,
-  index,
 }: {
   card: (typeof appOverviewCards)[number];
-  index: number;
 }) {
   const { t } = useLanguage();
   const Icon = overviewIcons[card.icon as keyof typeof overviewIcons];
   return (
-    <Reveal delay={index * 0.04}>
-      <motion.div
-        whileHover={{ y: -4 }}
-        className="rounded-2xl border border-white/12 bg-white/[0.07] p-5 text-white backdrop-blur-md transition hover:border-gold/35 hover:bg-white/10"
-      >
-        <Icon className="size-5 text-gold" strokeWidth={1.4} />
-        <p className="mt-3 text-sm font-medium leading-snug">
-          {t(`application.overview.cards.${card.key}`)}
-        </p>
-      </motion.div>
-    </Reveal>
+    <motion.li
+      variants={overviewItem}
+      whileHover={{ y: -3, transition: { duration: 0.25 } }}
+      className="flex items-center gap-3 text-white"
+    >
+      <span className="grid size-10 shrink-0 place-items-center rounded-full border border-gold/35 bg-gold/10 text-gold shadow-[0_0_20px_-8px_rgba(200,169,106,0.55)]">
+        {Icon ? <Icon className="size-4" strokeWidth={1.5} /> : null}
+      </span>
+      <span className="text-sm font-medium leading-snug text-white/90">
+        {t(`application.overview.cards.${card.key}`)}
+      </span>
+    </motion.li>
   );
 }
 
-function TanksScreen() {
-  const { t } = useLanguage();
+function FeaturesCarousel() {
+  const { t, isRTL } = useLanguage();
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const total = featureSlides.length;
+  const slide = featureSlides[index]!;
+
+  useEffect(() => {
+    if (paused) return;
+    const id = window.setInterval(() => {
+      setIndex((current) => (current + 1) % total);
+    }, 3500);
+    return () => window.clearInterval(id);
+  }, [paused, total]);
+
+  const go = (next: number) => {
+    setIndex((next + total) % total);
+  };
+
+  const PrevIcon = isRTL ? ChevronRight : ChevronLeft;
+  const NextIcon = isRTL ? ChevronLeft : ChevronRight;
+
   return (
-    <div className="flex h-full flex-col px-4 pb-5 pt-10 text-white">
-      <p className="text-[0.6rem] tracking-[0.2em] text-gold uppercase">{t("application.tanks.brand")}</p>
-      <h3 className="mt-1 text-lg">{t("application.tanks.screenTitle")}</h3>
-      <p className="mt-1 text-[0.7rem] text-white/50">{t("application.tanks.updated")}</p>
-      <div className="mt-6 grid grid-cols-2 gap-5">
-        {tankLevels.map((tank) => (
-          <TankRing
-            key={tank.id}
-            value={tank.value}
-            color={tank.color}
-            label={t(`application.tanks.${tank.key}`)}
+    <div
+      className="mx-auto mt-14 max-w-5xl"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setPaused(false);
+        }
+      }}
+    >
+      <div className="relative flex items-center justify-center gap-2 sm:gap-5">
+        <button
+          type="button"
+          aria-label={t("application.features.prev")}
+          onClick={() => go(index - 1)}
+          className="grid size-11 shrink-0 place-items-center rounded-full border border-navy/15 bg-white text-navy shadow-sm transition hover:border-gold hover:text-gold"
+        >
+          <PrevIcon className="size-5" strokeWidth={1.5} />
+        </button>
+
+        <div className="relative min-w-0 flex-1">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={slide.key}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.35 }}
+              className="grid items-center gap-8 md:grid-cols-[auto_1fr] md:gap-12"
+            >
+              <div className="mx-auto w-full max-w-[260px] sm:max-w-[280px]">
+                <PhoneFrame className="w-full">
+                  <PhoneScreenshot
+                    src={slide.src}
+                    alt={t(`application.features.items.${slide.key}.title`)}
+                  />
+                </PhoneFrame>
+              </div>
+              <div className="text-center md:text-start">
+                <p className="text-[0.65rem] tracking-[0.2em] text-gold uppercase">
+                  {index + 1} / {total}
+                </p>
+                <h3 className="mt-3 font-display text-2xl text-navy sm:text-3xl lg:text-4xl">
+                  {t(`application.features.items.${slide.key}.title`)}
+                </h3>
+                <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base md:mx-0">
+                  {t(`application.features.items.${slide.key}.description`)}
+                </p>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <button
+          type="button"
+          aria-label={t("application.features.next")}
+          onClick={() => go(index + 1)}
+          className="grid size-11 shrink-0 place-items-center rounded-full border border-navy/15 bg-white text-navy shadow-sm transition hover:border-gold hover:text-gold"
+        >
+          <NextIcon className="size-5" strokeWidth={1.5} />
+        </button>
+      </div>
+
+      <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
+        {featureSlides.map((item, dotIndex) => (
+          <button
+            key={item.key + item.src}
+            type="button"
+            aria-label={t(`application.features.items.${item.key}.title`)}
+            aria-current={dotIndex === index}
+            onClick={() => setIndex(dotIndex)}
+            className={cn(
+              "h-2 rounded-full transition-all",
+              dotIndex === index ? "w-8 bg-gold" : "w-2 bg-navy/20 hover:bg-navy/40",
+            )}
           />
         ))}
       </div>
@@ -139,96 +187,113 @@ function TanksScreen() {
   );
 }
 
-function ChecklistScreen() {
+function HeroPhones() {
   const { t } = useLanguage();
   return (
-    <div className="h-full overflow-hidden px-4 pb-4 pt-10 text-white">
-      <p className="text-[0.6rem] tracking-[0.2em] text-gold uppercase">Checklist</p>
-      <div className="mt-4 space-y-4 overflow-y-auto pb-4">
-        {checklistGroups.map((group) => (
-          <div key={group.id}>
-            <p className="text-[0.65rem] tracking-[0.16em] text-white/45 uppercase">
-              {t(`application.checklist.groups.${group.key}`)}
-            </p>
-            <ul className="mt-2 space-y-2">
-              {group.items.map((item) => (
-                <li
-                  key={item}
-                  className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/85"
-                >
-                  <CheckCircle2 className="size-3.5 text-emerald-400" />
-                  {t(`application.checklist.items.${item}`)}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
+    <div className="relative mx-auto flex w-full max-w-[300px] items-end justify-center pt-6 pb-2 sm:max-w-[320px] sm:pt-8">
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: [0, -8, 0] }}
+        transition={{
+          opacity: { duration: 0.85 },
+          y: { duration: 5, repeat: Infinity, ease: "easeInOut" },
+        }}
+        className="relative z-10"
+      >
+        <PhoneFrame className="w-[240px] sm:w-[270px]">
+          <PhoneScreenshot
+            src={appFeaturedScreens.hero}
+            alt={t("application.gallery.labels.home")}
+          />
+        </PhoneFrame>
+      </motion.div>
     </div>
   );
 }
 
-function ServicesScreen() {
+function ComingSoonStores({
+  className,
+  light = false,
+}: {
+  className?: string;
+  light?: boolean;
+}) {
   const { t } = useLanguage();
-  const tone = {
-    completed: "bg-emerald-400/20 text-emerald-300",
-    upcoming: "bg-amber-400/20 text-amber-300",
-    overdue: "bg-rose-400/20 text-rose-300",
-  } as const;
-
   return (
-    <div className="flex h-full flex-col px-4 pb-5 pt-10 text-white">
-      <p className="text-[0.6rem] tracking-[0.2em] text-gold uppercase">Services</p>
-      <h3 className="mt-1 text-lg">{t("application.services.title")}</h3>
-      <div className="mt-5 space-y-2 overflow-y-auto">
-        {upcomingServices.map((service) => (
-          <div
-            key={service.id}
-            className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-3"
+    <div
+      className={cn(
+        "relative overflow-hidden border px-5 py-4 sm:px-6",
+        light
+          ? "border-white/25 bg-white/10 text-white backdrop-blur-sm"
+          : "border-navy/15 bg-white text-navy",
+        className,
+      )}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0 text-start">
+          <p
+            className={cn(
+              "text-[0.62rem] tracking-[0.22em] uppercase",
+              light ? "text-gold" : "text-gold",
+            )}
           >
-            <div>
-              <p className="text-sm">{t(`application.services.items.${service.key}`)}</p>
-              <p className="mt-1 text-[0.7rem] text-white/45">
-                {t(`application.services.dates.${service.dateKey}`)}
-              </p>
-            </div>
-            <span className={cn("rounded-full px-2.5 py-1 text-[0.6rem] uppercase", tone[service.status])}>
-              {t(`application.services.status.${service.status}`)}
-            </span>
-          </div>
-        ))}
+            {t("application.comingSoon.eyebrow")}
+          </p>
+          <p
+            className={cn(
+              "mt-1.5 text-sm font-medium sm:text-base",
+              light ? "text-white" : "text-navy",
+            )}
+          >
+            {t("application.comingSoon.title")}
+          </p>
+          <p
+            className={cn(
+              "mt-1 text-xs leading-relaxed",
+              light ? "text-white/65" : "text-muted-foreground",
+            )}
+          >
+            {t("application.comingSoon.body")}
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+          <span
+            className={cn(
+              "inline-flex items-center justify-center border px-3 py-2 text-[0.62rem] tracking-[0.14em] uppercase opacity-70",
+              light ? "border-white/35 text-white/80" : "border-navy/20 text-navy/70",
+            )}
+          >
+            {t("application.hero.appStore")}
+          </span>
+          <span
+            className={cn(
+              "inline-flex items-center justify-center border px-3 py-2 text-[0.62rem] tracking-[0.14em] uppercase opacity-70",
+              light ? "border-gold/50 text-gold" : "border-gold/50 text-navy/70",
+            )}
+          >
+            {t("application.hero.googlePlay")}
+          </span>
+        </div>
       </div>
     </div>
   );
 }
 
 export function ApplicationSections() {
-  const { t, isRTL } = useLanguage();
+  const { t } = useLanguage();
 
   return (
     <>
       {/* HERO */}
-      <section className="relative flex min-h-[calc(100svh-4rem)] w-full items-center overflow-hidden py-12 sm:py-16 lg:min-h-[calc(100svh-4rem)] lg:py-0">
-        <div className="absolute inset-0">
+      <section className="relative flex min-h-[calc(100svh-4rem)] w-full items-center py-10 sm:py-14 lg:py-12">
+        <div className="absolute inset-0 overflow-hidden">
           <img src={aboutMarina} alt="" aria-hidden className="size-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-br from-[#03111f]/75 via-[#07263a]/55 to-[#0a3a4a]/45" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(200,169,106,0.18),transparent_40%)]" />
+          <div className="absolute inset-0 bg-[#03111f]/55" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#03111f]/92 via-[#03111f]/55 to-[#03111f]/20 rtl:bg-gradient-to-l" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(200,169,106,0.16),transparent_42%)]" />
         </div>
-        {[...Array(12)].map((_, index) => (
-          <motion.span
-            key={index}
-            aria-hidden
-            className="absolute size-1 rounded-full bg-white/40"
-            style={{
-              left: `${8 + index * 7}%`,
-              top: `${12 + ((index * 17) % 70)}%`,
-            }}
-            animate={{ y: [0, -18, 0], opacity: [0.2, 0.8, 0.2] }}
-            transition={{ duration: 4 + index * 0.3, repeat: Infinity, ease: "easeInOut" }}
-          />
-        ))}
 
-        <div className="container-luxe relative z-10 grid items-center gap-12 lg:grid-cols-2 lg:gap-8">
+        <div className="container-luxe relative z-10 grid items-center gap-8 lg:grid-cols-2 lg:gap-10">
           <div className="max-w-xl text-white">
             <motion.p
               initial={{ opacity: 0, y: 16 }}
@@ -243,16 +308,13 @@ export function ApplicationSections() {
               transition={{ delay: 0.1 }}
               className="mt-5 whitespace-pre-line font-display text-[1.85rem] leading-[1.15] sm:text-5xl lg:text-6xl"
             >
-              {isRTL ? t("application.hero.titleAr") : t("application.hero.title")}
+              {t("application.hero.title")}
             </motion.h1>
-            {isRTL ? (
-              <p className="mt-4 text-lg text-white/75">{t("application.hero.subtitleAr")}</p>
-            ) : null}
             <motion.p
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="mt-6 text-base leading-relaxed text-white/70 sm:text-lg"
+              className="mt-6 text-base leading-relaxed text-white/75 sm:text-lg"
             >
               {t("application.hero.description")}
             </motion.p>
@@ -260,47 +322,26 @@ export function ApplicationSections() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="mt-8 flex w-full flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap"
+              className="mt-8 flex w-full max-w-md flex-col gap-3 sm:mt-10"
             >
+              <ComingSoonStores light />
               <Link
                 to="/contact"
-                className="border border-gold bg-gold px-6 py-3.5 text-center text-[0.7rem] tracking-[0.18em] text-navy uppercase transition hover:bg-transparent hover:text-gold"
+                className="border border-white/40 bg-white/10 px-6 py-3.5 text-center text-[0.7rem] tracking-[0.18em] text-white uppercase backdrop-blur-sm transition hover:border-gold hover:bg-gold hover:text-navy"
               >
                 {t("application.hero.ask")}
               </Link>
-              <a
-                href="#download"
-                className="border border-white/35 px-6 py-3.5 text-center text-[0.7rem] tracking-[0.18em] text-white uppercase transition hover:border-white hover:bg-white/10"
-              >
-                {t("application.hero.appStore")}
-              </a>
-              <a
-                href="#download"
-                className="border border-white/35 px-6 py-3.5 text-center text-[0.7rem] tracking-[0.18em] text-white uppercase transition hover:border-white hover:bg-white/10"
-              >
-                {t("application.hero.googlePlay")}
-              </a>
             </motion.div>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: [0, -12, 0] }}
-            transition={{
-              opacity: { duration: 0.8 },
-              y: { duration: 5, repeat: Infinity, ease: "easeInOut" },
-            }}
-            className="relative flex justify-center"
-          >
-            <PhoneFrame>
-              <DashboardScreen />
-            </PhoneFrame>
-          </motion.div>
+          <div className="flex justify-center lg:justify-end">
+            <HeroPhones />
+          </div>
         </div>
       </section>
 
       {/* OVERVIEW */}
-      <section className="relative overflow-hidden bg-[#061525] py-24 lg:py-32">
+      <section className="relative overflow-hidden bg-[#061525] py-20 lg:py-28">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(200,169,106,0.12),transparent_55%)]"
@@ -315,175 +356,160 @@ export function ApplicationSections() {
             </h2>
           </Reveal>
 
-          {/* Mobile: phone then cards */}
-          <div className="mt-14 flex flex-col items-center gap-10 lg:hidden">
-            <Reveal>
+          <div className="mt-14 flex flex-col items-center gap-12 lg:mt-16 lg:gap-14">
+            <Reveal className="relative z-10">
               <PhoneFrame>
-                <DashboardScreen />
-              </PhoneFrame>
-            </Reveal>
-            <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3">
-              {appOverviewCards.map((card, index) => (
-                <OverviewCard key={card.id} card={card} index={index} />
-              ))}
-            </div>
-          </div>
-
-          {/* Desktop: cards flank the phone — no overlap */}
-          <div className="mt-16 hidden items-center gap-6 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-10 xl:gap-14">
-            <div className="flex flex-col gap-4">
-              {appOverviewCards.slice(0, 4).map((card, index) => (
-                <OverviewCard key={card.id} card={card} index={index} />
-              ))}
-            </div>
-
-            <Reveal className="relative z-10 flex justify-center px-2">
-              <PhoneFrame>
-                <DashboardScreen />
+                <PhoneScreenshot
+                  src={appFeaturedScreens.overview}
+                  alt={t("application.gallery.labels.home")}
+                />
               </PhoneFrame>
             </Reveal>
 
-            <div className="flex flex-col gap-4">
-              {appOverviewCards.slice(4).map((card, index) => (
-                <OverviewCard key={card.id} card={card} index={index + 4} />
+            <motion.ul
+              className="grid w-full max-w-4xl grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-3 sm:gap-x-10 sm:gap-y-6"
+              variants={overviewStagger}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-40px", amount: 0.2 }}
+            >
+              {appOverviewCards.map((card) => (
+                <OverviewFeature key={card.id} card={card} />
               ))}
-            </div>
+            </motion.ul>
           </div>
         </div>
       </section>
 
-      {/* TANKS */}
-      <section className="bg-background py-24 lg:py-32">
-        <div className="container-luxe grid items-center gap-14 lg:grid-cols-2">
+      {/* FLEET */}
+      <section className="bg-background py-20 lg:py-28">
+        <div className="container-luxe grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <Reveal direction="left" className="flex justify-center">
             <PhoneFrame>
-              <TanksScreen />
+              <PhoneScreenshot
+                src={appFeaturedScreens.fleet}
+                alt={t("application.gallery.labels.fleet")}
+              />
             </PhoneFrame>
           </Reveal>
           <Reveal direction="right">
-            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">{t("application.tanks.eyebrow")}</p>
-            <h2 className="mt-4 font-display text-3xl text-navy sm:text-5xl">{t("application.tanks.title")}</h2>
+            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
+              {t("application.tanks.eyebrow")}
+            </p>
+            <h2 className="mt-4 font-display text-3xl text-navy sm:text-5xl">
+              {t("application.tanks.title")}
+            </h2>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
               {t("application.tanks.description")}
             </p>
-            {isRTL ? null : (
-              <>
-                <p className="mt-6 font-display text-2xl text-navy/80">{t("application.tanks.titleAr")}</p>
-                <p className="mt-3 max-w-xl font-arabic text-muted-foreground">{t("application.tanks.descriptionAr")}</p>
-              </>
-            )}
           </Reveal>
         </div>
       </section>
 
-      {/* CHECKLIST */}
-      <section className="bg-sand py-24 lg:py-32">
-        <div className="container-luxe grid items-center gap-14 lg:grid-cols-2">
+      {/* SCHEDULE */}
+      <section className="bg-sand py-20 lg:py-28">
+        <div className="container-luxe grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <Reveal direction="left" className="order-2 lg:order-1">
-            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">{t("application.checklist.eyebrow")}</p>
-            <h2 className="mt-4 font-display text-3xl text-navy sm:text-5xl">{t("application.checklist.title")}</h2>
+            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
+              {t("application.checklist.eyebrow")}
+            </p>
+            <h2 className="mt-4 font-display text-3xl text-navy sm:text-5xl">
+              {t("application.checklist.title")}
+            </h2>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
               {t("application.checklist.description")}
             </p>
-            {!isRTL ? (
-              <>
-                <p className="mt-6 font-display text-2xl text-navy/80">{t("application.checklist.titleAr")}</p>
-                <p className="mt-3 max-w-xl font-arabic text-muted-foreground">{t("application.checklist.descriptionAr")}</p>
-              </>
-            ) : null}
           </Reveal>
           <Reveal direction="right" className="order-1 flex justify-center lg:order-2">
             <PhoneFrame>
-              <ChecklistScreen />
+              <PhoneScreenshot
+                src={appFeaturedScreens.schedule}
+                alt={t("application.gallery.labels.schedule")}
+              />
             </PhoneFrame>
           </Reveal>
         </div>
       </section>
 
-      {/* SERVICES */}
-      <section className="bg-[#071a2b] py-24 lg:py-32">
-        <div className="container-luxe grid items-center gap-14 lg:grid-cols-2">
+      {/* BOOKINGS */}
+      <section className="bg-[#071a2b] py-20 lg:py-28">
+        <div className="container-luxe grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <Reveal direction="left" className="flex justify-center">
             <PhoneFrame>
-              <ServicesScreen />
+              <PhoneScreenshot
+                src={appFeaturedScreens.bookings}
+                alt={t("application.gallery.labels.bookings")}
+              />
             </PhoneFrame>
           </Reveal>
           <Reveal direction="right" className="text-white">
-            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">{t("application.services.eyebrow")}</p>
-            <h2 className="mt-4 font-display text-3xl sm:text-5xl">{t("application.services.title")}</h2>
+            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
+              {t("application.services.eyebrow")}
+            </p>
+            <h2 className="mt-4 font-display text-3xl sm:text-5xl">
+              {t("application.services.title")}
+            </h2>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg">
               {t("application.services.description")}
             </p>
-            {!isRTL ? (
-              <>
-                <p className="mt-6 font-display text-2xl text-white/85">{t("application.services.titleAr")}</p>
-                <p className="mt-3 max-w-xl font-arabic text-white/60">{t("application.services.descriptionAr")}</p>
-              </>
-            ) : null}
             <div className="mt-8 flex flex-wrap gap-3 text-[0.65rem] tracking-[0.14em] uppercase">
-              <span className="rounded-full bg-emerald-400/15 px-3 py-1.5 text-emerald-300">{t("application.services.status.completed")}</span>
-              <span className="rounded-full bg-amber-400/15 px-3 py-1.5 text-amber-300">{t("application.services.status.upcoming")}</span>
-              <span className="rounded-full bg-rose-400/15 px-3 py-1.5 text-rose-300">{t("application.services.status.overdue")}</span>
+              <span className="rounded-full bg-emerald-400/15 px-3 py-1.5 text-emerald-300">
+                {t("application.services.status.completed")}
+              </span>
+              <span className="rounded-full bg-amber-400/15 px-3 py-1.5 text-amber-300">
+                {t("application.services.status.upcoming")}
+              </span>
+              <span className="rounded-full bg-sky-400/15 px-3 py-1.5 text-sky-300">
+                {t("application.gallery.labels.support")}
+              </span>
             </div>
           </Reveal>
         </div>
       </section>
 
-      {/* FEATURES GRID */}
-      <section className="bg-background py-24 lg:py-32">
+      {/* FEATURES CAROUSEL */}
+      <section className="bg-background py-20 lg:py-28">
         <div className="container-luxe">
           <Reveal className="mx-auto max-w-2xl text-center">
-            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">{t("application.features.eyebrow")}</p>
-            <h2 className="mt-4 font-display text-3xl text-navy sm:text-5xl">{t("application.features.title")}</h2>
+            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
+              {t("application.features.eyebrow")}
+            </p>
+            <h2 className="mt-4 font-display text-3xl text-navy sm:text-5xl">
+              {t("application.features.title")}
+            </h2>
           </Reveal>
-          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {appFeatureCards.map((key, index) => {
-              const Icon = featureIcons[index % featureIcons.length];
-              return (
-                <Reveal key={key} delay={(index % 4) * 0.05}>
-                  <motion.article
-                    whileHover={{ y: -8 }}
-                    className="h-full rounded-2xl border border-navy/10 bg-sand/70 p-6 transition hover:border-gold/40 hover:bg-white hover:shadow-card"
-                  >
-                    <Icon className="size-6 text-gold" strokeWidth={1.35} />
-                    <h3 className="mt-5 text-lg text-navy">{t(`application.features.items.${key}.title`)}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                      {t(`application.features.items.${key}.description`)}
-                    </p>
-                  </motion.article>
-                </Reveal>
-              );
-            })}
-          </div>
+          <FeaturesCarousel />
         </div>
       </section>
 
       {/* GALLERY */}
-      <section className="overflow-hidden bg-[#050f1c] py-24 lg:py-32">
+      <section className="bg-[#050f1c] py-20 lg:py-28">
         <div className="container-luxe">
           <Reveal className="mx-auto max-w-2xl text-center">
-            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">{t("application.gallery.eyebrow")}</p>
-            <h2 className="mt-4 font-display text-3xl text-white sm:text-5xl">{t("application.gallery.title")}</h2>
+            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
+              {t("application.gallery.eyebrow")}
+            </p>
+            <h2 className="mt-4 font-display text-3xl text-white sm:text-5xl">
+              {t("application.gallery.title")}
+            </h2>
           </Reveal>
-          <div className="mt-16 flex flex-wrap items-end justify-center gap-6 lg:gap-8">
+
+          <div className="mt-14 grid grid-cols-2 gap-6 sm:grid-cols-3 sm:gap-8 lg:grid-cols-5 lg:gap-6">
             {galleryScreens.map((screen, index) => (
-              <Reveal key={screen} delay={index * 0.06}>
+              <Reveal key={screen.src} delay={Math.min(index, 8) * 0.04}>
                 <motion.div
-                  animate={{ y: [0, index % 2 === 0 ? -12 : 12, 0] }}
-                  transition={{ duration: 5 + index * 0.2, repeat: Infinity, ease: "easeInOut" }}
-                  className="w-[180px] sm:w-[200px]"
+                  whileHover={{ y: -6 }}
+                  className="flex flex-col items-center gap-3"
                 >
-                  <PhoneFrame className="w-full" glow={false}>
-                    {screen === "tanks" ? (
-                      <TanksScreen />
-                    ) : screen === "checklist" ? (
-                      <ChecklistScreen />
-                    ) : screen === "services" ? (
-                      <ServicesScreen />
-                    ) : (
-                      <DashboardScreen />
-                    )}
+                  <PhoneFrame className="w-full max-w-[180px]" glow={false}>
+                    <PhoneScreenshot
+                      src={screen.src}
+                      alt={t(`application.gallery.labels.${screen.labelKey}`)}
+                    />
                   </PhoneFrame>
+                  <p className="text-center text-[0.65rem] tracking-[0.16em] text-white/55 uppercase">
+                    {t(`application.gallery.labels.${screen.labelKey}`)}
+                  </p>
                 </motion.div>
               </Reveal>
             ))}
@@ -492,10 +518,10 @@ export function ApplicationSections() {
       </section>
 
       {/* DOWNLOAD CTA */}
-      <section id="download" className="relative overflow-hidden py-28 lg:py-36">
+      <section id="download" className="relative overflow-hidden py-24 lg:py-32">
         <div className="absolute inset-0">
           <img src={aboutMarina} alt="" aria-hidden className="size-full object-cover" />
-          <div className="absolute inset-0 bg-navy/80" />
+          <div className="absolute inset-0 bg-navy/82" />
           <motion.div
             aria-hidden
             className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-sky-500/20 to-transparent"
@@ -507,28 +533,11 @@ export function ApplicationSections() {
           <Reveal>
             <h2 className="font-display text-4xl sm:text-6xl">{t("application.download.title")}</h2>
             <p className="mt-5 text-lg text-white/75">{t("application.download.description")}</p>
-            {!isRTL ? (
-              <>
-                <p className="mt-6 font-display text-2xl text-gold">{t("application.download.titleAr")}</p>
-                <p className="mt-2 font-arabic text-white/65">{t("application.download.descriptionAr")}</p>
-              </>
-            ) : null}
-            <div className="mt-10 flex w-full flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:justify-center">
-              <a
-                href="#"
-                className="w-full border border-gold bg-gold px-6 py-4 text-center text-[0.7rem] tracking-[0.18em] text-navy uppercase transition hover:bg-transparent hover:text-gold sm:w-auto sm:min-w-[220px]"
-              >
-                {t("application.download.appStore")}
-              </a>
-              <a
-                href="#"
-                className="w-full border border-white/40 px-6 py-4 text-center text-[0.7rem] tracking-[0.18em] text-white uppercase transition hover:border-white hover:bg-white/10 sm:w-auto sm:min-w-[220px]"
-              >
-                {t("application.download.googlePlay")}
-              </a>
+            <div className="mt-10 flex w-full flex-col items-center gap-4">
+              <ComingSoonStores light className="w-full max-w-xl text-start" />
               <Link
                 to="/contact"
-                className="w-full border border-white/40 px-6 py-4 text-center text-[0.7rem] tracking-[0.18em] text-white uppercase transition hover:border-gold hover:text-gold sm:w-auto sm:min-w-[220px]"
+                className="w-full max-w-xl border border-white/50 bg-white/10 px-6 py-4 text-center text-[0.7rem] tracking-[0.18em] text-white uppercase backdrop-blur-sm transition hover:border-gold hover:bg-gold hover:text-navy"
               >
                 {t("application.download.contact")}
               </Link>

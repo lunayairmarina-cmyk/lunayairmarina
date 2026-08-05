@@ -67,6 +67,9 @@ function LanguageProviderInner({ children }: { children: ReactNode }) {
       bundledDictionaries[language] as Record<string, unknown>,
       remote && Object.keys(remote).length > 0 ? remote : null,
     );
+    const fallbackDict = bundledDictionaries[language] as Record<string, unknown>;
+    const enDict = bundledDictionaries.en as Record<string, unknown>;
+    const arDict = bundledDictionaries.ar as Record<string, unknown>;
 
     return {
       language,
@@ -76,10 +79,40 @@ function LanguageProviderInner({ children }: { children: ReactNode }) {
       toggleLanguage: () => setLanguage(language === "en" ? "ar" : "en"),
       t: (key: string) => {
         const found = resolve(dict, key);
-        if (typeof found === "string") return found;
+        const bundled = resolve(fallbackDict, key);
+        const enBundled = resolve(enDict, key);
+        const arBundled = resolve(arDict, key);
+
+        if (typeof found === "string" && found.trim() && found !== key) {
+          // CMS sometimes saved English into the Arabic copy (or vice versa).
+          // Prefer the bundled locale when the overlay matches the wrong language.
+          if (
+            language === "ar" &&
+            typeof enBundled === "string" &&
+            typeof arBundled === "string" &&
+            found === enBundled &&
+            arBundled !== enBundled
+          ) {
+            return arBundled;
+          }
+          if (
+            language === "en" &&
+            typeof arBundled === "string" &&
+            typeof enBundled === "string" &&
+            found === arBundled &&
+            arBundled !== enBundled
+          ) {
+            return enBundled;
+          }
+          return found;
+        }
+        if (typeof bundled === "string") return bundled;
         return key;
       },
-      tv: <T,>(key: string) => resolve(dict, key) as T,
+      tv: <T,>(key: string) => {
+        const found = resolve(dict, key);
+        return (found !== undefined ? found : resolve(fallbackDict, key)) as T;
+      },
     };
   }, [language, setLanguage, siteContent?.bundle?.copy]);
 
@@ -94,14 +127,18 @@ export function useLanguage(): LanguageContextValue {
   const ctx = useContext(LanguageContext);
   if (!ctx) {
     // Fallback during rare route/error remounts so the app doesn't white-screen.
+    const dict = bundledDictionaries.en;
     return {
       language: "en",
       dir: "ltr",
       isRTL: false,
       setLanguage: () => undefined,
       toggleLanguage: () => undefined,
-      t: (key: string) => key,
-      tv: <T,>(key: string) => resolve(bundledDictionaries.en, key) as T,
+      t: (key: string) => {
+        const found = resolve(dict, key);
+        return typeof found === "string" ? found : key;
+      },
+      tv: <T,>(key: string) => resolve(dict, key) as T,
     };
   }
   return ctx;

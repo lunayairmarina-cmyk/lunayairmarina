@@ -118,7 +118,7 @@ export function saveAdminUsers(users: AdminUser[]) {
 
 export const PERMISSION_ROUTE: Record<AdminPermission, string> = {
   dashboard: "/admin/dashboard",
-  pages: "/admin/pages",
+  pages: "/admin/content",
   content: "/admin/content",
   services: "/admin/services",
   why: "/admin/why",

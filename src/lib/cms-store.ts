@@ -171,6 +171,97 @@ export function deepMergeCopy(
   return result;
 }
 
+/**
+ * Replace strings that were saved in the wrong language (e.g. English text
+ * stored inside the Arabic CMS copy) with the correct locale value.
+ */
+export function repairWrongLanguageCopy(
+  copy: Record<string, unknown> | null | undefined,
+  correctLocale: Record<string, unknown>,
+  wrongLocale: Record<string, unknown>,
+): Record<string, unknown> {
+  if (!copy) return { ...correctLocale };
+
+  const walk = (node: unknown, correct: unknown, wrong: unknown): unknown => {
+    if (typeof node === "string") {
+      if (
+        typeof wrong === "string" &&
+        typeof correct === "string" &&
+        node === wrong &&
+        correct !== wrong
+      ) {
+        return correct;
+      }
+      return node;
+    }
+    if (Array.isArray(node)) {
+      if (!Array.isArray(correct)) return node;
+      return node.map((item, index) =>
+        walk(item, (correct as unknown[])[index], Array.isArray(wrong) ? wrong[index] : undefined),
+      );
+    }
+    if (node && typeof node === "object") {
+      const result: Record<string, unknown> = {};
+      const correctObj =
+        correct && typeof correct === "object" && !Array.isArray(correct)
+          ? (correct as Record<string, unknown>)
+          : {};
+      const wrongObj =
+        wrong && typeof wrong === "object" && !Array.isArray(wrong)
+          ? (wrong as Record<string, unknown>)
+          : {};
+      const keys = new Set([
+        ...Object.keys(node as Record<string, unknown>),
+        ...Object.keys(correctObj),
+      ]);
+      for (const key of keys) {
+        const value = (node as Record<string, unknown>)[key];
+        if (value === undefined) {
+          if (correctObj[key] !== undefined) result[key] = correctObj[key];
+          continue;
+        }
+        result[key] = walk(value, correctObj[key], wrongObj[key]);
+      }
+      return result;
+    }
+    return node;
+  };
+
+  return walk(copy, correctLocale, wrongLocale) as Record<string, unknown>;
+}
+
+/** Keep only CMS overrides that differ from the bundled locale. */
+export function diffCopyAgainstLocale(
+  copy: Record<string, unknown>,
+  locale: Record<string, unknown>,
+): Record<string, unknown> {
+  const walk = (node: unknown, base: unknown): unknown => {
+    if (typeof node === "string") {
+      return typeof base === "string" && node === base ? undefined : node;
+    }
+    if (Array.isArray(node)) {
+      if (JSON.stringify(node) === JSON.stringify(base)) return undefined;
+      return node;
+    }
+    if (node && typeof node === "object") {
+      const result: Record<string, unknown> = {};
+      const baseObj =
+        base && typeof base === "object" && !Array.isArray(base)
+          ? (base as Record<string, unknown>)
+          : {};
+      for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+        const next = walk(value, baseObj[key]);
+        if (next !== undefined) result[key] = next;
+      }
+      return Object.keys(result).length > 0 ? result : undefined;
+    }
+    return node === base ? undefined : node;
+  };
+
+  const diff = walk(copy, locale);
+  return (diff && typeof diff === "object" ? diff : {}) as Record<string, unknown>;
+}
+
 export function setCopyPath(
   copy: { en: Record<string, unknown>; ar: Record<string, unknown> },
   language: "en" | "ar",

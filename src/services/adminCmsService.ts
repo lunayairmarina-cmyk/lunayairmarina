@@ -3,8 +3,10 @@ import { getDb } from "@/lib/firebase";
 import {
   CMS_UPDATED_EVENT,
   deepMergeCopy,
+  diffCopyAgainstLocale,
   loadCmsStore,
   patchCmsStore,
+  repairWrongLanguageCopy,
   type CmsMessage,
   type CmsStore,
   type FirebaseSyncStatus,
@@ -12,6 +14,8 @@ import {
   type SeoPageId,
   type SeoPageMeta,
 } from "@/lib/cms-store";
+import enLocale from "@/locales/en.json";
+import arLocale from "@/locales/ar.json";
 import { clearContentCache } from "@/services/contentService";
 import type {
   AboutContent,
@@ -103,11 +107,24 @@ export async function saveCopyBundle(copy: {
   en: Record<string, unknown>;
   ar: Record<string, unknown>;
 }): Promise<SaveResult> {
+  const enLocaleDict = enLocale as Record<string, unknown>;
+  const arLocaleDict = arLocale as Record<string, unknown>;
+
+  // Repair accidental cross-language saves, then store only real overrides.
+  const repaired = {
+    en: repairWrongLanguageCopy(copy.en, enLocaleDict, arLocaleDict),
+    ar: repairWrongLanguageCopy(copy.ar, arLocaleDict, enLocaleDict),
+  };
+  const toPersist = {
+    en: diffCopyAgainstLocale(repaired.en, enLocaleDict),
+    ar: diffCopyAgainstLocale(repaired.ar, arLocaleDict),
+  };
+
   const sync = await tryFirebaseWrite(async () => {
-    await setDoc(doc(getDb(), "copy", "en"), copy.en, { merge: true });
-    await setDoc(doc(getDb(), "copy", "ar"), copy.ar, { merge: true });
+    await setDoc(doc(getDb(), "copy", "en"), toPersist.en, { merge: true });
+    await setDoc(doc(getDb(), "copy", "ar"), toPersist.ar, { merge: true });
   });
-  patchCmsStore({ copy, firebaseSync: sync });
+  patchCmsStore({ copy: toPersist, firebaseSync: sync });
   notifySiteReload();
   return { ok: true, sync };
 }

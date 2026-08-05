@@ -9,8 +9,8 @@ import { Counter } from "@/components/shared/Counter";
 import { useLanguage } from "@/lib/i18n";
 import { buildSeoHead } from "@/services/seoService";
 import { usePageHeaderImage } from "@/hooks/usePageHeaderImage";
-import aboutHeader from "@/assets/page-header-about.jpg";
-import aboutImage from "@/assets/about-marina.jpg";
+import aboutHeader from "@/assets/headers/header-about.jpg";
+import aboutImage from "@/assets/about/about-marina.jpg";
 
 export const Route = createFileRoute("/about")({
   head: () => buildSeoHead("about", "/about"),
@@ -44,20 +44,41 @@ function AboutPage() {
       />
 
       {/* Stats strip */}
-      <section className="border-b border-border bg-background">
-        <div className="container-luxe grid divide-y divide-border sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:rtl:divide-x-reverse">
+      <section className="relative overflow-hidden bg-navy py-14 sm:py-16 lg:py-20">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(200,169,106,0.14),transparent_55%)]"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent"
+        />
+        <div className="container-luxe relative grid gap-10 sm:grid-cols-3 sm:gap-6 lg:gap-10">
           {stats.map((stat, index) => (
             <Reveal
               key={stat.label}
-              delay={index * 0.08}
-              className="px-2 py-10 text-center sm:px-8 sm:py-12 sm:text-start"
+              delay={index * 0.1}
+              className="group relative text-center sm:px-4"
             >
-              <p className="type-display-l text-navy">
+              <p className="text-[0.6rem] tracking-[0.28em] text-gold/70 uppercase">
+                0{index + 1}
+              </p>
+              <p className="mt-3 font-display text-5xl leading-none text-gold sm:text-6xl lg:text-7xl">
                 <Counter value={stat.value} suffix={stat.suffix} />
               </p>
-              <p className="type-body-sm mx-auto mt-3 max-w-[16rem] text-muted-foreground sm:mx-0 sm:mt-4">
+              <span
+                aria-hidden
+                className="mx-auto mt-5 block h-px w-12 bg-gold/45 transition-all duration-500 group-hover:w-20 group-hover:bg-gold"
+              />
+              <p className="mx-auto mt-5 max-w-[15rem] text-sm leading-relaxed text-navy-foreground/65 sm:max-w-[17rem]">
                 {stat.label}
               </p>
+              {index < stats.length - 1 ? (
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-y-2 end-0 hidden w-px bg-gradient-to-b from-transparent via-navy-foreground/15 to-transparent sm:block"
+                />
+              ) : null}
             </Reveal>
           ))}
         </div>

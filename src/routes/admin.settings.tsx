@@ -129,22 +129,22 @@ function AdminSettingsPage() {
               }
             />
             <ModalField
-              label="Facebook"
-              value={settings.socialLinks.facebook}
+              label="TikTok"
+              value={settings.socialLinks.tiktok ?? ""}
               onChange={(value) =>
                 setSettings({
                   ...settings,
-                  socialLinks: { ...settings.socialLinks, facebook: value },
+                  socialLinks: { ...settings.socialLinks, tiktok: value },
                 })
               }
             />
             <ModalField
-              label="YouTube"
-              value={settings.socialLinks.youtube}
+              label="X"
+              value={settings.socialLinks.x ?? ""}
               onChange={(value) =>
                 setSettings({
                   ...settings,
-                  socialLinks: { ...settings.socialLinks, youtube: value },
+                  socialLinks: { ...settings.socialLinks, x: value },
                 })
               }
             />

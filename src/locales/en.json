@@ -442,36 +442,37 @@
     "hero": {
       "eyebrow": "Exclusive Mobile Application",
       "title": "Premium Yacht Management.\nAnywhere. Anytime.",
-      "titleAr": "تطبيق إدارة يخوت احترافي",
-      "subtitleAr": "راقب يختك من أي مكان في العالم.",
-      "description": "Imagine monitoring your yacht from anywhere in the world with a single tap. Our exclusive application gives yacht owners complete visibility over maintenance, tank levels, inspections, services, crew status, documents and much more.",
+      "description": "Manage your yacht from anywhere in the world with a single tap. Our exclusive app gives you complete visibility over your fleet, schedule, bookings, support, crew, documents and more.",
       "ask": "Ask a Question",
-      "appStore": "Download on the App Store",
-      "googlePlay": "Get it on Google Play"
+      "appStore": "App Store",
+      "googlePlay": "Google Play"
+    },
+    "comingSoon": {
+      "eyebrow": "Coming soon",
+      "title": "The app is on its way to the stores",
+      "body": "App Store & Google Play — launch is coming soon."
     },
     "overview": {
       "eyebrow": "App Overview",
       "title": "Everything your yacht needs, in one place",
       "cards": {
-        "tanks": "Tank Levels",
-        "checklist": "Checklist",
-        "safety": "Safety",
-        "systems": "Systems",
-        "documents": "Documents",
+        "tanks": "Fleet Management",
+        "checklist": "Schedule & Tasks",
+        "safety": "Find Dock",
+        "systems": "Voyages",
+        "documents": "Certifications",
         "crew": "Crew",
-        "services": "Upcoming Services",
-        "history": "History",
-        "info": "Information"
+        "services": "Bookings & Support",
+        "history": "Membership",
+        "info": "Profile"
       }
     },
     "tanks": {
-      "eyebrow": "Live Monitoring",
-      "title": "Monitor Tank Levels Anywhere",
-      "description": "View your yacht's tank levels from anywhere in the world. Our captains update tank information after every trip. Receive instant notifications whenever new data is available.",
-      "titleAr": "راقب مستويات الخزانات من أي مكان",
-      "descriptionAr": "اطّلع على مستويات خزانات يختك من أي مكان في العالم. يقوم القباطنة بتحديث البيانات بعد كل رحلة، وتصلك إشعارات فورية عند توفر معلومات جديدة.",
-      "screenTitle": "Tank Levels",
-      "brand": "Golden Eye",
+      "eyebrow": "Fleet Management",
+      "title": "Manage your fleet from one screen",
+      "description": "Track yachts, bookings, earnings and utilization in a single dashboard. Add vessels, monitor availability and stay in control of fleet operations anytime.",
+      "screenTitle": "Manage Fleet",
+      "brand": "Yacht Pro",
       "updated": "Last Updated: Today",
       "diesel": "Diesel",
       "fresh": "Fresh Water",
@@ -479,11 +480,9 @@
       "gas": "Gas"
     },
     "checklist": {
-      "eyebrow": "Inspections",
-      "title": "Custom Weekly Inspection Checklist",
-      "description": "Every yacht receives a completely customized inspection checklist. Our management team updates every inspection weekly. Track maintenance history with complete transparency.",
-      "titleAr": "قائمة فحص أسبوعية مخصصة",
-      "descriptionAr": "يحصل كل يخت على قائمة فحص مخصصة بالكامل. يحدّث فريق الإدارة كل فحص أسبوعيًا مع سجل صيانة شفاف بالكامل.",
+      "eyebrow": "Schedule & Tasks",
+      "title": "Clear shifts and onboard tasks",
+      "description": "Review daily shifts and yacht tasks, request time off or swap shifts, and track confirmation status — full transparency for crew and management.",
       "groups": {
         "exterior": "Exterior",
         "interior": "Interior",
@@ -503,11 +502,9 @@
       }
     },
     "services": {
-      "eyebrow": "Maintenance",
-      "title": "Upcoming Services",
-      "description": "Never miss an important maintenance schedule. Receive reminders before every service. Our management team handles the planning for you.",
-      "titleAr": "الخدمات القادمة",
-      "descriptionAr": "لا تفوّت أي موعد صيانة مهم. تصلك تذكيرات قبل كل خدمة، ويتولى فريق الإدارة التخطيط بالكامل نيابةً عنك.",
+      "eyebrow": "Bookings & Support",
+      "title": "Your voyages and support, one tap away",
+      "description": "Follow upcoming trips, payments and history, and reach concierge or support instantly whenever you need — everything tied to your app account.",
       "status": {
         "completed": "Completed",
         "upcoming": "Upcoming",
@@ -531,68 +528,82 @@
     "features": {
       "eyebrow": "Capabilities",
       "title": "Application Features",
+      "prev": "Previous",
+      "next": "Next",
       "items": {
         "monitoring": {
-          "title": "24/7 Monitoring",
-          "description": "Continuous visibility over yacht systems and operations."
+          "title": "Home Dashboard",
+          "description": "Upcoming voyages, weather, featured tours and membership — all on one screen."
         },
         "notifications": {
-          "title": "Live Notifications",
-          "description": "Instant alerts when captains update critical data."
+          "title": "Support Center",
+          "description": "Reach concierge and support directly from the app whenever you need help."
         },
         "maintenance": {
-          "title": "Maintenance Tracking",
-          "description": "Follow every service from schedule to completion."
+          "title": "Schedule & Shifts",
+          "description": "Review daily tasks, manage shifts and track confirmation status with clarity."
         },
         "crew": {
-          "title": "Crew Management",
-          "description": "Stay informed about crew status and rotations."
+          "title": "Crew Profiles",
+          "description": "View captain and crew details and roles in one place."
         },
         "documents": {
-          "title": "Digital Documents",
-          "description": "Access certificates and papers securely anytime."
+          "title": "Certifications",
+          "description": "Secure access to certificates and official papers anytime."
         },
         "safety": {
-          "title": "Safety Reports",
-          "description": "Review inspections and safety checks in one place."
+          "title": "Find Dock",
+          "description": "Search marinas that fit your yacht dimensions and check availability."
         },
         "tanks": {
-          "title": "Tank Monitoring",
-          "description": "Diesel, water, waste and gas levels at a glance."
+          "title": "Owner Profile",
+          "description": "Manage your account, vessels and permissions from your profile."
         },
         "expenses": {
-          "title": "Expense Tracking",
-          "description": "Transparent cost visibility for ownership clarity."
+          "title": "Bookings & Payments",
+          "description": "Track upcoming trips, booking history and payments with full clarity."
         },
         "photos": {
-          "title": "Photo Reports",
-          "description": "Visual updates from decks, systems and service work."
+          "title": "Tour Details",
+          "description": "Explore tour details, photos and itineraries before you book."
         },
         "scheduling": {
-          "title": "Service Scheduling",
-          "description": "Plan upcoming yard and onboard work with reminders."
+          "title": "Create Tour",
+          "description": "Build new tours and services with precise details and reminders."
         },
         "fleet": {
-          "title": "Fleet Overview",
-          "description": "A clear snapshot of every managed vessel."
+          "title": "Fleet Management",
+          "description": "Yachts, availability, earnings and utilization in one dashboard."
         },
         "history": {
-          "title": "Maintenance History",
-          "description": "Complete archive of inspections and completed work."
+          "title": "VIP Membership",
+          "description": "Follow membership privileges, points and exclusive offers."
         }
       }
     },
     "gallery": {
       "eyebrow": "Inside the App",
-      "title": "A gallery of premium screens"
+      "title": "Real screens from the product",
+      "labels": {
+        "home": "Home",
+        "fleet": "Fleet",
+        "schedule": "Schedule",
+        "bookings": "Bookings",
+        "support": "Support",
+        "dock": "Find Dock",
+        "certs": "Certifications",
+        "tours": "Tours",
+        "owner": "Owner",
+        "vip": "VIP Membership",
+        "crew": "Crew",
+        "create": "Create Tour"
+      }
     },
     "download": {
       "title": "Take Full Control of Your Yacht",
-      "description": "Experience professional yacht management in your pocket.",
-      "titleAr": "تحكم كامل في يختك",
-      "descriptionAr": "اختبر إدارة يخوت احترافية بين يديك.",
-      "appStore": "Download on App Store",
-      "googlePlay": "Get it on Google Play",
+      "description": "Professional yacht management in your pocket — the app is being prepared for launch.",
+      "appStore": "App Store",
+      "googlePlay": "Google Play",
       "contact": "Contact Us"
     }
   },
@@ -676,7 +687,7 @@
       "label": "Average response",
       "value": "13",
       "unit": "minutes",
-      "caption": "Global fleet clients • 2025",
+      "caption": "Global fleet clients • 2026",
       "imageAlt": "Concierge preparing a luxury yacht itinerary"
     },
     "pathways": {
@@ -695,6 +706,10 @@
         "body": "We coordinate provisioning, customs clearance, and guest experiences worldwide.",
         "cta": "Design an itinerary"
       }
+    },
+    "pathwaysSection": {
+      "eyebrow": "How we can help",
+      "title": "Choose the path that fits your request"
     },
     "formSection": {
       "title": "Yacht management enquiry",
@@ -732,10 +747,12 @@
       "yachtLocation": "Yacht location",
       "yachtLocationPlaceholder": "Jeddah / Red Sea / Dubai",
       "serviceNeeded": "Service required",
-      "serviceNeededPlaceholder": "360° management, agency, marina, crew…",
+      "serviceNeededPlaceholder": "Select a service",
+      "serviceOther": "Other / general consultation",
       "message": "Additional notes",
       "messagePlaceholder": "Tell us anything else our management desk should know.",
       "submit": "Send management request",
+      "submitAnother": "Send another request",
       "sending": "Sending...",
       "success": "Thank you. Your management enquiry has been received.",
       "error": "Please complete all required fields."
@@ -938,6 +955,8 @@
     },
     "content": {
       "title": "Website Content",
+      "subtitle": "Edit all site copy and media in one place. Changes appear immediately after saving.",
+      "media": "Media & images",
       "hero": "Hero Section",
       "about": "About Section",
       "heroTitle": "Title",
@@ -1040,7 +1059,7 @@
       },
       "permissionLabels": {
         "dashboard": "Dashboard",
-        "pages": "Pages & Copy",
+        "pages": "Website Content",
         "content": "Website Content",
         "services": "Services",
         "why": "Why Choose Us",

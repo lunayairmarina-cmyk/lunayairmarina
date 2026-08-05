@@ -8,7 +8,7 @@ import { Reveal } from "@/components/shared/Reveal";
 import { useLanguage } from "@/lib/i18n";
 import { buildSeoHead } from "@/services/seoService";
 import { usePageHeaderImage } from "@/hooks/usePageHeaderImage";
-import servicesHeader from "@/assets/page-header-services.jpg";
+import servicesHeader from "@/assets/headers/header-services.jpg";
 
 export const Route = createFileRoute("/services/")({
   head: () => buildSeoHead("services", "/services"),

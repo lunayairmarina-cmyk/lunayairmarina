@@ -13,7 +13,7 @@ import {
 import { CMS_UPDATED_EVENT } from "@/lib/cms-store";
 import { buildSeoHead } from "@/services/seoService";
 import { usePageHeaderImage } from "@/hooks/usePageHeaderImage";
-import blogHeader from "@/assets/page-header-blog.jpg";
+import blogHeader from "@/assets/headers/header-blog.jpg";
 
 export const Route = createFileRoute("/blog/")({
   head: () => {

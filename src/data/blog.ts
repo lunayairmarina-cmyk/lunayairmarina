@@ -1,9 +1,10 @@
-import gallery1 from "@/assets/gallery-1.jpg";
-import gallery2 from "@/assets/gallery-2.jpg";
-import yacht1 from "@/assets/yacht-1.jpg";
-import aboutMarina from "@/assets/about-marina.jpg";
+import gallery1 from "@/assets/gallery/gallery-01-marina.jpg";
+import gallery2 from "@/assets/gallery/gallery-02-deck.jpg";
+import yacht1 from "@/assets/fleet/fleet-01.jpg";
+import aboutMarina from "@/assets/about/about-marina.jpg";
 import type { Language } from "@/lib/i18n";
 import { loadCmsStore } from "@/lib/cms-store";
+import { absoluteUrl as siteAbsoluteUrl } from "@/lib/site";
 
 export type Localized = { en: string; ar: string };
 
@@ -411,10 +412,7 @@ export function slugify(value: string) {
 }
 
 export function absoluteUrl(path: string) {
-  if (typeof window !== "undefined" && window.location?.origin) {
-    return `${window.location.origin}${path}`;
-  }
-  return `https://lunayairmarina.com${path}`;
+  return siteAbsoluteUrl(path);
 }
 
 export function buildArticleJsonLd(post: BlogPost, language: Language = "en") {
@@ -436,7 +434,7 @@ export function buildArticleJsonLd(post: BlogPost, language: Language = "en") {
       name: "lunayairmarina",
       logo: {
         "@type": "ImageObject",
-        url: absoluteUrl("/photo/lunayairmarina.png"),
+        url: absoluteUrl("/images/brand/logo.png"),
       },
     },
     mainEntityOfPage: {

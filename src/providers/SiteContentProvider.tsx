@@ -33,6 +33,23 @@ export function localizeValue(
   return value[language] || value.en || value.ar || "";
 }
 
+/** True when a CMS string looks like an i18n key (e.g. hero.title) instead of real copy. */
+export function looksLikeI18nKey(value: string | undefined | null): boolean {
+  if (!value) return true;
+  const trimmed = value.trim();
+  if (!trimmed) return true;
+  return /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/i.test(trimmed);
+}
+
+export function localizeOrFallback(
+  value: LocalizedString | string | undefined,
+  language: Lang,
+  fallback: string,
+): string {
+  const localized = localizeValue(value, language);
+  return looksLikeI18nKey(localized) ? fallback : localized;
+}
+
 export function SiteContentProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<ContentStatus>("loading");
   const [error, setError] = useState<string | null>(null);

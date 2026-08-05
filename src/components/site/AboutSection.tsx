@@ -3,8 +3,8 @@ import { Check } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import { Reveal } from "@/components/shared/Reveal";
 import { Counter } from "@/components/shared/Counter";
-import { useOptionalSiteContent, localizeValue } from "@/providers/SiteContentProvider";
-import aboutImageFallback from "@/assets/about-marina.jpg";
+import { useOptionalSiteContent, localizeOrFallback } from "@/providers/SiteContentProvider";
+import aboutImageFallback from "@/assets/about/about-marina.jpg";
 
 interface Stat {
   value: number;
@@ -16,21 +16,29 @@ export function AboutSection({ variant = "home" }: { variant?: "home" | "page" }
   const { t, tv, language } = useLanguage();
   const about = useOptionalSiteContent()?.bundle?.about;
   const aboutImage = about?.image || aboutImageFallback;
-  const eyebrow = about ? localizeValue(about.eyebrow, language) : t("about.eyebrow");
-  const title = about ? localizeValue(about.title, language) : t("about.title");
+  const eyebrow = about
+    ? localizeOrFallback(about.eyebrow, language, t("about.eyebrow"))
+    : t("about.eyebrow");
+  const title = about
+    ? localizeOrFallback(about.title, language, t("about.title"))
+    : t("about.title");
   const lead = about
-    ? localizeValue(about.lead || about.description, language)
+    ? localizeOrFallback(about.lead || about.description, language, t("about.lead"))
     : t("about.lead");
-  const body = about ? localizeValue(about.body, language) : t("about.body");
+  const body = about
+    ? localizeOrFallback(about.body, language, t("about.body"))
+    : t("about.body");
   const cta = t("about.cta");
   const points = about
-    ? about.points.map((p) => localizeValue(p, language))
+    ? about.points
+        .map((p) => localizeOrFallback(p, language, ""))
+        .filter(Boolean)
     : (tv<string[]>("about.points") ?? []);
   const stats = about
     ? about.stats.map((s) => ({
         value: s.value,
         suffix: s.suffix,
-        label: localizeValue(s.label, language),
+        label: localizeOrFallback(s.label, language, ""),
       }))
     : (tv<Stat[]>("about.stats") ?? []);
 
