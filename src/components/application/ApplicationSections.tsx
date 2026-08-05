@@ -204,6 +204,7 @@ function HeroPhones() {
           <PhoneScreenshot
             src={appFeaturedScreens.hero}
             alt={t("application.gallery.labels.home")}
+            priority
           />
         </PhoneFrame>
       </motion.div>
@@ -224,7 +225,7 @@ function ComingSoonStores({
       className={cn(
         "relative overflow-hidden border px-5 py-4 sm:px-6",
         light
-          ? "border-white/25 bg-white/10 text-white backdrop-blur-sm"
+          ? "border-white/35 bg-[#03111f]/90 text-white"
           : "border-navy/15 bg-white text-navy",
         className,
       )}
@@ -288,9 +289,8 @@ export function ApplicationSections() {
       <section className="relative flex min-h-[calc(100svh-4rem)] w-full items-center py-10 sm:py-14 lg:py-12">
         <div className="absolute inset-0 overflow-hidden">
           <img src={aboutMarina} alt="" aria-hidden className="size-full object-cover" />
-          <div className="absolute inset-0 bg-[#03111f]/55" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#03111f]/92 via-[#03111f]/55 to-[#03111f]/20 rtl:bg-gradient-to-l" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(200,169,106,0.16),transparent_42%)]" />
+          <div className="absolute inset-0 bg-[#03111f]/35" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#03111f]/88 via-[#03111f]/40 to-transparent rtl:bg-gradient-to-l" />
         </div>
 
         <div className="container-luxe relative z-10 grid items-center gap-8 lg:grid-cols-2 lg:gap-10">
@@ -327,7 +327,7 @@ export function ApplicationSections() {
               <ComingSoonStores light />
               <Link
                 to="/contact"
-                className="border border-white/40 bg-white/10 px-6 py-3.5 text-center text-[0.7rem] tracking-[0.18em] text-white uppercase backdrop-blur-sm transition hover:border-gold hover:bg-gold hover:text-navy"
+                className="border border-white/50 bg-[#03111f]/85 px-6 py-3.5 text-center text-[0.7rem] tracking-[0.18em] text-white uppercase transition hover:border-gold hover:bg-gold hover:text-navy"
               >
                 {t("application.hero.ask")}
               </Link>
@@ -537,7 +537,7 @@ export function ApplicationSections() {
               <ComingSoonStores light className="w-full max-w-xl text-start" />
               <Link
                 to="/contact"
-                className="w-full max-w-xl border border-white/50 bg-white/10 px-6 py-4 text-center text-[0.7rem] tracking-[0.18em] text-white uppercase backdrop-blur-sm transition hover:border-gold hover:bg-gold hover:text-navy"
+                className="w-full max-w-xl border border-white/50 bg-[#03111f]/85 px-6 py-4 text-center text-[0.7rem] tracking-[0.18em] text-white uppercase transition hover:border-gold hover:bg-gold hover:text-navy"
               >
                 {t("application.download.contact")}
               </Link>

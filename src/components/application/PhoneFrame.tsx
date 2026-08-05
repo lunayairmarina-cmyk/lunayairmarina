@@ -15,12 +15,12 @@ export function PhoneFrame({
       {glow ? (
         <div
           aria-hidden
-          className="absolute -inset-8 rounded-[3rem] bg-gold/15 blur-3xl"
+          className="absolute -inset-6 rounded-[3rem] bg-gold/20 blur-2xl"
         />
       ) : null}
-      <div className="relative overflow-hidden rounded-[2.4rem] border border-white/20 bg-[#0b1220] p-[10px] shadow-[0_40px_80px_-30px_rgba(0,0,0,0.7)]">
+      <div className="relative overflow-hidden rounded-[2.4rem] border border-white/45 bg-[#0b1220] p-[10px] shadow-[0_30px_60px_-20px_rgba(0,0,0,0.85)] ring-1 ring-white/20">
         <div className="absolute inset-x-0 top-0 z-20 flex justify-center pt-3">
-          <div className="h-6 w-28 rounded-full bg-black/90" />
+          <div className="h-5 w-24 rounded-full bg-black/80" />
         </div>
         <div className="relative aspect-[9/19] overflow-hidden rounded-[1.9rem] bg-[#07111d]">
           {children}
@@ -33,17 +33,20 @@ export function PhoneFrame({
 export function PhoneScreenshot({
   src,
   alt = "",
+  priority = false,
 }: {
   src: string;
   alt?: string;
+  priority?: boolean;
 }) {
   return (
     <img
       src={src}
       alt={alt}
-      loading="lazy"
+      loading={priority ? "eager" : "lazy"}
       decoding="async"
-      className="absolute inset-0 size-full object-cover object-top"
+      fetchPriority={priority ? "high" : "auto"}
+      className="block size-full object-cover object-top"
     />
   );
 }
