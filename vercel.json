@@ -1,10 +1,3 @@
 {
-  "redirects": [
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "lunayairmarina.com" }],
-      "destination": "https://www.lunayairmarina.com/:path*",
-      "permanent": true
-    }
-  ]
+  "framework": "tanstack-start"
 }
