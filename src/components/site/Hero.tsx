@@ -43,7 +43,7 @@ export function Hero() {
   const [videoReady, setVideoReady] = useState(false);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
-  // Poster-first: never auto-download the ~28MB MP4 on first paint.
+  // Poster-first: delay the ~28MB MP4 until after first paint, then actually fetch+play.
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const connection = (navigator as Navigator & {
@@ -56,7 +56,7 @@ export function Hero() {
 
     const el = sectionRef.current;
     if (!el || typeof IntersectionObserver === "undefined") {
-      const id = window.setTimeout(() => setShouldLoadVideo(true), 2500);
+      const id = window.setTimeout(() => setShouldLoadVideo(true), 900);
       return () => window.clearTimeout(id);
     }
 
@@ -66,13 +66,14 @@ export function Hero() {
         if (!entries.some((e) => e.isIntersecting)) return;
         observer.disconnect();
         const start = () => setShouldLoadVideo(true);
+        // Short idle window so video still starts soon after LCP poster paints.
         if (typeof window.requestIdleCallback === "function") {
-          idleId = window.requestIdleCallback(start, { timeout: 3000 });
+          idleId = window.requestIdleCallback(start, { timeout: 1200 });
         } else {
-          idleId = window.setTimeout(start, 1800);
+          idleId = window.setTimeout(start, 700);
         }
       },
-      { rootMargin: "0px", threshold: 0.2 },
+      { rootMargin: "0px", threshold: 0.15 },
     );
     observer.observe(el);
 
@@ -86,17 +87,50 @@ export function Hero() {
 
   useEffect(() => {
     if (!shouldLoadVideo) return;
-    const video = videoRef.current;
-    if (!video) return;
 
-    const onCanPlay = () => {
-      void video.play().catch(() => undefined);
-      setVideoReady(true);
+    let cancelled = false;
+    let video: HTMLVideoElement | null = null;
+
+    const markReady = () => {
+      if (!cancelled) setVideoReady(true);
     };
 
-    video.addEventListener("canplay", onCanPlay);
-    if (video.readyState >= 3) onCanPlay();
-    return () => video.removeEventListener("canplay", onCanPlay);
+    const tryPlay = () => {
+      if (!video || cancelled) return;
+      void video
+        .play()
+        .then(markReady)
+        .catch(() => undefined);
+    };
+
+    const start = () => {
+      video = videoRef.current;
+      if (!video) return false;
+      video.addEventListener("playing", markReady);
+      video.addEventListener("canplay", tryPlay);
+      // Kick fetch even if preload was none; with preload=auto this still helps.
+      video.load();
+      tryPlay();
+      return true;
+    };
+
+    // Ref is set after commit; retry once on next frame if needed.
+    if (!start()) {
+      const raf = requestAnimationFrame(() => {
+        start();
+      });
+      return () => {
+        cancelled = true;
+        cancelAnimationFrame(raf);
+      };
+    }
+
+    return () => {
+      cancelled = true;
+      if (!video) return;
+      video.removeEventListener("playing", markReady);
+      video.removeEventListener("canplay", tryPlay);
+    };
   }, [shouldLoadVideo, heroVideo]);
 
   return (
@@ -127,7 +161,8 @@ export function Hero() {
             muted
             loop
             playsInline
-            preload="none"
+            autoPlay
+            preload="auto"
             poster={heroImage}
             aria-hidden
             src={heroVideo}
