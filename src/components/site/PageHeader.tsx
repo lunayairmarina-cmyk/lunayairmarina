@@ -1,6 +1,4 @@
-import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { useLanguage } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 interface PageHeaderProps {
@@ -8,8 +6,6 @@ interface PageHeaderProps {
   title: string;
   subtitle?: string;
   image: string;
-  /** Current page label for breadcrumb after Home */
-  crumb?: string;
   compact?: boolean;
 }
 
@@ -18,85 +14,67 @@ export function PageHeader({
   title,
   subtitle,
   image,
-  crumb,
   compact = false,
 }: PageHeaderProps) {
-  const { t } = useLanguage();
-
   return (
     <section
       className={cn(
-        "relative flex items-end overflow-hidden pt-16",
+        "relative flex w-full items-end overflow-hidden",
         compact
-          ? "min-h-[46vh] pb-14 sm:min-h-[50vh] sm:pb-16"
-          : "min-h-[58vh] pb-20 sm:min-h-[64vh] sm:pb-24",
+          ? "min-h-[34vh] pb-10 sm:min-h-[36vh] sm:pb-14"
+          : "min-h-[38vh] pb-10 sm:min-h-[44vh] sm:pb-16 lg:min-h-[50vh] lg:pb-20",
       )}
     >
-      <div className="absolute inset-0">
-        <img src={image} alt="" aria-hidden className="animate-slow-zoom size-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050d18] via-navy/55 to-navy/30" />
-        <div
+      <div className="absolute inset-0 bg-navy">
+        <img
+          src={image}
+          alt=""
           aria-hidden
-          className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(200,169,106,0.16),transparent_45%)]"
+          className="size-full object-cover object-[center_40%] sm:object-center"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050d18]/70 via-[#050d18]/25 to-transparent sm:from-[#050d18]/55 sm:via-transparent" />
       </div>
 
-      <div className="container-luxe relative z-10 max-w-3xl">
-        {crumb ? (
-          <motion.nav
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.6 }}
-            aria-label="Breadcrumb"
-            className="mb-5 flex flex-wrap items-center gap-2 text-[0.65rem] tracking-[0.2em] text-white/50 uppercase"
-          >
-            <Link to="/" className="transition-colors hover:text-gold">
-              {t("nav.home")}
-            </Link>
-            <span aria-hidden className="text-gold/60">
-              /
-            </span>
-            <span className="text-gold">{crumb}</span>
-          </motion.nav>
-        ) : null}
+      <div className="container-luxe relative z-10 w-full">
+        <div className="max-w-xl text-start">
+          {eyebrow ? (
+            <motion.span
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.7 }}
+              className="eyebrow block"
+            >
+              {eyebrow}
+            </motion.span>
+          ) : null}
 
-        {eyebrow ? (
+          <motion.h1
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            className="type-display-l mt-3 whitespace-pre-line text-balance text-white sm:mt-4"
+          >
+            {title}
+          </motion.h1>
+
           <motion.span
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.7 }}
-            className="block text-[0.7rem] tracking-[0.28em] text-gold uppercase"
-          >
-            {eyebrow}
-          </motion.span>
-        ) : null}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ delay: 0.4, duration: 0.7 }}
+            className="gold-rule mt-4 origin-start sm:mt-6"
+          />
 
-        <motion.h1
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-4 font-display whitespace-pre-line text-4xl leading-[1.1] text-balance text-white sm:text-5xl lg:text-6xl"
-        >
-          {title}
-        </motion.h1>
-
-        <motion.span
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ delay: 0.45, duration: 0.7 }}
-          className="mt-6 block h-px w-16 origin-start bg-gold"
-        />
-
-        {subtitle ? (
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
-            className="mt-6 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg"
-          >
-            {subtitle}
-          </motion.p>
-        ) : null}
+          {subtitle ? (
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45, duration: 0.8 }}
+              className="type-body mt-4 max-w-md text-white/80 sm:mt-6 sm:max-w-xl"
+            >
+              {subtitle}
+            </motion.p>
+          ) : null}
+        </div>
       </div>
     </section>
   );

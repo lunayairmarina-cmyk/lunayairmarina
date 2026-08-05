@@ -10,7 +10,7 @@ import { useCompanySettings, useCompanyAddress } from "@/hooks/useCompanySetting
 import { ingestContactLead } from "@/services/adminCmsService";
 import { buildSeoHead } from "@/services/seoService";
 import { usePageHeaderImage } from "@/hooks/usePageHeaderImage";
-import contactHeader from "@/assets/about-marina.jpg";
+import contactHeader from "@/assets/page-header-contact.jpg";
 import loungeImage from "@/assets/gallery-3.jpg";
 
 export const Route = createFileRoute("/contact")({
@@ -130,13 +130,12 @@ function ContactPage() {
   };
 
   return (
-    <SiteLayout transparentNav>
+    <SiteLayout>
       <PageHeader
         eyebrow={t("contact.eyebrow")}
         title={t("contact.title")}
         subtitle={t("contact.subtitle")}
         image={headerImage}
-        crumb={t("footer.contact")}
         compact
       />
 
@@ -144,10 +143,10 @@ function ContactPage() {
       <section id="contact-form" className="bg-sand py-16 lg:py-20">
         <div className="container-luxe grid items-start gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
           <Reveal direction="left">
-            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
+            <p className="eyebrow">
               {t("contact.info.title")}
             </p>
-            <h2 className="mt-4 font-display text-3xl leading-tight text-navy sm:text-4xl">
+            <h2 className="type-display-m mt-3 text-navy sm:mt-4">
               {t("contact.info.subtitle")}
             </h2>
 
@@ -194,10 +193,10 @@ function ContactPage() {
               onSubmit={(event) => void handleSubmit(event)}
               className="border border-navy/10 bg-background p-5 sm:p-9 lg:p-10"
             >
-              <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
+              <p className="eyebrow">
                 {t("contact.formSection.title")}
               </p>
-              <h2 className="mt-3 font-display text-2xl text-navy sm:text-3xl">
+              <h2 className="type-display-s mt-3 text-navy sm:text-2xl lg:text-3xl">
                 {t("contact.formSection.subtitle")}
               </h2>
 

@@ -63,22 +63,13 @@ async function tryFirebaseWrite(task: () => Promise<void>): Promise<FirebaseSync
     await task();
     try {
       await mirrorFullCmsStore();
-    } catch (mirrorError) {
-      console.warn("[firebase] cms mirror failed", mirrorError);
+    } catch {
+      // Collection write succeeded; mirror is best-effort.
     }
     return "synced";
-  } catch (error) {
-    console.error("[firebase] write failed", error);
-    return "error";
+  } catch {
+    return "local";
   }
-}
-
-export function getCmsSnapshot(): CmsStore {
-  return loadCmsStore();
-}
-
-export function getFirebaseSyncStatus(): FirebaseSyncStatus {
-  return loadCmsStore().firebaseSync;
 }
 
 export async function saveSettings(settings: SiteSettings, logoUrl?: string): Promise<SaveResult> {

@@ -63,7 +63,7 @@ export function Hero() {
   }, [shouldLoadVideo, heroVideo]);
 
   return (
-    <section className="relative flex h-[calc(100svh-4rem)] min-h-[calc(100svh-4rem)] w-full items-center justify-center overflow-hidden">
+    <section className="relative flex min-h-[calc(100svh-4rem-env(safe-area-inset-top))] w-full items-center justify-center overflow-hidden max-sm:items-end max-sm:pb-16">
       <div className="absolute inset-0 bg-navy">
         <img
           src={heroImage}
@@ -89,11 +89,11 @@ export function Hero() {
             src={heroVideo}
           />
         ) : null}
-        <div className="absolute inset-0 bg-navy/45" />
-        <div className="absolute inset-0 bg-gradient-to-t from-navy/75 via-navy/20 to-navy/40" />
+        <div className="absolute inset-0 bg-navy/25" />
+        <div className="absolute inset-0 bg-gradient-to-t from-navy/70 via-navy/20 to-transparent sm:from-navy/55 sm:via-transparent" />
       </div>
 
-      <div className="container-luxe relative z-10 flex w-full flex-col items-center py-10 text-center">
+      <div className="container-luxe relative z-10 flex w-full flex-col items-center px-1 py-8 text-center sm:py-10">
         <motion.span
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
@@ -107,7 +107,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 1, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-5 font-display text-4xl leading-none tracking-[0.04em] text-balance text-white uppercase sm:mt-6 sm:text-5xl sm:tracking-[0.08em] md:text-7xl lg:text-8xl"
+          className="type-display-xl mt-4 text-balance text-white uppercase sm:mt-6"
         >
           {t("brand.name")}
         </motion.h1>
@@ -116,7 +116,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.55, duration: 0.85 }}
-          className="mt-6 max-w-2xl text-base leading-relaxed text-white/90 sm:mt-7 sm:text-lg md:text-xl"
+          className="type-body mt-4 max-w-2xl text-white/90 sm:mt-7"
         >
           {title}
         </motion.p>
@@ -125,7 +125,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.65, duration: 0.8 }}
-          className="mt-3 max-w-xl text-sm leading-relaxed text-white/70 sm:text-base"
+          className="type-body-sm mt-2 max-w-xl text-white/70 sm:mt-3"
         >
           {subtitle}
         </motion.p>
@@ -134,17 +134,17 @@ export function Hero() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.8 }}
-          className="mt-10 flex w-full max-w-md flex-col gap-3 sm:mt-12 sm:max-w-none sm:flex-row sm:justify-center"
+          className="mt-8 flex w-full max-w-sm flex-col gap-3 sm:mt-12 sm:max-w-none sm:flex-row sm:justify-center"
         >
           <Link
             to="/contact"
-            className="border border-gold bg-gold px-8 py-4 text-center text-[0.7rem] tracking-[0.22em] text-navy uppercase transition-all duration-500 hover:bg-transparent hover:text-gold"
+            className="type-cta border border-gold bg-gold px-6 py-3.5 text-center text-navy transition-all duration-500 hover:bg-transparent hover:text-gold sm:px-8 sm:py-4"
           >
             {primary}
           </Link>
           <Link
             to="/services"
-            className="border border-white/50 px-8 py-4 text-center text-[0.7rem] tracking-[0.22em] text-white uppercase transition-all duration-500 hover:border-white hover:bg-white/10"
+            className="type-cta border border-white/50 px-6 py-3.5 text-center text-white transition-all duration-500 hover:border-white hover:bg-white/10 sm:px-8 sm:py-4"
           >
             {secondary}
           </Link>
@@ -155,7 +155,7 @@ export function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.8 }}
-        className="absolute inset-x-0 bottom-7 z-10 flex flex-col items-center gap-2"
+        className="absolute inset-x-0 bottom-4 z-10 hidden flex-col items-center gap-2 sm:bottom-7 sm:flex"
       >
         <span className="text-[0.6rem] tracking-[0.3em] text-white/55 uppercase">{scroll}</span>
         <motion.span

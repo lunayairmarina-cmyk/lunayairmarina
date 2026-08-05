@@ -8,7 +8,7 @@ import { Reveal } from "@/components/shared/Reveal";
 import { useLanguage } from "@/lib/i18n";
 import { buildSeoHead } from "@/services/seoService";
 import { usePageHeaderImage } from "@/hooks/usePageHeaderImage";
-import servicesHeader from "@/assets/yacht-2.jpg";
+import servicesHeader from "@/assets/page-header-services.jpg";
 
 export const Route = createFileRoute("/services/")({
   head: () => buildSeoHead("services", "/services"),
@@ -19,31 +19,29 @@ function ServicesPage() {
   const { t } = useLanguage();
   const headerImage = usePageHeaderImage("services", servicesHeader);
   return (
-    <SiteLayout transparentNav>
+    <SiteLayout>
       <PageHeader
         eyebrow={t("services.eyebrow")}
         title={t("services.title")}
         subtitle={t("services.subtitle")}
         image={headerImage}
-        crumb={t("nav.services")}
       />
       <ServicesSection variant="page" />
-      <WhyChooseUs />
+      <WhyChooseUs variant="home" />
       <FaqSection />
 
-      {/* Light CTA instead of full contact form */}
-      <section className="border-t border-border bg-background py-20 lg:py-24">
-        <div className="container-luxe flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
+      <section className="border-t border-border bg-sand py-16 sm:py-20 lg:py-24">
+        <div className="container-luxe flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center lg:gap-12">
           <Reveal>
-            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">{t("contact.eyebrow")}</p>
-            <h2 className="mt-3 max-w-xl font-display text-3xl text-navy sm:text-4xl">
+            <p className="eyebrow">{t("contact.eyebrow")}</p>
+            <h2 className="type-display-m mt-3 max-w-xl text-navy sm:mt-3">
               {t("about.ctaBand.title")}
             </h2>
           </Reveal>
           <Reveal delay={0.08}>
             <Link
               to="/contact"
-              className="inline-flex border border-navy bg-navy px-8 py-4 text-[0.7rem] tracking-[0.2em] text-navy-foreground uppercase transition hover:border-gold hover:bg-gold hover:text-navy"
+              className="type-cta inline-flex shrink-0 border border-navy bg-navy px-7 py-3.5 text-navy-foreground transition hover:border-gold hover:bg-gold hover:text-navy sm:px-8 sm:py-4"
             >
               {t("about.ctaBand.button")}
             </Link>

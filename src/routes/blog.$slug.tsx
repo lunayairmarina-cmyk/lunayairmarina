@@ -104,7 +104,7 @@ function BlogPostPage() {
               alt={tx(post.coverAlt, language)}
               className="size-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/55 to-navy/30" />
+            <div className="absolute inset-0 bg-gradient-to-t from-navy/65 via-navy/20 to-transparent" />
           </div>
           <div className="container-luxe relative z-10 max-w-3xl py-20 text-white">
             <p className="text-[0.7rem] tracking-[0.22em] text-gold uppercase">

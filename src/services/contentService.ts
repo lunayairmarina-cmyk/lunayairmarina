@@ -114,43 +114,12 @@ async function hydrateLocalCmsFromCloud() {
     saveCmsStore({
       ...emptyCmsStore(),
       ...remote,
-      services: remote.services ?? [],
-      gallery: remote.gallery ?? [],
-      testimonials: remote.testimonials ?? [],
-      faq: remote.faq ?? [],
-      blog: remote.blog ?? [],
-      team: remote.team ?? [],
-      fleet: remote.fleet ?? [],
-      messages: remote.messages ?? [],
-      seo: remote.seo ?? {},
-      serviceSeo: remote.serviceSeo ?? {},
-      pageHeaders: remote.pageHeaders ?? {},
       firebaseSync: "synced",
       updatedAt: remote.updatedAt || new Date().toISOString(),
     });
   } catch {
     // Ignore hydrate failures.
   }
-}
-
-function bundleFromCmsMirror(remote: Partial<ReturnType<typeof loadCmsStore>>): SiteBundle {
-  return {
-    settings: remote.settings ?? null,
-    homepage: remote.homepage ?? null,
-    about: remote.about ?? null,
-    why: remote.why ?? null,
-    trust: remote.trust ?? null,
-    services: remote.services ?? [],
-    fleet: remote.fleet ?? [],
-    team: remote.team ?? [],
-    testimonials: remote.testimonials ?? [],
-    locations: [],
-    blog: [...(remote.blog ?? [])].sort((a, b) => String(b.date).localeCompare(String(a.date))),
-    gallery: remote.gallery ?? [],
-    faq: remote.faq ?? [],
-    copy: remote.copy ?? null,
-    fetchedAt: Date.now(),
-  };
 }
 
 async function fetchBundleFromFirebase(): Promise<SiteBundle> {
@@ -172,7 +141,6 @@ async function fetchBundleFromFirebase(): Promise<SiteBundle> {
       faq,
       copyEn,
       copyAr,
-      cmsMirror,
     ] = await Promise.all([
       getSingleton<SiteSettings>("settings", "general"),
       getSingleton<HomepageContent>("homepage", "main"),
@@ -189,7 +157,6 @@ async function fetchBundleFromFirebase(): Promise<SiteBundle> {
       getCollectionOrdered<FaqContent>("faq"),
       getDoc(doc(getDb(), "copy", "en")),
       getDoc(doc(getDb(), "copy", "ar")),
-      getDoc(doc(getDb(), "cms", "v1")),
     ]);
 
     const copy =
@@ -200,7 +167,7 @@ async function fetchBundleFromFirebase(): Promise<SiteBundle> {
           }
         : null;
 
-    const fromCollections: SiteBundle = {
+    return {
       settings: settings ? stripId(settings) : null,
       homepage: homepage ? stripId(homepage) : null,
       about: about ? stripId(about) : null,
@@ -217,26 +184,6 @@ async function fetchBundleFromFirebase(): Promise<SiteBundle> {
       copy,
       fetchedAt: Date.now(),
     };
-
-    // If individual collections are empty, fall back to cms/v1 mirror.
-    const collectionsEmpty =
-      !fromCollections.settings &&
-      !fromCollections.homepage &&
-      fromCollections.services.length === 0 &&
-      fromCollections.blog.length === 0 &&
-      fromCollections.gallery.length === 0;
-
-    if (collectionsEmpty && cmsMirror.exists()) {
-      const mirrored = bundleFromCmsMirror(cmsMirror.data() as Partial<ReturnType<typeof loadCmsStore>>);
-      return {
-        ...mirrored,
-        copy: mirrored.copy ?? fromCollections.copy,
-        locations: fromCollections.locations,
-        fetchedAt: Date.now(),
-      };
-    }
-
-    return fromCollections;
   } catch {
     return emptyBundle();
   }
@@ -306,6 +253,3 @@ export function clearContentCache() {
   }
 }
 
-export function getCachedSiteContent(): SiteBundle | null {
-  return memoryCache ?? readSessionCache();
-}

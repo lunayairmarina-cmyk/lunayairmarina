@@ -124,6 +124,7 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: clip;
   }
 
   body {
@@ -131,6 +132,29 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+    max-width: 100%;
+  }
+
+  /* Prevent accidental horizontal scroll from absolute/decorative elements */
+  #root,
+  .site-shell {
+    overflow-x: clip;
+    max-width: 100%;
+  }
+
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Full-bleed media that must keep cover sizing */
+  img.size-full,
+  video.size-full,
+  img.absolute,
+  video.absolute {
+    height: 100%;
   }
 
   html[dir="rtl"] body {
@@ -163,7 +187,7 @@
   width: 100%;
   margin-inline: auto;
   max-width: 80rem;
-  padding-inline: 1rem;
+  padding-inline: max(1rem, env(safe-area-inset-left), env(safe-area-inset-right));
 
   @media (min-width: 640px) {
     padding-inline: 1.25rem;
@@ -188,17 +212,130 @@
 
 @utility eyebrow {
   font-family: var(--font-sans);
-  font-size: 0.7rem;
-  letter-spacing: 0.28em;
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--gold);
+
+  @media (min-width: 640px) {
+    font-size: 0.7rem;
+    letter-spacing: 0.28em;
+  }
 }
 
 @utility gold-rule {
   display: block;
-  width: 3.5rem;
+  width: 2.75rem;
   height: 1px;
   background: var(--gradient-gold);
+
+  @media (min-width: 640px) {
+    width: 3.5rem;
+  }
+}
+
+/* Consistent public-site type scale (sizes only — font family comes from h1–h4 / .font-display) */
+@utility type-display-xl {
+  font-size: 1.875rem;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+
+  @media (min-width: 640px) {
+    font-size: 3rem;
+    letter-spacing: 0.06em;
+  }
+
+  @media (min-width: 768px) {
+    font-size: 4.25rem;
+  }
+
+  @media (min-width: 1024px) {
+    font-size: 5.5rem;
+    letter-spacing: 0.08em;
+  }
+}
+
+@utility type-display-l {
+  font-size: 1.625rem;
+  line-height: 1.2;
+
+  @media (min-width: 640px) {
+    font-size: 2.25rem;
+  }
+
+  @media (min-width: 1024px) {
+    font-size: 3rem;
+  }
+}
+
+@utility type-display-m {
+  font-size: 1.5rem;
+  line-height: 1.25;
+
+  @media (min-width: 640px) {
+    font-size: 2rem;
+  }
+
+  @media (min-width: 1024px) {
+    font-size: 2.75rem;
+  }
+}
+
+@utility type-display-s {
+  font-size: 1.125rem;
+  line-height: 1.35;
+
+  @media (min-width: 640px) {
+    font-size: 1.25rem;
+  }
+
+  @media (min-width: 1024px) {
+    font-size: 1.35rem;
+  }
+}
+
+@utility type-body {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+
+  @media (min-width: 640px) {
+    font-size: 1rem;
+  }
+
+  @media (min-width: 1024px) {
+    font-size: 1.125rem;
+  }
+}
+
+@utility type-body-sm {
+  font-size: 0.8125rem;
+  line-height: 1.65;
+
+  @media (min-width: 640px) {
+    font-size: 0.875rem;
+  }
+}
+
+@utility type-cta {
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+
+  @media (min-width: 640px) {
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+  }
+}
+
+@utility type-meta {
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+
+  @media (min-width: 640px) {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+  }
 }
 
 @utility nav-link {
@@ -241,19 +378,6 @@
 
 @utility bg-gradient-gold {
   background-image: var(--gradient-gold);
-}
-
-@keyframes slow-zoom {
-  from {
-    transform: scale(1.12);
-  }
-  to {
-    transform: scale(1);
-  }
-}
-
-@utility animate-slow-zoom {
-  animation: slow-zoom 9s var(--ease-luxe) forwards;
 }
 
 /* Hide scrollbars in admin chrome, but keep table horizontal scroll visible */

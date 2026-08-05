@@ -92,7 +92,7 @@ function ServiceDetailPage() {
       <section className="relative overflow-hidden pt-12 pb-16 lg:pb-24">
         <div className="absolute inset-0">
           <img src={coverImage} alt="" className="size-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/70 to-navy/35" />
+          <div className="absolute inset-0 bg-gradient-to-t from-navy/70 via-navy/25 to-transparent" />
         </div>
 
         <div className="container-luxe relative z-10 grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
@@ -207,7 +207,7 @@ function ServiceDetailPage() {
                     src={item.src}
                     alt={copy.gallery[item.captionKey] ?? copy.title}
                     loading="lazy"
-                    className="aspect-[4/5] w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="aspect-[4/5] w-full object-cover"
                   />
                   <span
                     aria-hidden

@@ -208,10 +208,10 @@ export function ApplicationSections() {
   return (
     <>
       {/* HERO */}
-      <section className="relative flex min-h-[calc(100svh-4rem)] items-center overflow-hidden pt-12 pb-16">
+      <section className="relative flex min-h-[calc(100svh-4rem)] w-full items-center overflow-hidden py-12 sm:py-16 lg:min-h-[calc(100svh-4rem)] lg:py-0">
         <div className="absolute inset-0">
-          <img src={aboutMarina} alt="" aria-hidden className="size-full object-cover scale-110 blur-sm" />
-          <div className="absolute inset-0 bg-gradient-to-br from-[#03111f]/95 via-[#07263a]/80 to-[#0a3a4a]/70" />
+          <img src={aboutMarina} alt="" aria-hidden className="size-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#03111f]/75 via-[#07263a]/55 to-[#0a3a4a]/45" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(200,169,106,0.18),transparent_40%)]" />
         </div>
         {[...Array(12)].map((_, index) => (
@@ -241,7 +241,7 @@ export function ApplicationSections() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="mt-5 whitespace-pre-line font-display text-4xl leading-[1.1] sm:text-5xl lg:text-6xl"
+              className="mt-5 whitespace-pre-line font-display text-[1.85rem] leading-[1.15] sm:text-5xl lg:text-6xl"
             >
               {isRTL ? t("application.hero.titleAr") : t("application.hero.title")}
             </motion.h1>
@@ -260,7 +260,7 @@ export function ApplicationSections() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap"
+              className="mt-8 flex w-full flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap"
             >
               <Link
                 to="/contact"
@@ -513,22 +513,22 @@ export function ApplicationSections() {
                 <p className="mt-2 font-arabic text-white/65">{t("application.download.descriptionAr")}</p>
               </>
             ) : null}
-            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-10 flex w-full flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:justify-center">
               <a
                 href="#"
-                className="min-w-[220px] border border-gold bg-gold px-6 py-4 text-[0.7rem] tracking-[0.18em] text-navy uppercase transition hover:bg-transparent hover:text-gold"
+                className="w-full border border-gold bg-gold px-6 py-4 text-center text-[0.7rem] tracking-[0.18em] text-navy uppercase transition hover:bg-transparent hover:text-gold sm:w-auto sm:min-w-[220px]"
               >
                 {t("application.download.appStore")}
               </a>
               <a
                 href="#"
-                className="min-w-[220px] border border-white/40 px-6 py-4 text-[0.7rem] tracking-[0.18em] text-white uppercase transition hover:border-white hover:bg-white/10"
+                className="w-full border border-white/40 px-6 py-4 text-center text-[0.7rem] tracking-[0.18em] text-white uppercase transition hover:border-white hover:bg-white/10 sm:w-auto sm:min-w-[220px]"
               >
                 {t("application.download.googlePlay")}
               </a>
               <Link
                 to="/contact"
-                className="min-w-[220px] border border-white/40 px-6 py-4 text-[0.7rem] tracking-[0.18em] text-white uppercase transition hover:border-gold hover:text-gold"
+                className="w-full border border-white/40 px-6 py-4 text-center text-[0.7rem] tracking-[0.18em] text-white uppercase transition hover:border-gold hover:text-gold sm:w-auto sm:min-w-[220px]"
               >
                 {t("application.download.contact")}
               </Link>

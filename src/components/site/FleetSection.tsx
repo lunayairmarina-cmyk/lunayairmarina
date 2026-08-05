@@ -11,7 +11,7 @@ export function FleetSection({ limit }: { limit?: number }) {
   if (!items.length) return null;
 
   return (
-    <section className="bg-[#f3efe7] py-20 lg:py-28">
+    <section className="bg-[#f3efe7] py-16 sm:py-20 lg:py-24">
       <div className="container-luxe">
         <SectionHeading
           eyebrow={t("fleet.eyebrow")}
@@ -19,7 +19,7 @@ export function FleetSection({ limit }: { limit?: number }) {
           subtitle={t("fleet.subtitle")}
           align="start"
         />
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-6 sm:mt-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           {items.map((yacht, index) => (
             <Reveal key={yacht.id} delay={index * 0.05} className="overflow-hidden border border-navy/10 bg-white">
               <img

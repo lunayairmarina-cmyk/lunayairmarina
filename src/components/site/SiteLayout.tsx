@@ -6,18 +6,17 @@ import { WhatsAppButton } from "./WhatsAppButton";
 
 interface SiteLayoutProps {
   children: ReactNode;
-  transparentNav?: boolean;
 }
 
-export function SiteLayout({ children, transparentNav = false }: SiteLayoutProps) {
+export function SiteLayout({ children }: SiteLayoutProps) {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <Navbar transparent={transparentNav} />
+    <div className="site-shell flex min-h-svh flex-col overflow-x-clip bg-background">
+      <Navbar />
       <motion.main
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="flex-1 pt-16"
+        className="min-w-0 flex-1 pt-[calc(4rem+env(safe-area-inset-top))]"
       >
         {children}
       </motion.main>

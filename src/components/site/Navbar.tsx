@@ -15,7 +15,7 @@ const links = [
   { to: "/contact", key: "nav.cta" },
 ] as const;
 
-export function Navbar({ transparent: _transparent = false }: { transparent?: boolean }) {
+export function Navbar() {
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
 
@@ -32,11 +32,11 @@ export function Navbar({ transparent: _transparent = false }: { transparent?: bo
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className="fixed inset-x-0 top-0 z-50 h-16 overflow-visible border-b border-navy/10 bg-white shadow-card"
+        className="fixed inset-x-0 top-0 z-50 h-[calc(4rem+env(safe-area-inset-top))] overflow-visible border-b border-navy/10 bg-white pt-[env(safe-area-inset-top)] shadow-card"
       >
         <div className="container-luxe grid h-full grid-cols-[1fr_auto] items-center gap-3 lg:grid-cols-[1fr_auto_1fr]">
-          <Link to="/" className="relative z-10 min-w-0 justify-self-start" aria-label={t("brand.name")}>
-            <Logo tone="dark" className="h-10 w-28 sm:h-12 sm:w-36" />
+          <Link to="/" className="relative z-10 min-w-0 max-w-[58%] justify-self-start sm:max-w-none" aria-label={t("brand.name")}>
+            <Logo tone="dark" className="h-9 w-24 sm:h-12 sm:w-36" />
           </Link>
 
           <nav className="hidden items-center gap-9 lg:flex">
@@ -56,20 +56,23 @@ export function Navbar({ transparent: _transparent = false }: { transparent?: bo
             <LanguageSwitcher tone="dark" />
             <Link
               to="/contact"
-              className="border border-navy bg-navy px-5 py-2.5 text-[0.7rem] tracking-[0.14em] text-navy-foreground transition-all duration-500 hover:border-gold hover:bg-gold hover:text-navy"
+              className="type-cta border border-navy bg-navy px-5 py-2.5 text-navy-foreground transition-all duration-500 hover:border-gold hover:bg-gold hover:text-navy"
             >
               {t("nav.contactUs")}
             </Link>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            aria-label="Open menu"
-            className="grid size-11 place-items-center justify-self-end rounded-lg text-navy transition-colors hover:bg-navy/5 lg:hidden"
-          >
-            <Menu className="size-6" strokeWidth={1.5} />
-          </button>
+          <div className="flex items-center justify-self-end gap-1.5 lg:hidden">
+            <LanguageSwitcher tone="dark" />
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              aria-label="Open menu"
+              className="grid size-11 place-items-center rounded-lg text-navy transition-colors hover:bg-navy/5"
+            >
+              <Menu className="size-6" strokeWidth={1.5} />
+            </button>
+          </div>
         </div>
       </motion.header>
 
@@ -80,10 +83,10 @@ export function Navbar({ transparent: _transparent = false }: { transparent?: bo
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.35 }}
-            className="fixed inset-0 z-[100] overflow-y-auto bg-white lg:hidden"
+            className="fixed inset-0 z-[100] overflow-y-auto bg-white pt-[env(safe-area-inset-top)] lg:hidden"
           >
             <div className="container-luxe flex h-16 items-center justify-between border-b border-navy/10">
-              <Logo tone="dark" className="h-10 w-28" />
+              <Logo tone="dark" className="h-9 w-24 sm:h-10 sm:w-28" />
               <button
                 type="button"
                 onClick={() => setOpen(false)}
@@ -94,7 +97,7 @@ export function Navbar({ transparent: _transparent = false }: { transparent?: bo
               </button>
             </div>
 
-            <nav className="container-luxe mt-8 flex flex-col gap-2 pb-8">
+            <nav className="container-luxe mt-6 flex flex-col gap-1 pb-6 sm:mt-8 sm:gap-2 sm:pb-8">
               {links.map((link, index) => (
                 <motion.div
                   key={link.to}
@@ -105,7 +108,7 @@ export function Navbar({ transparent: _transparent = false }: { transparent?: bo
                   <Link
                     to={link.to}
                     onClick={() => setOpen(false)}
-                    className="block py-3 font-display text-2xl text-navy transition-colors hover:text-gold sm:text-3xl"
+                    className="block py-2.5 font-display text-[1.35rem] leading-snug text-navy transition-colors hover:text-gold sm:py-3 sm:text-3xl"
                   >
                     {t(link.key)}
                   </Link>
@@ -113,17 +116,14 @@ export function Navbar({ transparent: _transparent = false }: { transparent?: bo
               ))}
             </nav>
 
-            <div className="container-luxe mt-4 flex flex-col gap-4 pb-10">
-              <div className="flex items-center gap-3">
-                <LanguageSwitcher tone="dark" />
-                <Link
-                  to="/contact"
-                  onClick={() => setOpen(false)}
-                  className="flex-1 border border-navy bg-navy px-5 py-3 text-center text-[0.7rem] tracking-[0.14em] text-navy-foreground"
-                >
-                  {t("nav.contactUs")}
-                </Link>
-              </div>
+            <div className="container-luxe mt-2 pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:mt-4 sm:pb-10">
+              <Link
+                to="/contact"
+                onClick={() => setOpen(false)}
+                className="type-cta block w-full border border-navy bg-navy px-5 py-3.5 text-center text-navy-foreground"
+              >
+                {t("nav.contactUs")}
+              </Link>
             </div>
           </motion.div>
         )}

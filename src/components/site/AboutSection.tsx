@@ -46,7 +46,7 @@ export function AboutSection({ variant = "home" }: { variant?: "home" | "page" }
                 loading="lazy"
                 width={1200}
                 height={900}
-                className="aspect-[5/4] w-full object-cover transition-transform duration-[1.2s] hover:scale-105"
+                className="aspect-[5/4] w-full object-cover"
               />
             </div>
           </Reveal>
@@ -54,15 +54,15 @@ export function AboutSection({ variant = "home" }: { variant?: "home" | "page" }
           <div className="flex flex-col">
             <Reveal direction="right">
               <span className="eyebrow">{eyebrow}</span>
-              <h2 className="mt-4 text-3xl leading-tight text-navy sm:text-4xl lg:text-5xl">
+              <h2 className="type-display-m mt-3 text-balance text-navy sm:mt-4">
                 {title}
               </h2>
-              <span className="gold-rule mt-6" />
-              <p className="mt-6 text-lg leading-relaxed text-navy/80">{lead}</p>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{body}</p>
+              <span className="gold-rule mt-5 sm:mt-6" />
+              <p className="type-body mt-5 text-navy/80 sm:mt-6">{lead}</p>
+              <p className="type-body-sm mt-3 text-muted-foreground sm:mt-4">{body}</p>
               <Link
                 to="/about"
-                className="mt-10 inline-flex w-fit border border-navy bg-navy px-8 py-4 text-[0.7rem] tracking-[0.22em] text-navy-foreground uppercase transition-all duration-500 hover:border-gold hover:bg-gold hover:text-navy"
+                className="type-cta mt-8 inline-flex w-fit border border-navy bg-navy px-7 py-3.5 text-navy-foreground transition-all duration-500 hover:border-gold hover:bg-gold hover:text-navy sm:mt-10 sm:px-8 sm:py-4"
               >
                 {cta}
               </Link>
@@ -91,21 +91,21 @@ export function AboutSection({ variant = "home" }: { variant?: "home" | "page" }
           <div className="flex flex-col justify-center gap-8">
             <Reveal direction="right">
               <span className="eyebrow">{eyebrow}</span>
-              <h2 className="mt-4 text-3xl leading-tight text-navy sm:text-4xl lg:text-5xl">
+              <h2 className="type-display-m mt-3 text-balance text-navy sm:mt-4">
                 {title}
               </h2>
-              <span className="gold-rule mt-6" />
+              <span className="gold-rule mt-5 sm:mt-6" />
             </Reveal>
 
             <Reveal direction="right" delay={0.1}>
-              <p className="text-lg leading-relaxed text-navy/80">{lead}</p>
-              <p className="mt-5 leading-relaxed text-muted-foreground">{body}</p>
+              <p className="type-body text-navy/80">{lead}</p>
+              <p className="type-body-sm mt-4 text-muted-foreground sm:mt-5">{body}</p>
             </Reveal>
 
             <Reveal direction="right" delay={0.2}>
               <ul className="grid gap-4 sm:grid-cols-2">
                 {points.map((point) => (
-                  <li key={point} className="flex items-start gap-3 border-s-2 border-gold/50 ps-4 text-sm text-navy/75">
+                  <li key={point} className="type-body-sm flex items-start gap-3 border-s-2 border-gold/50 ps-4 text-navy/75">
                     <Check className="mt-0.5 size-4 shrink-0 text-gold" strokeWidth={2} />
                     {point}
                   </li>
@@ -116,13 +116,13 @@ export function AboutSection({ variant = "home" }: { variant?: "home" | "page" }
         </div>
 
         <Reveal delay={0.15}>
-          <div className="mt-16 grid grid-cols-1 gap-8 border-t border-border pt-12 sm:grid-cols-3">
+          <div className="mt-12 grid grid-cols-1 gap-8 border-t border-border pt-10 sm:mt-16 sm:grid-cols-3 sm:pt-12">
             {stats.map((stat) => (
               <div key={stat.label} className="text-center sm:text-start">
-                <p className="font-display text-4xl text-navy sm:text-5xl">
+                <p className="type-display-l text-navy">
                   <Counter value={stat.value} suffix={stat.suffix} />
                 </p>
-                <p className="mt-3 text-[0.65rem] tracking-[0.22em] text-muted-foreground uppercase">
+                <p className="type-meta mt-3 text-muted-foreground">
                   {stat.label}
                 </p>
               </div>

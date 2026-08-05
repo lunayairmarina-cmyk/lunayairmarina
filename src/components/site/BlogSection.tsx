@@ -119,7 +119,7 @@ export function BlogSection({ limit = 3 }: { limit?: number }) {
                     src={post.coverImage}
                     alt={tx(post.coverAlt, language)}
                     loading="lazy"
-                    className="aspect-[16/10] w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="aspect-[16/10] w-full object-cover"
                   />
                 </Link>
                 <p className="mt-5 text-[0.65rem] tracking-[0.2em] text-muted-foreground uppercase">

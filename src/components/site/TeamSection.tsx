@@ -10,14 +10,14 @@ export function TeamSection() {
   if (!team.length) return null;
 
   return (
-    <section className="bg-background py-20 lg:py-28">
+    <section className="bg-background py-16 sm:py-20 lg:py-24">
       <div className="container-luxe">
         <SectionHeading
           eyebrow={language === "ar" ? "الفريق" : "Our Team"}
           title={language === "ar" ? "فريق الإدارة" : "Management Team"}
           align="start"
         />
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-6 sm:mt-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           {team.map((member, index) => (
             <Reveal key={member.id} delay={index * 0.05} className="border border-navy/10 bg-white p-6">
               {member.image ? (

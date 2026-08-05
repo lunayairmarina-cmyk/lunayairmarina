@@ -13,7 +13,7 @@ import {
 import { CMS_UPDATED_EVENT } from "@/lib/cms-store";
 import { buildSeoHead } from "@/services/seoService";
 import { usePageHeaderImage } from "@/hooks/usePageHeaderImage";
-import blogHeader from "@/assets/gallery-2.jpg";
+import blogHeader from "@/assets/page-header-blog.jpg";
 
 export const Route = createFileRoute("/blog/")({
   head: () => {
@@ -62,24 +62,23 @@ function BlogIndexPage() {
   const rest = posts.slice(1);
 
   return (
-    <SiteLayout transparentNav>
+    <SiteLayout>
       <PageHeader
         eyebrow={t("blog.eyebrow")}
         title={t("blog.title")}
         subtitle={t("blog.subtitle")}
         image={headerImage}
-        crumb={t("nav.blog")}
       />
 
-      <section className="bg-background py-20 lg:py-28">
+      <section className="bg-background py-16 sm:py-20 lg:py-24">
         <div className="container-luxe">
           {posts.length === 0 ? (
-            <p className="text-center text-muted-foreground">{t("blog.empty")}</p>
+            <p className="py-16 text-center text-muted-foreground">{t("blog.empty")}</p>
           ) : (
-            <div className="space-y-16 lg:space-y-20">
+            <div className="space-y-14 lg:space-y-16">
               {featured ? (
                 <Reveal>
-                  <article className="group grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-14">
+                  <article className="group grid gap-8 border border-navy/10 bg-[#fbfaf8] p-5 sm:p-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-12 lg:p-8">
                     <Link
                       to="/blog/$slug"
                       params={{ slug: featured.slug }}
@@ -91,10 +90,10 @@ function BlogIndexPage() {
                         loading="lazy"
                         width={1400}
                         height={900}
-                        className="aspect-[16/10] w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                        className="aspect-[16/10] w-full object-cover"
                       />
                     </Link>
-                    <div>
+                    <div className="flex flex-col justify-center lg:py-2">
                       <div className="flex flex-wrap items-center gap-3 text-[0.65rem] tracking-[0.16em] text-muted-foreground uppercase">
                         <time dateTime={featured.publishedAt}>
                           {formatDate(featured.publishedAt, language)}
@@ -103,18 +102,18 @@ function BlogIndexPage() {
                           <span className="text-gold">{tx(featured.focusKeyword, language)}</span>
                         ) : null}
                       </div>
-                      <h2 className="mt-5 font-display text-3xl leading-tight text-navy transition-colors group-hover:text-gold sm:text-4xl">
+                      <h2 className="type-display-m mt-4 text-navy transition-colors group-hover:text-gold sm:mt-5">
                         <Link to="/blog/$slug" params={{ slug: featured.slug }}>
                           {tx(featured.title, language)}
                         </Link>
                       </h2>
-                      <p className="mt-5 text-base leading-relaxed text-muted-foreground">
+                      <p className="type-body mt-4 text-muted-foreground sm:mt-5">
                         {tx(featured.excerpt, language)}
                       </p>
                       <Link
                         to="/blog/$slug"
                         params={{ slug: featured.slug }}
-                        className="mt-8 inline-flex text-[0.7rem] tracking-[0.2em] text-navy uppercase transition-colors hover:text-gold"
+                        className="type-cta mt-6 inline-flex text-navy transition-colors hover:text-gold sm:mt-8"
                       >
                         {t("blog.readMore")}
                       </Link>
@@ -124,7 +123,7 @@ function BlogIndexPage() {
               ) : null}
 
               {rest.length > 0 ? (
-                <div className="grid gap-12 border-t border-border pt-14 md:grid-cols-2 lg:grid-cols-3 lg:gap-x-10 lg:gap-y-16">
+                <div className="grid gap-8 border-t border-border pt-12 sm:gap-10 md:grid-cols-2 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-12 lg:pt-14">
                   {rest.map((post, index) => (
                     <Reveal key={post.id} delay={index * 0.05}>
                       <article className="group flex h-full flex-col">
@@ -139,7 +138,7 @@ function BlogIndexPage() {
                             loading="lazy"
                             width={900}
                             height={600}
-                            className="aspect-[16/10] w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            className="aspect-[16/10] w-full object-cover"
                           />
                         </Link>
                         <div className="mt-5 flex flex-1 flex-col">
@@ -151,18 +150,18 @@ function BlogIndexPage() {
                               <span className="text-gold">{tx(post.focusKeyword, language)}</span>
                             ) : null}
                           </div>
-                          <h2 className="mt-3 font-display text-2xl text-navy transition-colors group-hover:text-gold">
+                          <h2 className="type-display-s mt-3 text-navy transition-colors group-hover:text-gold">
                             <Link to="/blog/$slug" params={{ slug: post.slug }}>
                               {tx(post.title, language)}
                             </Link>
                           </h2>
-                          <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
+                          <p className="type-body-sm mt-3 flex-1 text-muted-foreground">
                             {tx(post.excerpt, language)}
                           </p>
                           <Link
                             to="/blog/$slug"
                             params={{ slug: post.slug }}
-                            className="mt-5 text-[0.7rem] tracking-[0.2em] text-navy uppercase transition-colors hover:text-gold"
+                            className="type-cta mt-5 text-navy transition-colors hover:text-gold"
                           >
                             {t("blog.readMore")}
                           </Link>

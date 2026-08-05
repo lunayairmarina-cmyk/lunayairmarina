@@ -24,8 +24,8 @@ export function FaqSection({ variant = "default" }: { variant?: "default" | "hom
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section className={cn("py-24 lg:py-32", variant === "home" ? "bg-[#fbfaf7]" : "bg-background")}>
-      <div className="container-luxe grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+    <section className={cn("py-16 sm:py-20 lg:py-24", variant === "home" ? "bg-[#fbfaf7]" : "bg-background")}>
+      <div className="container-luxe grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16 xl:gap-20">
         <SectionHeading eyebrow={t("faq.eyebrow")} title={t("faq.title")} align="start" />
 
         <div className="divide-y divide-border border-y border-border">
@@ -37,7 +37,7 @@ export function FaqSection({ variant = "default" }: { variant?: "default" | "hom
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                   aria-expanded={isOpen}
-                  className="flex w-full items-center justify-between gap-6 py-6 text-start"
+                  className="flex w-full items-start justify-between gap-3 py-5 text-start sm:items-center sm:gap-6 sm:py-6"
                 >
                   <span
                     className={cn(

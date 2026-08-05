@@ -106,14 +106,14 @@ export function ServicesSection({
   }
 
   return (
-    <section className="bg-background py-16 lg:py-24">
+    <section className="bg-background py-16 sm:py-20 lg:py-24">
       <div className="container-luxe">
         <motion.div
           variants={staggerContainer}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-60px" }}
-          className="grid gap-5 sm:grid-cols-2 sm:gap-6 lg:gap-8"
+          className="grid gap-6 sm:grid-cols-2 sm:gap-7 lg:gap-8"
         >
           {items.map((item, index) => {
             const slug = resolveSlug(item, index);
@@ -123,7 +123,7 @@ export function ServicesSection({
               <motion.article
                 key={slug}
                 variants={staggerItem}
-                className="group flex flex-col overflow-hidden border border-navy/15 bg-[#fbfaf8] transition-colors duration-500 hover:border-gold/45"
+                className="group flex flex-col overflow-hidden border border-navy/12 bg-[#fbfaf8] transition-colors duration-500 hover:border-gold/45"
               >
                 <Link
                   to="/services/$slug"
@@ -134,26 +134,26 @@ export function ServicesSection({
                     <img
                       src={cover}
                       alt=""
-                      className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
+                      className="absolute inset-0 size-full object-cover"
                     />
                   ) : null}
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy/60 via-navy/15 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-navy/35 via-transparent to-transparent" />
                   <span className="absolute bottom-3 start-3 font-display text-2xl tracking-[0.08em] text-white/90 sm:text-3xl">
                     {String(index + 1).padStart(2, "0")}
                   </span>
                 </Link>
 
-                <div className="flex flex-1 flex-col p-5 sm:p-6">
-                  <h3 className="font-display text-xl leading-snug text-navy transition-colors group-hover:text-gold sm:text-[1.35rem]">
+                <div className="flex flex-1 flex-col p-6 sm:p-7">
+                  <h3 className="type-display-s text-navy transition-colors group-hover:text-gold">
                     {item.title}
                   </h3>
-                  <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                  <p className="type-body-sm mt-3 line-clamp-3 text-muted-foreground">
                     {item.description}
                   </p>
 
-                  <ul className="mt-5 space-y-2.5">
+                  <ul className="mt-5 space-y-2.5 border-t border-navy/8 pt-5">
                     {item.features.slice(0, 3).map((feature) => (
-                      <li key={feature} className="flex items-start gap-2.5 text-[0.85rem] text-navy/70">
+                      <li key={feature} className="type-body-sm flex items-start gap-2.5 text-navy/70">
                         <span className="mt-1.5 size-1.5 shrink-0 bg-gold" />
                         {feature}
                       </li>
@@ -163,7 +163,7 @@ export function ServicesSection({
                   <Link
                     to="/services/$slug"
                     params={{ slug }}
-                    className="mt-6 inline-flex w-fit items-center gap-2 border-b border-navy/15 pb-1.5 text-[0.65rem] tracking-[0.18em] text-navy uppercase transition-colors hover:border-gold hover:text-gold"
+                    className="type-cta mt-7 inline-flex w-fit items-center gap-2 border-b border-navy/15 pb-1.5 text-navy transition-colors hover:border-gold hover:text-gold"
                   >
                     {t("services.cta")}
                     <ArrowRight

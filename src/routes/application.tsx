@@ -16,7 +16,7 @@ export const Route = createFileRoute("/application")({
 
 function ApplicationPage() {
   return (
-    <SiteLayout transparentNav>
+    <SiteLayout>
       <ApplicationSections />
     </SiteLayout>
   );

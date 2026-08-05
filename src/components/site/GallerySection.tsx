@@ -75,9 +75,9 @@ export function GallerySection({ limit }: { limit?: number }) {
                 src={image.src}
                 alt={image.caption[language]}
                 loading="lazy"
-                className="size-full object-cover transition-transform duration-[1.1s] ease-out group-hover:scale-110"
+                className="size-full object-cover"
               />
-              <span className="absolute inset-0 bg-navy/35 transition-colors duration-500 sm:bg-navy/0 sm:group-hover:bg-navy/55" />
+              <span className="absolute inset-0 bg-navy/15 transition-colors duration-500 sm:bg-navy/0 sm:group-hover:bg-navy/45" />
               <span className="absolute inset-0 flex items-end justify-center p-4 sm:items-center sm:p-6">
                 <span className="text-center text-xs tracking-[0.18em] text-white uppercase opacity-100 transition-all duration-500 sm:translate-y-2 sm:text-sm sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 sm:text-base">
                   {image.caption[language]}

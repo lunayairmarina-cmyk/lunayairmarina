@@ -9,7 +9,7 @@ import { Counter } from "@/components/shared/Counter";
 import { useLanguage } from "@/lib/i18n";
 import { buildSeoHead } from "@/services/seoService";
 import { usePageHeaderImage } from "@/hooks/usePageHeaderImage";
-import aboutHeader from "@/assets/gallery-2.jpg";
+import aboutHeader from "@/assets/page-header-about.jpg";
 import aboutImage from "@/assets/about-marina.jpg";
 
 export const Route = createFileRoute("/about")({
@@ -35,13 +35,12 @@ function AboutPage() {
   const values = tv<ValueItem[]>("about.values") ?? [];
 
   return (
-    <SiteLayout transparentNav>
+    <SiteLayout>
       <PageHeader
         eyebrow={t("about.eyebrow")}
         title={t("about.pageTitle")}
         subtitle={t("about.pageSubtitle")}
         image={headerImage}
-        crumb={t("nav.about")}
       />
 
       {/* Stats strip */}
@@ -51,12 +50,12 @@ function AboutPage() {
             <Reveal
               key={stat.label}
               delay={index * 0.08}
-              className="px-2 py-12 text-center sm:px-8 sm:py-14 sm:text-start"
+              className="px-2 py-10 text-center sm:px-8 sm:py-12 sm:text-start"
             >
-              <p className="font-display text-5xl text-navy lg:text-6xl">
+              <p className="type-display-l text-navy">
                 <Counter value={stat.value} suffix={stat.suffix} />
               </p>
-              <p className="mx-auto mt-4 max-w-[16rem] text-sm leading-relaxed text-muted-foreground sm:mx-0">
+              <p className="type-body-sm mx-auto mt-3 max-w-[16rem] text-muted-foreground sm:mx-0 sm:mt-4">
                 {stat.label}
               </p>
             </Reveal>
@@ -65,9 +64,9 @@ function AboutPage() {
       </section>
 
       {/* Story — asymmetric */}
-      <section className="bg-background py-24 lg:py-32">
-        <div className="container-luxe grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 xl:gap-24">
-          <Reveal direction="left" className="relative lg:-ms-4">
+      <section className="bg-background py-16 sm:py-20 lg:py-24">
+        <div className="container-luxe grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 xl:gap-20">
+          <Reveal direction="left" className="relative">
             <img
               src={aboutImage}
               alt=""
@@ -86,14 +85,14 @@ function AboutPage() {
           </Reveal>
 
           <Reveal direction="right">
-            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
+            <p className="eyebrow">
               {t("about.story.eyebrow")}
             </p>
-            <h2 className="mt-4 font-display text-3xl leading-tight text-navy sm:text-4xl lg:text-[2.75rem]">
+            <h2 className="type-display-m mt-3 text-navy sm:mt-4">
               {t("about.story.title")}
             </h2>
-            <span className="mt-6 block h-px w-14 bg-gold" />
-            <p className="mt-8 text-base leading-relaxed text-navy/75 sm:text-lg">
+            <span className="gold-rule mt-5 sm:mt-6" />
+            <p className="type-body mt-6 text-navy/75 sm:mt-7">
               {t("about.story.body")}
             </p>
           </Reveal>
@@ -101,21 +100,21 @@ function AboutPage() {
       </section>
 
       {/* Mission / Vision */}
-      <section className="bg-sand py-24 lg:py-28">
-        <div className="container-luxe grid gap-12 lg:grid-cols-2 lg:gap-16">
-          <Reveal className="border-s-2 border-gold ps-8 sm:ps-10">
-            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
+      <section className="bg-sand py-16 sm:py-20 lg:py-24">
+        <div className="container-luxe grid gap-10 lg:grid-cols-2 lg:gap-14">
+          <Reveal className="border-s-2 border-gold ps-7 sm:ps-10">
+            <p className="eyebrow">
               {t("about.mission.eyebrow")}
             </p>
-            <p className="mt-5 font-display text-2xl leading-snug text-navy sm:text-3xl">
+            <p className="type-display-s mt-4 text-navy sm:mt-5 sm:text-2xl lg:text-3xl">
               {t("about.mission.body")}
             </p>
           </Reveal>
-          <Reveal delay={0.1} className="border-s-2 border-navy/25 ps-8 sm:ps-10">
-            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
+          <Reveal delay={0.1} className="border-s-2 border-navy/25 ps-7 sm:ps-10">
+            <p className="eyebrow">
               {t("about.vision.eyebrow")}
             </p>
-            <p className="mt-5 font-display text-2xl leading-snug text-navy sm:text-3xl">
+            <p className="type-display-s mt-4 text-navy sm:mt-5 sm:text-2xl lg:text-3xl">
               {t("about.vision.body")}
             </p>
           </Reveal>
@@ -123,25 +122,25 @@ function AboutPage() {
       </section>
 
       {/* Values */}
-      <section className="bg-background py-24 lg:py-32">
+      <section className="bg-background py-16 sm:py-20 lg:py-24">
         <div className="container-luxe">
           <Reveal className="max-w-2xl">
-            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">{t("about.eyebrow")}</p>
-            <h2 className="mt-4 font-display text-3xl text-navy sm:text-5xl">{t("about.valuesTitle")}</h2>
-            <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
+            <p className="eyebrow">{t("about.eyebrow")}</p>
+            <h2 className="type-display-m mt-3 text-navy sm:mt-4">{t("about.valuesTitle")}</h2>
+            <p className="type-body mt-4 text-muted-foreground sm:mt-5">
               {t("about.valuesLead")}
             </p>
           </Reveal>
 
-          <div className="mt-16 grid gap-x-12 gap-y-14 sm:grid-cols-2">
+          <div className="mt-12 grid gap-x-10 gap-y-10 sm:mt-14 sm:grid-cols-2 sm:gap-y-12 lg:gap-x-14">
             {values.map((value, index) => (
               <Reveal key={value.title} delay={index * 0.06} className="flex gap-4">
                 <span className="mt-1 text-lg text-gold" aria-hidden>
                   ✦
                 </span>
                 <div>
-                  <h3 className="text-xl text-navy sm:text-2xl">{value.title}</h3>
-                  <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">
+                  <h3 className="type-display-s text-navy">{value.title}</h3>
+                  <p className="type-body-sm mt-3 max-w-md text-muted-foreground">
                     {value.description}
                   </p>
                 </div>
@@ -152,21 +151,21 @@ function AboutPage() {
       </section>
 
       {/* Clients */}
-      <section className="relative overflow-hidden bg-[#050d18] py-24 lg:py-32">
+      <section className="relative overflow-hidden bg-[#050d18] py-16 sm:py-20 lg:py-24">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(200,169,106,0.12),transparent_55%)]"
         />
         <div className="container-luxe relative max-w-3xl text-center text-white">
           <Reveal>
-            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
+            <p className="eyebrow">
               {t("about.clients.eyebrow")}
             </p>
-            <h2 className="mt-4 font-display text-3xl sm:text-5xl">{t("about.clients.title")}</h2>
-            <p className="mt-6 text-base leading-relaxed text-white/65 sm:text-lg">
+            <h2 className="type-display-m mt-3 sm:mt-4">{t("about.clients.title")}</h2>
+            <p className="type-body mt-5 text-white/65 sm:mt-6">
               {t("about.clients.body")}
             </p>
-            <p className="mt-12 font-display text-2xl text-gold sm:text-3xl">
+            <p className="type-display-s mt-10 text-gold sm:mt-12 sm:text-2xl lg:text-3xl">
               “{t("about.clients.quote")}”
             </p>
           </Reveal>
@@ -178,27 +177,27 @@ function AboutPage() {
       <WhyChooseUs />
 
       {/* CTA */}
-      <section className="relative overflow-hidden bg-sand py-24 lg:py-28">
+      <section className="relative overflow-hidden border-t border-border bg-sand py-16 sm:py-20 lg:py-24">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(200,169,106,0.16),transparent_50%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(200,169,106,0.12),transparent_50%)]"
         />
-        <div className="container-luxe relative flex flex-col items-start justify-between gap-10 lg:flex-row lg:items-end">
+        <div className="container-luxe relative flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-end lg:gap-12">
           <Reveal>
-            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
+            <p className="eyebrow">
               {t("about.ctaBand.eyebrow")}
             </p>
-            <h2 className="mt-4 max-w-xl font-display text-3xl text-navy sm:text-5xl">
+            <h2 className="type-display-m mt-3 max-w-xl text-navy sm:mt-4">
               {t("about.ctaBand.title")}
             </h2>
-            <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground">
+            <p className="type-body mt-4 max-w-lg text-muted-foreground sm:mt-5">
               {t("about.ctaBand.body")}
             </p>
           </Reveal>
           <Reveal delay={0.1}>
             <Link
               to="/contact"
-              className="inline-flex items-center gap-3 border border-navy bg-navy px-8 py-4 text-[0.7rem] tracking-[0.22em] text-navy-foreground uppercase transition-all duration-500 hover:border-gold hover:bg-gold hover:text-navy"
+              className="type-cta inline-flex shrink-0 items-center gap-3 border border-navy bg-navy px-7 py-3.5 text-navy-foreground transition-all duration-500 hover:border-gold hover:bg-gold hover:text-navy sm:px-8 sm:py-4"
             >
               {t("about.ctaBand.button")}
               <span aria-hidden>➝</span>

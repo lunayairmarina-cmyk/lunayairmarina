@@ -28,7 +28,7 @@ export function WhyChooseUs({ variant = "default" }: { variant?: "default" | "ho
   return (
     <section
       className={cn(
-        "py-24 lg:py-32",
+        "py-16 sm:py-20 lg:py-24",
         variant === "home" ? "bg-[#f3efe7]" : "bg-background",
       )}
     >
@@ -40,7 +40,7 @@ export function WhyChooseUs({ variant = "default" }: { variant?: "default" | "ho
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-60px" }}
-          className="mt-14 grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2 lg:grid-cols-4"
+          className="mt-12 grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2 lg:grid-cols-4"
         >
           {items.map((item, index) => {
             const Icon = icons[index % icons.length];
@@ -49,7 +49,7 @@ export function WhyChooseUs({ variant = "default" }: { variant?: "default" | "ho
                 key={`${item.title}-${index}`}
                 variants={staggerItem}
                 className={cn(
-                  "group p-9 transition-colors duration-500 hover:bg-navy",
+                  "group p-6 transition-colors duration-500 hover:bg-navy sm:p-9",
                   variant === "home" ? "bg-white" : "bg-sand",
                 )}
               >
@@ -57,10 +57,10 @@ export function WhyChooseUs({ variant = "default" }: { variant?: "default" | "ho
                   className="size-7 text-gold transition-transform duration-500 group-hover:scale-110"
                   strokeWidth={1.3}
                 />
-                <h3 className="mt-6 text-lg text-navy transition-colors duration-500 group-hover:text-navy-foreground">
+                <h3 className="type-display-s mt-5 text-navy transition-colors duration-500 group-hover:text-navy-foreground sm:mt-6">
                   {item.title}
                 </h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground transition-colors duration-500 group-hover:text-navy-foreground/60">
+                <p className="type-body-sm mt-2.5 text-muted-foreground transition-colors duration-500 group-hover:text-navy-foreground/60 sm:mt-3">
                   {item.description}
                 </p>
               </motion.div>

@@ -95,7 +95,7 @@ function AdminGalleryPage() {
               src={image.src}
               alt={image.caption[language]}
               loading="lazy"
-              className="aspect-4/3 w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              className="aspect-4/3 w-full object-cover"
             />
             <figcaption className="flex items-center justify-between gap-3 px-4 py-3 text-xs text-navy/70">
               <span className="truncate">{image.caption[language]}</span>
