@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { getSiteContent, clearContentCache } from "@/services/contentService";
+import { getSiteContent, clearContentCache } from "@/services/content";
 import { CMS_UPDATED_EVENT } from "@/lib/cms-store";
 import type { LocalizedString, SiteBundle } from "@/types/content";
 

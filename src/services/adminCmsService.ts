@@ -16,7 +16,7 @@ import {
 } from "@/lib/cms-store";
 import enLocale from "@/locales/en.json";
 import arLocale from "@/locales/ar.json";
-import { clearContentCache } from "@/services/contentService";
+import { clearContentCache } from "@/services/content";
 import type {
   AboutContent,
   BlogContent,
