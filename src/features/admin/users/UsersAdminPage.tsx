@@ -252,7 +252,7 @@ export function UsersAdminPage() {
             setNotice(null);
             setOpen(true);
           }}
-          className="flex items-center justify-center gap-2 rounded-full bg-navy px-5 py-3 text-xs tracking-[0.18em] text-white uppercase transition-colors hover:bg-navy/90"
+          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-navy px-5 py-3 text-xs tracking-[0.18em] text-white uppercase transition-colors hover:bg-navy/90 sm:w-auto"
         >
           <Plus className="size-4" strokeWidth={1.5} />
           {t("admin.users.add")}

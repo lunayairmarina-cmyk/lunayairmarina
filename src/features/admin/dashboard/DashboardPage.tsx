@@ -216,29 +216,26 @@ export function DashboardPage() {
   return (
     <AdminLayout title={t("admin.dashboard.title")}>
       {/* Welcome band — light admin palette */}
-      <section className="relative overflow-hidden rounded-2xl border border-navy/8 bg-white px-6 py-7 sm:px-8 sm:py-8">
+      <section className="relative overflow-hidden rounded-2xl border border-navy/8 bg-white px-4 py-5 sm:px-8 sm:py-8">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(201,169,110,0.14),transparent_42%)]"
         />
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl">
+        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-6">
+          <div className="max-w-2xl min-w-0">
             <p className="inline-flex items-center gap-2 text-[0.65rem] tracking-[0.22em] text-navy/45 uppercase">
-              <Sparkles className="size-3.5 text-gold" strokeWidth={1.6} />
+              <Sparkles className="size-3.5 shrink-0 text-gold" strokeWidth={1.6} />
               {t(greetingKey(now.getHours()))}
             </p>
-            <h2 className="mt-3 font-display text-3xl leading-tight text-navy sm:text-4xl">
+            <h2 className="mt-2 break-words font-display text-2xl leading-tight text-navy sm:mt-3 sm:text-4xl">
               {user?.name || t("brand.name")}
             </h2>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-navy/60 sm:text-base">
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-navy/60 sm:mt-3 sm:text-base">
               {t("admin.dashboard.welcomeLead")}
             </p>
-            <div className="mt-5 flex flex-wrap items-center gap-3 text-xs text-navy/50">
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-navy/50 sm:mt-5 sm:gap-3">
               <span className="rounded-full border border-navy/10 bg-[#faf8f4] px-3 py-1.5">
                 {dateLabel}
-              </span>
-              <span className="rounded-full border border-gold/35 bg-gold/10 px-3 py-1.5 text-navy/70">
-                {user ? t(`admin.users.roles.${user.role}`) : t("admin.portal")}
               </span>
               <span
                 className={cn(
@@ -255,17 +252,17 @@ export function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:gap-3">
             <Link
               to="/"
-              className="inline-flex items-center gap-2 rounded-full border border-navy bg-navy px-5 py-2.5 text-[0.7rem] tracking-[0.18em] text-white uppercase transition hover:bg-transparent hover:text-navy"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-navy bg-navy px-5 py-2.5 text-[0.7rem] tracking-[0.18em] text-white uppercase transition hover:bg-transparent hover:text-navy"
             >
               {t("admin.backToSite")}
               <CtaArrow className="size-3.5 rtl:rotate-180" strokeWidth={1.6} />
             </Link>
             <Link
               to="/admin/messages"
-              className="inline-flex items-center gap-2 rounded-full border border-navy/15 bg-[#faf8f4] px-5 py-2.5 text-[0.7rem] tracking-[0.18em] text-navy uppercase transition hover:border-gold hover:bg-gold/10"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-navy/15 bg-[#faf8f4] px-5 py-2.5 text-[0.7rem] tracking-[0.18em] text-navy uppercase transition hover:border-gold hover:bg-gold/10"
             >
               {t("admin.dashboard.actions.reviewInbox")}
               {newMessages.length > 0 ? (
@@ -279,7 +276,7 @@ export function DashboardPage() {
       </section>
 
       {/* KPI grid */}
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+      <div className="mt-6 grid gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3 2xl:grid-cols-6">
         <DashboardCard
           icon={Newspaper}
           label={t("admin.dashboard.stats.posts")}

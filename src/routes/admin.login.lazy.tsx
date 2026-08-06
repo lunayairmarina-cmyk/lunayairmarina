@@ -36,13 +36,13 @@ function AdminLoginPage() {
   };
 
   return (
-    <div className="relative grid min-h-screen place-items-center overflow-hidden px-5 py-16">
+    <div className="relative grid min-h-dvh place-items-center overflow-x-clip px-4 py-12 sm:px-5 sm:py-16">
       <div className="absolute inset-0">
         <img src={adminBg} alt="" aria-hidden className="size-full object-cover" />
         <div className="absolute inset-0 bg-navy/85" />
       </div>
 
-      <div className="absolute top-6 inset-inline-end-6 z-10">
+      <div className="absolute top-[max(1rem,env(safe-area-inset-top))] inset-inline-end-4 z-10 sm:inset-inline-end-6">
         <LanguageSwitcher tone="light" />
       </div>
 
@@ -50,7 +50,7 @@ function AdminLoginPage() {
         initial={{ opacity: 0, y: 26, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        className="glass-card relative z-10 w-full max-w-md rounded-xl p-8 sm:p-10"
+        className="glass-card relative z-10 w-full max-w-md rounded-xl p-6 sm:p-10"
       >
         <div className="flex justify-center">
           <Logo tone="light" align="center" className="h-28 w-36 sm:h-40 sm:w-48" />

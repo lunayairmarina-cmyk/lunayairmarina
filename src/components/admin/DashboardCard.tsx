@@ -36,7 +36,7 @@ export function DashboardCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.08, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "group relative h-full overflow-hidden rounded-2xl border bg-white p-5 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-md",
+        "group relative h-full overflow-hidden rounded-2xl border bg-white p-4 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-md sm:p-5",
         tone === "gold" && "border-gold/30 bg-gradient-to-br from-white to-gold/10",
         tone === "alert" && "border-navy/20 bg-gradient-to-br from-white to-navy/[0.04]",
         tone === "default" && "border-navy/8 hover:border-gold/35",
@@ -51,7 +51,7 @@ export function DashboardCard({
           <p className="text-[0.6rem] tracking-[0.22em] text-muted-foreground uppercase">
             {label}
           </p>
-          <p className="mt-3 font-display text-4xl text-navy">
+          <p className="mt-2 font-display text-3xl text-navy sm:mt-3 sm:text-4xl">
             <Counter value={value} suffix={suffix} />
           </p>
           {trend ? <p className="mt-2 text-xs text-gold">{trend}</p> : null}

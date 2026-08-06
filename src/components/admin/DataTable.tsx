@@ -33,7 +33,7 @@ export function DataTable<T>({ columns, rows, getRowId, actions }: DataTableProp
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.03, duration: 0.35 }}
-              className="space-y-3 p-4"
+              className="space-y-2.5 p-3.5 sm:p-4"
             >
               {columns.map((column) => (
                 <div key={column.key} className="min-w-0">
@@ -44,7 +44,9 @@ export function DataTable<T>({ columns, rows, getRowId, actions }: DataTableProp
                 </div>
               ))}
               {actions ? (
-                <div className="flex flex-wrap gap-2 pt-1">{actions(row)}</div>
+                <div className="flex flex-wrap gap-2 border-t border-navy/6 pt-3">
+                  {actions(row)}
+                </div>
               ) : null}
             </motion.article>
           ))

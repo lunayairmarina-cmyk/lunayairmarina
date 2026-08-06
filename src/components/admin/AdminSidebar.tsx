@@ -63,20 +63,15 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
     if (item.permission === "content") return can("content") || can("pages");
     return can(item.permission);
   });
-  const roleLabel = user ? t(`admin.users.roles.${user.role}`) : t("admin.portal");
 
   return (
-    <div className="flex h-full flex-col bg-[#f4f0e8] text-navy">
-      {/* Logo only — no broken truncated brand text */}
-      <div className="flex flex-col items-center border-b border-navy/8 px-5 py-6">
-        <Logo tone="dark" align="center" className="h-16 w-40" />
-        <span className="mt-3 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[0.6rem] tracking-[0.16em] text-navy/70 uppercase">
-          {roleLabel}
-        </span>
+    <div className="flex h-full min-h-0 flex-col bg-[#f4f0e8] text-navy">
+      <div className="flex shrink-0 flex-col items-center border-b border-navy/8 px-4 pb-4 pt-14 sm:px-5 sm:pt-6 lg:pt-6">
+        <Logo tone="dark" align="center" className="h-14 w-36 sm:h-16 sm:w-40" />
       </div>
 
-      <nav className="admin-hide-scrollbar flex-1 overflow-y-auto px-3 py-4">
-        <ul className="space-y-1">
+      <nav className="admin-hide-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3 sm:py-4">
+        <ul className="space-y-0.5 sm:space-y-1">
           {visibleItems.map((item) => {
             const active =
               pathname === item.to ||
@@ -88,7 +83,7 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
                   to={item.to}
                   onClick={onNavigate}
                   className={cn(
-                    "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-300",
+                    "group relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-300",
                     active
                       ? "bg-navy text-white shadow-sm"
                       : "text-navy/65 hover:bg-white/80 hover:text-navy",
@@ -97,7 +92,9 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
                   <span
                     className={cn(
                       "grid size-8 shrink-0 place-items-center rounded-lg transition-colors",
-                      active ? "bg-white/10 text-gold" : "bg-white/70 text-navy/55 group-hover:text-navy",
+                      active
+                        ? "bg-white/10 text-gold"
+                        : "bg-white/70 text-navy/55 group-hover:text-navy",
                     )}
                   >
                     <Icon className="size-4" strokeWidth={1.5} />
@@ -110,7 +107,7 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
         </ul>
       </nav>
 
-      <div className="border-t border-navy/8 p-3">
+      <div className="shrink-0 border-t border-navy/8 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         {user ? (
           <div className="mb-2 flex items-center gap-3 rounded-xl bg-white/70 px-3 py-2.5">
             <span className="grid size-9 shrink-0 place-items-center rounded-full bg-navy text-[0.65rem] tracking-wide text-white">
@@ -127,7 +124,7 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
         <button
           type="button"
           onClick={logout}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-navy/55 transition-colors hover:bg-red-50 hover:text-red-600"
+          className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-navy/55 transition-colors hover:bg-red-50 hover:text-red-600"
         >
           <LogOut className="size-4 shrink-0 rtl:rotate-180" strokeWidth={1.5} />
           {t("admin.nav.logout")}
@@ -144,9 +141,12 @@ export function AdminSidebar({
   open: boolean;
   onClose: () => void;
 }) {
+  const { isRTL } = useLanguage();
+  const slideFrom = isRTL ? "100%" : "-100%";
+
   return (
     <>
-      <aside className="admin-hide-scrollbar fixed inset-y-0 right-0 z-40 hidden w-72 overflow-hidden border-l border-navy/10 lg:block">
+      <aside className="admin-hide-scrollbar fixed inset-y-0 start-0 z-40 hidden w-72 overflow-hidden border-e border-navy/10 lg:block">
         <SidebarBody />
       </aside>
 
@@ -161,17 +161,17 @@ export function AdminSidebar({
               className="fixed inset-0 z-50 bg-navy/40 backdrop-blur-sm lg:hidden"
             />
             <motion.aside
-              initial={{ x: "100%" }}
+              initial={{ x: slideFrom }}
               animate={{ x: 0 }}
-              exit={{ x: "100%" }}
+              exit={{ x: slideFrom }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className="admin-hide-scrollbar fixed inset-y-0 right-0 z-50 w-72 overflow-hidden shadow-luxe lg:hidden"
+              className="admin-hide-scrollbar fixed inset-y-0 start-0 z-50 w-[min(19rem,calc(100vw-2.5rem))] overflow-hidden shadow-luxe lg:hidden"
             >
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="absolute top-3 left-3 z-10 grid size-11 place-items-center rounded-md text-navy/50 transition-colors hover:bg-navy/5 hover:text-navy"
+                className="absolute top-[max(0.75rem,env(safe-area-inset-top))] end-3 z-10 grid size-11 place-items-center rounded-md text-navy/50 transition-colors hover:bg-navy/5 hover:text-navy"
               >
                 <X className="size-5" strokeWidth={1.5} />
               </button>

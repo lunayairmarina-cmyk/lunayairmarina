@@ -3,13 +3,16 @@ import { ImagePlus, LoaderCircle } from "lucide-react";
 import { uploadMediaFile } from "@/services/adminCmsService";
 import { useLanguage } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { GalleryPicker } from "@/components/admin/GalleryPicker";
 
 interface MediaUploaderProps {
   value?: string;
-  onChange: (url: string) => void;
+  onChange: (url: string, meta?: { caption?: { en: string; ar: string } }) => void;
   pathPrefix?: string;
   label?: string;
   className?: string;
+  /** Allow picking an existing site gallery image */
+  allowGallery?: boolean;
 }
 
 export function MediaUploader({
@@ -18,6 +21,7 @@ export function MediaUploader({
   pathPrefix = "images/uploads",
   label,
   className,
+  allowGallery = false,
 }: MediaUploaderProps) {
   const { t } = useLanguage();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -45,14 +49,14 @@ export function MediaUploader({
         <p className="text-[0.6rem] tracking-[0.22em] text-navy/40 uppercase">{label}</p>
       ) : null}
       <div className="flex items-center gap-4">
-        <div className="grid size-20 place-items-center overflow-hidden rounded-xl border border-navy/10 bg-[#faf8f4]">
+        <div className="grid size-20 shrink-0 place-items-center overflow-hidden rounded-xl border border-navy/10 bg-[#faf8f4]">
           {value ? (
             <img src={value} alt="" className="size-full object-cover" />
           ) : (
             <ImagePlus className="size-5 text-navy/35" strokeWidth={1.5} />
           )}
         </div>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 space-y-2">
           <button
             type="button"
             disabled={busy}
@@ -66,12 +70,18 @@ export function MediaUploader({
             )}
             {t("admin.actions.upload")}
           </button>
-          <p className="mt-2 text-[0.65rem] leading-relaxed text-navy/45">
+          <p className="text-[0.65rem] leading-relaxed text-navy/45">
             {t("admin.cms.uploadDeviceHint")}
           </p>
-          {error ? <p className="mt-1 text-xs text-red-500">{error}</p> : null}
+          {error ? <p className="text-xs text-red-500">{error}</p> : null}
         </div>
       </div>
+      {allowGallery ? (
+        <GalleryPicker
+          value={value}
+          onSelect={(src, caption) => onChange(src, { caption })}
+        />
+      ) : null}
       <input
         ref={inputRef}
         type="file"

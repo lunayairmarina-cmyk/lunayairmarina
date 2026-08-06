@@ -50,10 +50,12 @@ export function Modal({
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             onClick={(event) => event.stopPropagation()}
-            className="admin-hide-scrollbar flex max-h-[92dvh] w-full max-w-xl flex-col overflow-y-auto rounded-t-2xl border border-navy/8 bg-white shadow-luxe sm:max-h-[88vh] sm:rounded-2xl"
+            className="admin-hide-scrollbar flex max-h-[min(92dvh,100%)] w-full max-w-xl flex-col overflow-hidden rounded-t-2xl border border-navy/8 bg-white shadow-luxe sm:max-h-[88vh] sm:rounded-2xl"
           >
-            <div className="flex items-center justify-between gap-4 border-b border-navy/8 px-4 py-4 sm:px-6 sm:py-5">
-              <h2 className="min-w-0 truncate font-display text-lg text-navy">{title}</h2>
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-navy/8 px-4 py-3.5 sm:gap-4 sm:px-6 sm:py-5">
+              <h2 className="min-w-0 truncate font-display text-base text-navy sm:text-lg">
+                {title}
+              </h2>
               <button
                 type="button"
                 onClick={onClose}
@@ -64,14 +66,16 @@ export function Modal({
               </button>
             </div>
 
-            <div className="flex flex-col gap-5 px-4 py-5 sm:px-6 sm:py-6">{children}</div>
+            <div className="admin-hide-scrollbar flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-4 py-5 sm:px-6 sm:py-6">
+              {children}
+            </div>
 
             {onSubmit ? (
-              <div className="sticky bottom-0 flex flex-col-reverse gap-3 border-t border-navy/8 bg-white px-4 py-4 sm:flex-row sm:justify-end sm:px-6 sm:py-5">
+              <div className="sticky bottom-0 flex shrink-0 flex-col-reverse gap-2 border-t border-navy/8 bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:flex-row sm:justify-end sm:gap-3 sm:px-6 sm:py-5">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-full border border-navy/10 px-5 py-3 text-xs tracking-[0.16em] text-navy/65 uppercase transition-colors hover:text-navy"
+                  className="min-h-11 rounded-full border border-navy/10 px-5 py-3 text-xs tracking-[0.16em] text-navy/65 uppercase transition-colors hover:text-navy"
                 >
                   {t("admin.actions.cancel")}
                 </button>
@@ -79,7 +83,7 @@ export function Modal({
                   type="button"
                   disabled={busy}
                   onClick={onSubmit}
-                  className="rounded-full bg-navy px-5 py-3 text-xs tracking-[0.16em] text-white uppercase transition-colors hover:bg-navy/90 disabled:opacity-60"
+                  className="min-h-11 rounded-full bg-navy px-5 py-3 text-xs tracking-[0.16em] text-white uppercase transition-colors hover:bg-navy/90 disabled:opacity-60"
                 >
                   {submitLabel ?? t("admin.actions.save")}
                 </button>

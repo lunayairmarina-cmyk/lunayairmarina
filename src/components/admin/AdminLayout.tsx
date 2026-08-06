@@ -34,6 +34,11 @@ export function AdminLayout({ title, children }: AdminLayoutProps) {
     }
   }, [authed, can, navigate, pathname]);
 
+  // Close the mobile drawer on navigation.
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
   useEffect(() => {
     document.documentElement.classList.add("admin-hide-scrollbar");
     document.body.classList.add("admin-hide-scrollbar");
@@ -43,16 +48,25 @@ export function AdminLayout({ title, children }: AdminLayoutProps) {
     };
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [open]);
+
   return (
-    <div className="admin-shell admin-hide-scrollbar min-h-screen bg-[#faf8f4]">
+    <div className="admin-shell admin-hide-scrollbar min-h-dvh overflow-x-clip bg-[#faf8f4]">
       <AdminSidebar open={open} onClose={() => setOpen(false)} />
-      <div className="lg:pr-72">
+      <div className="min-w-0 lg:ps-72">
         <AdminHeader title={title} onMenu={() => setOpen(true)} />
         <motion.main
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="admin-hide-scrollbar px-3 py-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-5 sm:py-8 lg:px-8"
+          className="admin-hide-scrollbar mx-auto w-full max-w-[1600px] px-3 py-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-5 sm:py-8 lg:px-8"
         >
           {children}
         </motion.main>

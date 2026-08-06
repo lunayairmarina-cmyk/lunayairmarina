@@ -380,7 +380,7 @@ export function PageCopyEditor() {
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
+    <div className="grid gap-4 lg:grid-cols-[240px_1fr] lg:gap-6">
       <aside className="rounded-2xl border border-navy/8 bg-white p-3 shadow-sm">
         <p className="px-2 py-2 text-[0.6rem] tracking-[0.22em] text-navy/45 uppercase">
           {t("admin.pages.sectionsLabel")}
@@ -389,19 +389,19 @@ export function PageCopyEditor() {
           value={filter}
           onChange={(event) => setFilter(event.target.value)}
           placeholder={t("admin.search")}
-          className="mb-2 w-full rounded-lg border border-navy/10 bg-[#faf8f4] px-3 py-2 text-xs outline-none focus:border-navy/30"
+          className="mb-2 w-full rounded-lg border border-navy/10 bg-[#faf8f4] px-3 py-2.5 text-xs outline-none focus:border-navy/30"
         />
-        <ul className="admin-hide-scrollbar max-h-[70vh] space-y-1 overflow-y-auto">
+        <ul className="admin-hide-scrollbar flex max-h-none gap-2 overflow-x-auto pb-1 lg:max-h-[70vh] lg:flex-col lg:space-y-1 lg:gap-0 lg:overflow-y-auto lg:pb-0">
           {visibleSections.map((item) => (
-            <li key={item.id}>
+            <li key={item.id} className="shrink-0 lg:shrink lg:w-full">
               <button
                 type="button"
                 onClick={() => setSectionId(item.id)}
                 className={cn(
-                  "w-full rounded-xl px-3 py-2.5 text-start text-sm transition-colors",
+                  "min-h-10 w-full whitespace-nowrap rounded-xl px-3 py-2.5 text-start text-sm transition-colors",
                   sectionId === item.id
                     ? "bg-navy text-white"
-                    : "text-navy/65 hover:bg-[#faf8f4] hover:text-navy",
+                    : "bg-[#faf8f4] text-navy/65 hover:text-navy lg:bg-transparent",
                 )}
               >
                 {t(item.labelKey)}
@@ -411,19 +411,19 @@ export function PageCopyEditor() {
         </ul>
       </aside>
 
-      <div className="rounded-2xl border border-navy/8 bg-white p-6 shadow-sm">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h3 className="font-display text-2xl text-navy">{t(section.labelKey)}</h3>
+      <div className="min-w-0 rounded-2xl border border-navy/8 bg-white p-4 shadow-sm sm:p-6">
+        <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h3 className="font-display text-xl text-navy sm:text-2xl">{t(section.labelKey)}</h3>
             <p className="mt-1 text-sm text-navy/55">{t("admin.pages.hint")}</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
             {status ? <span className="text-xs text-navy/55">{status}</span> : null}
             <button
               type="button"
               disabled={saving}
               onClick={() => void save()}
-              className="rounded-full bg-navy px-5 py-3 text-xs tracking-[0.18em] text-white uppercase transition-colors hover:bg-navy/90 disabled:opacity-60"
+              className="min-h-11 w-full rounded-full bg-navy px-5 py-3 text-xs tracking-[0.18em] text-white uppercase transition-colors hover:bg-navy/90 disabled:opacity-60 sm:w-auto"
             >
               {t("admin.content.save")}
             </button>

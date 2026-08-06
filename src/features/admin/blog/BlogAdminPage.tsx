@@ -282,7 +282,7 @@ export function BlogAdminPage() {
         <button
           type="button"
           onClick={openCreate}
-          className="flex items-center justify-center gap-2 rounded-full bg-navy px-5 py-3 text-xs tracking-[0.18em] text-white uppercase transition-colors hover:bg-navy/90"
+          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-navy px-5 py-3 text-xs tracking-[0.18em] text-white uppercase transition-colors hover:bg-navy/90 sm:w-auto"
         >
           <Plus className="size-4" strokeWidth={1.5} />
           {t("admin.blog.add")}
@@ -355,7 +355,15 @@ export function BlogAdminPage() {
           label={t("admin.blog.coverImage")}
           value={draft.coverImage}
           pathPrefix="images/blog"
-          onChange={(url) => setDraft({ ...draft, coverImage: url })}
+          allowGallery
+          onChange={(url, meta) =>
+            setDraft({
+              ...draft,
+              coverImage: url,
+              coverAltEn: meta?.caption?.en || draft.coverAltEn,
+              coverAltAr: meta?.caption?.ar || draft.coverAltAr,
+            })
+          }
         />
         <div className="grid gap-5 sm:grid-cols-2">
           <ModalField
@@ -595,6 +603,28 @@ export function BlogAdminPage() {
 
                 {block.type === "image" ? (
                   <div className="grid gap-3">
+                    <MediaUploader
+                      value={block.src}
+                      pathPrefix="images/blog"
+                      allowGallery
+                      onChange={(url, meta) =>
+                        updateBlock(block.id, {
+                          src: url,
+                          alt: meta?.caption
+                            ? {
+                                en: meta.caption.en || tx(block.alt, "en"),
+                                ar: meta.caption.ar || tx(block.alt, "ar"),
+                              }
+                            : block.alt,
+                          caption: meta?.caption
+                            ? {
+                                en: meta.caption.en || tx(block.caption, "en"),
+                                ar: meta.caption.ar || tx(block.caption, "ar"),
+                              }
+                            : block.caption,
+                        })
+                      }
+                    />
                     <input
                       value={block.src}
                       onChange={(event) => updateBlock(block.id, { src: event.target.value })}

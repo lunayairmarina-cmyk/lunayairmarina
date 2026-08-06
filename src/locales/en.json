@@ -815,7 +815,7 @@
       "content": "Website Content",
       "services": "Services",
       "why": "Why Choose Us",
-      "trust": "Trust Blocks",
+      "trust": "Trust Proof",
       "team": "Team",
       "fleet": "Fleet",
       "blog": "Blog",
@@ -853,7 +853,7 @@
         "about": "About",
         "services": "Services",
         "why": "Why Choose Us",
-        "trust": "Trust",
+        "trust": "Trust Proof",
         "gallery": "Gallery",
         "fleet": "Fleet",
         "testimonials": "Testimonials",
@@ -869,10 +869,10 @@
       "items": "Reasons / cards"
     },
     "trust": {
-      "slots": "Trust slots",
-      "slotsCount": "slots",
-      "slotLabel": "Slot",
-      "slotAdded": "New trust slot added — scroll down to edit it, then Save."
+      "slots": "Proof cards",
+      "slotsCount": "cards",
+      "slotLabel": "Card",
+      "slotAdded": "New proof card added — scroll down to edit it, then Save."
     },
     "messages": {
       "loading": "Loading inbox from Firebase…"
@@ -1055,7 +1055,10 @@
       "keywordLink": "Turn a keyword into a colored SEO link",
       "imageUrl": "Image URL",
       "imageAlt": "Image alt (required for SEO)",
-      "imageCaption": "Optional caption"
+      "imageCaption": "Optional caption",
+      "pickFromGallery": "Choose from gallery",
+      "hideGallery": "Hide gallery",
+      "galleryPickHint": "Tap an image from the site gallery to use it."
     },
     "users": {
       "subtitle": "Add team members and choose exactly which admin sections each person can edit.",
@@ -1081,7 +1084,7 @@
         "content": "Website Content",
         "services": "Services",
         "why": "Why Choose Us",
-        "trust": "Trust Blocks",
+        "trust": "Trust Proof",
         "team": "Team",
         "fleet": "Fleet",
         "blog": "Blog",

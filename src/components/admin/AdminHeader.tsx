@@ -22,9 +22,9 @@ export function AdminHeader({ title, onMenu }: AdminHeaderProps) {
   const initials = getInitials(user?.name || t("brand.name"));
 
   return (
-    <header className="sticky top-0 z-30 border-b border-navy/8 bg-[#faf8f4]/95 backdrop-blur-xl">
-      <div className="flex items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-5 sm:py-4 lg:px-8">
-        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+    <header className="sticky top-0 z-30 border-b border-navy/8 bg-[#faf8f4]/95 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
+      <div className="flex items-center justify-between gap-2 px-3 py-2.5 sm:gap-4 sm:px-5 sm:py-4 lg:px-8">
+        <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-3">
           <button
             type="button"
             onClick={onMenu}
@@ -33,17 +33,19 @@ export function AdminHeader({ title, onMenu }: AdminHeaderProps) {
           >
             <Menu className="size-5" strokeWidth={1.5} />
           </button>
-          <h1 className="truncate font-display text-lg text-navy sm:text-xl md:text-2xl">{title}</h1>
+          <h1 className="truncate font-display text-base text-navy sm:text-xl md:text-2xl">
+            {title}
+          </h1>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
-          <div className="hidden sm:block">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-3">
+          <div className="scale-90 sm:scale-100">
             <LanguageSwitcher />
           </div>
           <Link
             to="/"
             aria-label={t("admin.backToSite")}
-            className="grid size-11 place-items-center rounded-full border border-navy/10 bg-white text-navy/65 transition-colors hover:border-gold hover:text-navy sm:hidden"
+            className="grid size-10 place-items-center rounded-full border border-navy/10 bg-white text-navy/65 transition-colors hover:border-gold hover:text-navy sm:hidden"
           >
             <ExternalLink className="size-4" strokeWidth={1.5} />
           </Link>
@@ -56,14 +58,11 @@ export function AdminHeader({ title, onMenu }: AdminHeaderProps) {
           </Link>
           <span
             title={user?.name ?? t("brand.name")}
-            className="grid size-10 place-items-center rounded-full bg-navy text-[0.65rem] tracking-wide text-white sm:size-9"
+            className="grid size-9 place-items-center rounded-full bg-navy text-[0.65rem] tracking-wide text-white sm:size-9"
           >
             {initials}
           </span>
         </div>
-      </div>
-      <div className="border-t border-navy/6 px-3 py-1 sm:hidden">
-        <LanguageSwitcher />
       </div>
     </header>
   );
