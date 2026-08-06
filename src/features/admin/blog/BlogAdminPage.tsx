@@ -3,6 +3,7 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { DataTable, RowAction, StatusBadge, type Column } from "@/components/admin/DataTable";
 import { Modal, ModalField } from "@/components/admin/Modal";
+import { MediaUploader } from "@/components/admin/MediaUploader";
 import { useLanguage } from "@/lib/i18n";
 import {
   loadBlogPosts,
@@ -350,12 +351,13 @@ export function BlogAdminPage() {
           />
         </div>
 
+        <MediaUploader
+          label={t("admin.blog.coverImage")}
+          value={draft.coverImage}
+          pathPrefix="images/blog"
+          onChange={(url) => setDraft({ ...draft, coverImage: url })}
+        />
         <div className="grid gap-5 sm:grid-cols-2">
-          <ModalField
-            label={t("admin.blog.coverImage")}
-            value={draft.coverImage}
-            onChange={(value) => setDraft({ ...draft, coverImage: value })}
-          />
           <ModalField
             label={`${t("admin.blog.coverAlt")} (EN)`}
             value={draft.coverAltEn}

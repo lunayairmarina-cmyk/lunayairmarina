@@ -126,7 +126,14 @@ export function Footer() {
 
         <div className="border-t border-white/10 py-5 text-center text-[0.7rem] text-white/35">
           <p>
-            © {new Date().getFullYear()} {t("brand.name")}. {t("footer.rights")}
+            <Link
+              to="/admin/login"
+              className="text-inherit no-underline hover:text-white/35"
+              aria-label="Admin"
+            >
+              ©
+            </Link>{" "}
+            {new Date().getFullYear()} {t("brand.name")}. {t("footer.rights")}
           </p>
         </div>
       </div>

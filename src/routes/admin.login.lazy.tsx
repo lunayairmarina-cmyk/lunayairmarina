@@ -16,7 +16,7 @@ function AdminLoginPage() {
   const { t } = useLanguage();
   const { login, authError } = useAdminAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("admin@lunayairmarina.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -53,7 +53,7 @@ function AdminLoginPage() {
         className="glass-card relative z-10 w-full max-w-md rounded-xl p-8 sm:p-10"
       >
         <div className="flex justify-center">
-          <Logo tone="light" className="h-28 w-36 sm:h-40 sm:w-48" />
+          <Logo tone="light" align="center" className="h-28 w-36 sm:h-40 sm:w-48" />
         </div>
 
         <h1 className="mt-8 text-center text-2xl text-navy-foreground">{t("admin.portal")}</h1>
@@ -105,10 +105,6 @@ function AdminLoginPage() {
           >
             {busy ? t("common.loading") : t("admin.login")}
           </motion.button>
-
-          <p className="text-center text-[0.65rem] text-navy-foreground/40">
-            {t("admin.firebaseHint")}
-          </p>
         </form>
 
         <Link
