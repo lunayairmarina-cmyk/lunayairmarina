@@ -6,7 +6,6 @@ export const ADMIN_PERMISSIONS = [
   "why",
   "trust",
   "team",
-  "fleet",
   "blog",
   "gallery",
   "testimonials",
@@ -44,7 +43,6 @@ export const ROLE_PRESETS: Record<
       "why",
       "trust",
       "team",
-      "fleet",
       "blog",
       "gallery",
       "testimonials",
@@ -53,7 +51,7 @@ export const ROLE_PRESETS: Record<
     ],
   },
   gallery_manager: {
-    permissions: ["dashboard", "gallery", "fleet"],
+    permissions: ["dashboard", "gallery"],
   },
   support: {
     permissions: ["dashboard", "messages"],
@@ -94,10 +92,10 @@ export function loadAdminUsers(): AdminUser[] {
     if (!raw) return DEFAULT_ADMIN_USERS;
     const parsed = JSON.parse(raw) as AdminUser[];
     if (!Array.isArray(parsed) || parsed.length === 0) return DEFAULT_ADMIN_USERS;
-    // Migrate old "fleet" permission to "blog" and grant new CMS permissions to super admins.
+    // Drop removed "fleet" permission and keep role presets in sync.
     return parsed.map((user) => {
-      const migrated = user.permissions.map((permission) =>
-        (permission as string) === "fleet" ? "blog" : permission,
+      const migrated = user.permissions.filter(
+        (permission) => (permission as string) !== "fleet",
       ) as AdminPermission[];
       const permissions =
         user.role === "super_admin"
@@ -124,7 +122,6 @@ export const PERMISSION_ROUTE: Record<AdminPermission, string> = {
   why: "/admin/why",
   trust: "/admin/trust",
   team: "/admin/team",
-  fleet: "/admin/fleet",
   blog: "/admin/blog",
   gallery: "/admin/gallery",
   testimonials: "/admin/testimonials",

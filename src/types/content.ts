@@ -77,7 +77,8 @@ export interface TeamMember {
 
 export interface TestimonialContent {
   id: string;
-  clientName: string;
+  /** Bilingual client name (legacy string still accepted at runtime). */
+  clientName: LocalizedString | string;
   role: LocalizedString;
   text: LocalizedString;
   image?: string;

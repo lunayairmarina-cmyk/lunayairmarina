@@ -6,6 +6,7 @@ import { DataTable, RowAction, type Column } from "@/components/admin/DataTable"
 import { Modal, ModalField } from "@/components/admin/Modal";
 import { MediaUploader } from "@/components/admin/MediaUploader";
 import { useLanguage } from "@/lib/i18n";
+import { asLocalized, pairLocalized } from "@/lib/localized";
 import { loadCmsStore } from "@/lib/cms-store";
 import { describeSaveResult, saveTeam } from "@/services/adminCmsService";
 import type { TeamMember } from "@/types/content";
@@ -14,19 +15,41 @@ export const Route = createLazyFileRoute("/admin/team")({
   component: AdminTeamPage,
 });
 
-const emptyDraft = {
-  name: "",
-  position: "",
-  bio: "",
-  image: "",
+type Draft = {
+  nameEn: string;
+  nameAr: string;
+  positionEn: string;
+  positionAr: string;
+  bioEn: string;
+  bioAr: string;
+  image: string;
 };
+
+const emptyDraft = (): Draft => ({
+  nameEn: "",
+  nameAr: "",
+  positionEn: "",
+  positionAr: "",
+  bioEn: "",
+  bioAr: "",
+  image: "",
+});
 
 function AdminTeamPage() {
   const { t, language } = useLanguage();
-  const [rows, setRows] = useState<TeamMember[]>(() => loadCmsStore().team);
+  const initial = useMemo<TeamMember[]>(() => {
+    return loadCmsStore().team.map((row) => ({
+      ...row,
+      name: asLocalized(row.name),
+      position: asLocalized(row.position),
+      bio: asLocalized(row.bio),
+    }));
+  }, []);
+
+  const [rows, setRows] = useState(initial);
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [draft, setDraft] = useState(emptyDraft);
+  const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [status, setStatus] = useState<string | null>(null);
 
   const persist = async (next: TeamMember[]) => {
@@ -41,14 +64,19 @@ function AdminTeamPage() {
   };
 
   const save = async () => {
+    if (!draft.nameEn.trim() && !draft.nameAr.trim()) return;
+    const name = pairLocalized(draft.nameEn, draft.nameAr);
+    const position = pairLocalized(draft.positionEn, draft.positionAr);
+    const bio = pairLocalized(draft.bioEn, draft.bioAr);
+
     const next = editingId
       ? rows.map((row) =>
           row.id === editingId
             ? {
                 ...row,
-                name: { ...row.name, [language]: draft.name },
-                position: { ...row.position, [language]: draft.position },
-                bio: { ...row.bio, [language]: draft.bio },
+                name,
+                position,
+                bio,
                 image: draft.image || row.image,
               }
             : row,
@@ -57,9 +85,9 @@ function AdminTeamPage() {
           ...rows,
           {
             id: `tm${Date.now()}`,
-            name: { en: draft.name, ar: draft.name },
-            position: { en: draft.position, ar: draft.position },
-            bio: { en: draft.bio, ar: draft.bio },
+            name,
+            position,
+            bio,
             image: draft.image,
             order: rows.length + 1,
           },
@@ -67,6 +95,7 @@ function AdminTeamPage() {
     await persist(next);
     setOpen(false);
     setEditingId(null);
+    setDraft(emptyDraft());
   };
 
   const columns: Column<TeamMember>[] = useMemo(
@@ -112,7 +141,7 @@ function AdminTeamPage() {
           type="button"
           onClick={() => {
             setEditingId(null);
-            setDraft(emptyDraft);
+            setDraft(emptyDraft());
             setOpen(true);
           }}
           className="flex items-center gap-2 rounded-full bg-navy px-5 py-3 text-xs tracking-[0.18em] text-white uppercase hover:bg-navy/90"
@@ -132,11 +161,17 @@ function AdminTeamPage() {
               icon={Pencil}
               label={t("admin.actions.edit")}
               onClick={() => {
+                const name = asLocalized(row.name);
+                const position = asLocalized(row.position);
+                const bio = asLocalized(row.bio);
                 setEditingId(row.id);
                 setDraft({
-                  name: row.name[language],
-                  position: row.position[language],
-                  bio: row.bio[language],
+                  nameEn: name.en,
+                  nameAr: name.ar,
+                  positionEn: position.en,
+                  positionAr: position.ar,
+                  bioEn: bio.en,
+                  bioAr: bio.ar,
                   image: row.image,
                 });
                 setOpen(true);
@@ -158,21 +193,39 @@ function AdminTeamPage() {
         onClose={() => setOpen(false)}
         onSubmit={() => void save()}
       >
+        <div className="grid gap-5 sm:grid-cols-2">
+          <ModalField
+            label={`${t("admin.table.name")} (EN)`}
+            value={draft.nameEn}
+            onChange={(value) => setDraft({ ...draft, nameEn: value })}
+          />
+          <ModalField
+            label={`${t("admin.table.name")} (AR)`}
+            value={draft.nameAr}
+            onChange={(value) => setDraft({ ...draft, nameAr: value })}
+          />
+          <ModalField
+            label={`${t("admin.table.position")} (EN)`}
+            value={draft.positionEn}
+            onChange={(value) => setDraft({ ...draft, positionEn: value })}
+          />
+          <ModalField
+            label={`${t("admin.table.position")} (AR)`}
+            value={draft.positionAr}
+            onChange={(value) => setDraft({ ...draft, positionAr: value })}
+          />
+        </div>
         <ModalField
-          label={t("admin.table.name")}
-          value={draft.name}
-          onChange={(value) => setDraft({ ...draft, name: value })}
-        />
-        <ModalField
-          label={t("admin.table.position")}
-          value={draft.position}
-          onChange={(value) => setDraft({ ...draft, position: value })}
+          textarea
+          label={`${t("admin.table.description")} (EN)`}
+          value={draft.bioEn}
+          onChange={(value) => setDraft({ ...draft, bioEn: value })}
         />
         <ModalField
           textarea
-          label={t("admin.table.description")}
-          value={draft.bio}
-          onChange={(value) => setDraft({ ...draft, bio: value })}
+          label={`${t("admin.table.description")} (AR)`}
+          value={draft.bioAr}
+          onChange={(value) => setDraft({ ...draft, bioAr: value })}
         />
         <MediaUploader
           label={t("admin.table.image")}

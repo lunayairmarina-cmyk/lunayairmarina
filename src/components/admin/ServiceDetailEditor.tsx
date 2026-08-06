@@ -55,8 +55,41 @@ function readDetail(dict: Record<string, unknown>, slug: string): DetailDraft {
   };
 }
 
+function applyLangDraft(
+  copy: { en: Record<string, unknown>; ar: Record<string, unknown> },
+  lang: "en" | "ar",
+  slug: string,
+  draft: DetailDraft,
+) {
+  let next = copy;
+  const base = `services.details.${slug}`;
+  const pairs: Array<[string, unknown]> = [
+    [`${base}.title`, draft.title],
+    [`${base}.intro`, draft.intro],
+    [`${base}.summary`, draft.summary],
+    [`${base}.detailTitle`, draft.detailTitle],
+    [`${base}.detailBody`, draft.detailBody],
+    [`${base}.benefitsLead`, draft.benefitsLead],
+    [
+      `${base}.benefits`,
+      draft.benefits
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean),
+    ],
+    [`${base}.valueTitle`, draft.valueTitle],
+    [`${base}.valueLead`, draft.valueLead],
+    [`${base}.startCta`, draft.startCta],
+    [`${base}.exploreCta`, draft.exploreCta],
+  ];
+  for (const [path, value] of pairs) {
+    next = setCopyPath(next, lang, path, value);
+  }
+  return next;
+}
+
 export function ServiceDetailEditor() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [slug, setSlug] = useState<(typeof SERVICE_SLUGS)[number]>(SERVICE_SLUGS[0]!);
   const baseCopy = useMemo(() => {
     const cms = loadCmsStore();
@@ -66,7 +99,8 @@ export function ServiceDetailEditor() {
     };
   }, []);
   const [copy, setCopy] = useState(baseCopy);
-  const [draft, setDraft] = useState(() => readDetail(baseCopy[language], slug));
+  const [draftEn, setDraftEn] = useState(() => readDetail(baseCopy.en, slug));
+  const [draftAr, setDraftAr] = useState(() => readDetail(baseCopy.ar, slug));
   const [cover, setCover] = useState(() => {
     return loadCmsStore().services.find((s) => s.slug === slug)?.image ?? "";
   });
@@ -75,41 +109,15 @@ export function ServiceDetailEditor() {
 
   const switchSlug = (next: (typeof SERVICE_SLUGS)[number]) => {
     setSlug(next);
-    setDraft(readDetail(copy[language], next));
+    setDraftEn(readDetail(copy.en, next));
+    setDraftAr(readDetail(copy.ar, next));
     setCover(loadCmsStore().services.find((s) => s.slug === next)?.image ?? "");
-  };
-
-  const applyDraftToCopy = () => {
-    let next = copy;
-    const base = `services.details.${slug}`;
-    const pairs: Array<[string, unknown]> = [
-      [`${base}.title`, draft.title],
-      [`${base}.intro`, draft.intro],
-      [`${base}.summary`, draft.summary],
-      [`${base}.detailTitle`, draft.detailTitle],
-      [`${base}.detailBody`, draft.detailBody],
-      [`${base}.benefitsLead`, draft.benefitsLead],
-      [
-        `${base}.benefits`,
-        draft.benefits
-          .split("\n")
-          .map((line) => line.trim())
-          .filter(Boolean),
-      ],
-      [`${base}.valueTitle`, draft.valueTitle],
-      [`${base}.valueLead`, draft.valueLead],
-      [`${base}.startCta`, draft.startCta],
-      [`${base}.exploreCta`, draft.exploreCta],
-    ];
-    for (const [path, value] of pairs) {
-      next = setCopyPath(next, language, path, value);
-    }
-    return next;
   };
 
   const save = async () => {
     setSaving(true);
-    const nextCopy = applyDraftToCopy();
+    let nextCopy = applyLangDraft(copy, "en", slug, draftEn);
+    nextCopy = applyLangDraft(nextCopy, "ar", slug, draftAr);
     setCopy(nextCopy);
     const copyResult = await saveCopyBundle(nextCopy);
 
@@ -124,8 +132,14 @@ export function ServiceDetailEditor() {
           {
             id: slug,
             slug,
-            title: { en: draft.title, ar: draft.title },
-            description: { en: draft.summary, ar: draft.summary },
+            title: {
+              en: draftEn.title || draftAr.title,
+              ar: draftAr.title || draftEn.title,
+            },
+            description: {
+              en: draftEn.summary || draftAr.summary,
+              ar: draftAr.summary || draftEn.summary,
+            },
             image: cover,
             features: [],
             order: services.length + 1,
@@ -189,34 +203,40 @@ export function ServiceDetailEditor() {
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        {FIELDS.map((field) => (
-          <label
-            key={field.key}
-            className={cn("flex flex-col gap-2", field.textarea && "lg:col-span-2")}
-          >
-            <span className="text-[0.6rem] tracking-[0.22em] text-muted-foreground uppercase">
-              {field.label} · {language.toUpperCase()}
-            </span>
-            {field.textarea ? (
-              <textarea
-                rows={3}
-                value={draft[field.key]}
-                onChange={(event) => setDraft({ ...draft, [field.key]: event.target.value })}
-                className="rounded-md border border-navy/10 bg-[#faf8f4] px-4 py-3 text-sm outline-none focus:border-navy/30"
-                dir={language === "ar" ? "rtl" : "ltr"}
-              />
-            ) : (
-              <input
-                value={draft[field.key]}
-                onChange={(event) => setDraft({ ...draft, [field.key]: event.target.value })}
-                className="rounded-md border border-navy/10 bg-[#faf8f4] px-4 py-3 text-sm outline-none focus:border-navy/30"
-                dir={language === "ar" ? "rtl" : "ltr"}
-              />
-            )}
-          </label>
-        ))}
-      </div>
+      {FIELDS.map((field) => (
+        <div
+          key={field.key}
+          className={cn("mb-4 grid gap-4", field.textarea ? "lg:grid-cols-2" : "sm:grid-cols-2")}
+        >
+          {(["en", "ar"] as const).map((lang) => {
+            const draft = lang === "en" ? draftEn : draftAr;
+            const setDraft = lang === "en" ? setDraftEn : setDraftAr;
+            return (
+              <label key={lang} className="flex flex-col gap-2">
+                <span className="text-[0.6rem] tracking-[0.22em] text-muted-foreground uppercase">
+                  {field.label} · {lang.toUpperCase()}
+                </span>
+                {field.textarea ? (
+                  <textarea
+                    rows={3}
+                    value={draft[field.key]}
+                    onChange={(event) => setDraft({ ...draft, [field.key]: event.target.value })}
+                    className="rounded-md border border-navy/10 bg-[#faf8f4] px-4 py-3 text-sm outline-none focus:border-navy/30"
+                    dir={lang === "ar" ? "rtl" : "ltr"}
+                  />
+                ) : (
+                  <input
+                    value={draft[field.key]}
+                    onChange={(event) => setDraft({ ...draft, [field.key]: event.target.value })}
+                    className="rounded-md border border-navy/10 bg-[#faf8f4] px-4 py-3 text-sm outline-none focus:border-navy/30"
+                    dir={lang === "ar" ? "rtl" : "ltr"}
+                  />
+                )}
+              </label>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }

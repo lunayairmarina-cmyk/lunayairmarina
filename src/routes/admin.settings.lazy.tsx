@@ -16,7 +16,7 @@ export const Route = createLazyFileRoute("/admin/settings")({
 });
 
 function AdminSettingsPage() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const initial = useMemo(() => {
     const cms = loadCmsStore();
     return {
@@ -86,12 +86,23 @@ function AdminSettingsPage() {
             />
             <ModalField
               textarea
-              label={t("admin.settings.address")}
-              value={settings.address[language]}
+              label={`${t("admin.settings.address")} (EN)`}
+              value={settings.address.en}
               onChange={(value) =>
                 setSettings({
                   ...settings,
-                  address: { ...settings.address, [language]: value },
+                  address: { ...settings.address, en: value },
+                })
+              }
+            />
+            <ModalField
+              textarea
+              label={`${t("admin.settings.address")} (AR)`}
+              value={settings.address.ar}
+              onChange={(value) =>
+                setSettings({
+                  ...settings,
+                  address: { ...settings.address, ar: value },
                 })
               }
             />

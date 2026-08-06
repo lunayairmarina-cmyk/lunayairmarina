@@ -9,18 +9,37 @@ import { faqRecords } from "@/data/mock";
 import { loadCmsStore } from "@/lib/cms-store";
 import { describeSaveResult, saveFaq } from "@/services/adminCmsService";
 import type { FaqContent } from "@/types/content";
+import { asLocalized, pairLocalized } from "@/lib/localized";
 
 export const Route = createLazyFileRoute("/admin/faq")({
   component: AdminFaqPage,
 });
 
-const emptyDraft = { question: "", answer: "" };
+type Draft = {
+  questionEn: string;
+  questionAr: string;
+  answerEn: string;
+  answerAr: string;
+};
+
+const emptyDraft = (): Draft => ({
+  questionEn: "",
+  questionAr: "",
+  answerEn: "",
+  answerAr: "",
+});
 
 function AdminFaqPage() {
   const { t, language } = useLanguage();
   const initial = useMemo<FaqContent[]>(() => {
     const cms = loadCmsStore();
-    if (cms.faq.length) return cms.faq;
+    if (cms.faq.length) {
+      return cms.faq.map((row) => ({
+        ...row,
+        question: asLocalized(row.question),
+        answer: asLocalized(row.answer),
+      }));
+    }
     return faqRecords.map((row, index) => ({
       id: row.id,
       question: { en: row.question, ar: row.question },
@@ -32,7 +51,7 @@ function AdminFaqPage() {
   const [rows, setRows] = useState(initial);
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [draft, setDraft] = useState(emptyDraft);
+  const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [status, setStatus] = useState<string | null>(null);
 
   const persist = async (next: FaqContent[]) => {
@@ -47,28 +66,24 @@ function AdminFaqPage() {
   };
 
   const save = async () => {
+    if (!draft.questionEn.trim() && !draft.questionAr.trim()) return;
+    const question = pairLocalized(draft.questionEn, draft.questionAr);
+    const answer = pairLocalized(draft.answerEn, draft.answerAr);
     const next = editingId
-      ? rows.map((row) =>
-          row.id === editingId
-            ? {
-                ...row,
-                question: { ...row.question, [language]: draft.question },
-                answer: { ...row.answer, [language]: draft.answer },
-              }
-            : row,
-        )
+      ? rows.map((row) => (row.id === editingId ? { ...row, question, answer } : row))
       : [
           ...rows,
           {
             id: `f${Date.now()}`,
-            question: { en: draft.question, ar: draft.question },
-            answer: { en: draft.answer, ar: draft.answer },
+            question,
+            answer,
             order: rows.length + 1,
           },
         ];
     await persist(next);
     setOpen(false);
     setEditingId(null);
+    setDraft(emptyDraft());
   };
 
   const columns: Column<FaqContent>[] = [
@@ -88,16 +103,16 @@ function AdminFaqPage() {
 
   return (
     <AdminLayout title={t("admin.nav.faq")}>
-      <div className="mb-6 flex items-center justify-between gap-3">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {status ? <span className="text-xs text-navy/55">{status}</span> : <span />}
         <button
           type="button"
           onClick={() => {
             setEditingId(null);
-            setDraft(emptyDraft);
+            setDraft(emptyDraft());
             setOpen(true);
           }}
-          className="flex items-center gap-2 rounded-full bg-navy px-5 py-3 text-xs tracking-[0.18em] text-white uppercase transition-colors hover:bg-navy/90"
+          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-navy px-5 py-3 text-xs tracking-[0.18em] text-white uppercase transition-colors hover:bg-navy/90 sm:w-auto"
         >
           <Plus className="size-4" strokeWidth={1.5} />
           {t("admin.actions.add")}
@@ -114,10 +129,14 @@ function AdminFaqPage() {
               icon={Pencil}
               label={t("admin.actions.edit")}
               onClick={() => {
+                const question = asLocalized(row.question);
+                const answer = asLocalized(row.answer);
                 setEditingId(row.id);
                 setDraft({
-                  question: row.question[language],
-                  answer: row.answer[language],
+                  questionEn: question.en,
+                  questionAr: question.ar,
+                  answerEn: answer.en,
+                  answerAr: answer.ar,
                 });
                 setOpen(true);
               }}
@@ -139,15 +158,26 @@ function AdminFaqPage() {
         onSubmit={() => void save()}
       >
         <ModalField
-          label={t("admin.table.question")}
-          value={draft.question}
-          onChange={(value) => setDraft({ ...draft, question: value })}
+          label={`${t("admin.table.question")} (EN)`}
+          value={draft.questionEn}
+          onChange={(value) => setDraft({ ...draft, questionEn: value })}
+        />
+        <ModalField
+          label={`${t("admin.table.question")} (AR)`}
+          value={draft.questionAr}
+          onChange={(value) => setDraft({ ...draft, questionAr: value })}
         />
         <ModalField
           textarea
-          label={t("admin.table.answer")}
-          value={draft.answer}
-          onChange={(value) => setDraft({ ...draft, answer: value })}
+          label={`${t("admin.table.answer")} (EN)`}
+          value={draft.answerEn}
+          onChange={(value) => setDraft({ ...draft, answerEn: value })}
+        />
+        <ModalField
+          textarea
+          label={`${t("admin.table.answer")} (AR)`}
+          value={draft.answerAr}
+          onChange={(value) => setDraft({ ...draft, answerAr: value })}
         />
       </Modal>
     </AdminLayout>

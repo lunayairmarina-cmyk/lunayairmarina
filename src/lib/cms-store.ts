@@ -128,9 +128,18 @@ export function saveCmsStore(store: CmsStore) {
   if (typeof window === "undefined") return;
   const next: CmsStore = {
     ...store,
+    // Drop inline data URLs so localStorage does not blow the quota and wipe CMS state.
+    gallery: store.gallery.map((item) => ({
+      ...item,
+      src: item.src.startsWith("data:") ? "" : item.src,
+    })).filter((item) => Boolean(item.src)),
     updatedAt: new Date().toISOString(),
   };
-  window.localStorage.setItem(CMS_STORAGE_KEY, JSON.stringify(next));
+  try {
+    window.localStorage.setItem(CMS_STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // Quota exceeded — still notify listeners with in-memory event payload.
+  }
   window.dispatchEvent(new CustomEvent(CMS_UPDATED_EVENT, { detail: next }));
 }
 

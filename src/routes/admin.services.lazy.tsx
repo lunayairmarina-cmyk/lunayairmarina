@@ -6,6 +6,7 @@ import { DataTable, RowAction, StatusBadge, type Column } from "@/components/adm
 import { Modal, ModalField } from "@/components/admin/Modal";
 import { MediaUploader } from "@/components/admin/MediaUploader";
 import { useLanguage } from "@/lib/i18n";
+import { asLocalized, pairLocalized } from "@/lib/localized";
 import { serviceRecords } from "@/data/mock";
 import { SERVICE_SLUGS } from "@/data/services";
 import { loadCmsStore } from "@/lib/cms-store";
@@ -17,14 +18,43 @@ export const Route = createLazyFileRoute("/admin/services")({
   component: AdminServicesPage,
 });
 
+type Draft = {
+  titleEn: string;
+  titleAr: string;
+  descriptionEn: string;
+  descriptionAr: string;
+  featuresEn: string;
+  featuresAr: string;
+  image: string;
+  slug: string;
+};
+
+const emptyDraft = (): Draft => ({
+  titleEn: "",
+  titleAr: "",
+  descriptionEn: "",
+  descriptionAr: "",
+  featuresEn: "",
+  featuresAr: "",
+  image: "",
+  slug: "",
+});
+
 function toServiceContent(): ServiceContent[] {
   const cms = loadCmsStore();
-  if (cms.services.length) return cms.services;
+  if (cms.services.length) {
+    return cms.services.map((row) => ({
+      ...row,
+      title: asLocalized(row.title),
+      description: asLocalized(row.description),
+      features: (row.features ?? []).map((feature) => asLocalized(feature)),
+    }));
+  }
   return serviceRecords.map((row, index) => ({
     id: row.id,
     slug: SERVICE_SLUGS[index] ?? row.id,
-    title: row.title,
-    description: row.description,
+    title: asLocalized(row.title),
+    description: asLocalized(row.description),
     image: row.image,
     features: [],
     order: index + 1,
@@ -36,13 +66,7 @@ function AdminServicesPage() {
   const { t, language } = useLanguage();
   const [rows, setRows] = useState<ServiceContent[]>(() => toServiceContent());
   const [editing, setEditing] = useState<ServiceContent | null>(null);
-  const [draft, setDraft] = useState({
-    title: "",
-    description: "",
-    image: "",
-    slug: "",
-    features: "",
-  });
+  const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [status, setStatus] = useState<string | null>(null);
 
   const persist = async (next: ServiceContent[]) => {
@@ -57,39 +81,51 @@ function AdminServicesPage() {
   };
 
   const openEdit = (row: ServiceContent) => {
+    const title = asLocalized(row.title);
+    const description = asLocalized(row.description);
+    const features = (row.features ?? []).map((feature) => asLocalized(feature));
     setEditing(row);
     setDraft({
-      title: row.title[language],
-      description: row.description[language],
-      image: row.image,
-      slug: row.slug,
-      features: (row.features ?? [])
-        .map((feature) => feature[language] || feature.en)
+      titleEn: title.en,
+      titleAr: title.ar,
+      descriptionEn: description.en,
+      descriptionAr: description.ar,
+      featuresEn: features
+        .map((feature) => feature.en)
         .filter(Boolean)
         .join("\n"),
+      featuresAr: features
+        .map((feature) => feature.ar)
+        .filter(Boolean)
+        .join("\n"),
+      image: row.image,
+      slug: row.slug,
     });
   };
 
   const save = async () => {
     if (!editing) return;
-    const featureLines = draft.features
+    const enLines = draft.featuresEn
       .split("\n")
       .map((line) => line.trim())
       .filter(Boolean);
+    const arLines = draft.featuresAr
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const featureCount = Math.max(enLines.length, arLines.length);
+    const features = Array.from({ length: featureCount }, (_, index) =>
+      pairLocalized(enLines[index] ?? "", arLines[index] ?? ""),
+    );
     const next = rows.map((row) =>
       row.id === editing.id
         ? {
             ...row,
             slug: draft.slug || row.slug,
             image: draft.image || row.image,
-            title: { ...row.title, [language]: draft.title },
-            description: { ...row.description, [language]: draft.description },
-            features: featureLines.map((line, index) => {
-              const existing = row.features?.[index];
-              return existing
-                ? { ...existing, [language]: line }
-                : { en: line, ar: line };
-            }),
+            title: pairLocalized(draft.titleEn, draft.titleAr),
+            description: pairLocalized(draft.descriptionEn, draft.descriptionAr),
+            features,
           }
         : row,
     );
@@ -125,14 +161,14 @@ function AdminServicesPage() {
       {
         key: "title",
         header: t("admin.table.title"),
-        render: (row) => <span className="text-navy">{row.title[language]}</span>,
+        render: (row) => <span className="text-navy">{asLocalized(row.title)[language]}</span>,
       },
       {
         key: "description",
         header: t("admin.table.description"),
         render: (row) => (
           <span className="line-clamp-2 max-w-sm text-muted-foreground">
-            {row.description[language]}
+            {asLocalized(row.description)[language]}
           </span>
         ),
       },
@@ -190,16 +226,29 @@ function AdminServicesPage() {
         onClose={() => setEditing(null)}
         onSubmit={() => void save()}
       >
+        <div className="grid gap-5 sm:grid-cols-2">
+          <ModalField
+            label={`${t("admin.table.title")} (EN)`}
+            value={draft.titleEn}
+            onChange={(value) => setDraft({ ...draft, titleEn: value })}
+          />
+          <ModalField
+            label={`${t("admin.table.title")} (AR)`}
+            value={draft.titleAr}
+            onChange={(value) => setDraft({ ...draft, titleAr: value })}
+          />
+        </div>
         <ModalField
-          label={t("admin.table.title")}
-          value={draft.title}
-          onChange={(value) => setDraft({ ...draft, title: value })}
+          textarea
+          label={`${t("admin.table.description")} (EN)`}
+          value={draft.descriptionEn}
+          onChange={(value) => setDraft({ ...draft, descriptionEn: value })}
         />
         <ModalField
           textarea
-          label={t("admin.table.description")}
-          value={draft.description}
-          onChange={(value) => setDraft({ ...draft, description: value })}
+          label={`${t("admin.table.description")} (AR)`}
+          value={draft.descriptionAr}
+          onChange={(value) => setDraft({ ...draft, descriptionAr: value })}
         />
         <ModalField
           label="Slug"
@@ -208,9 +257,15 @@ function AdminServicesPage() {
         />
         <ModalField
           textarea
-          label={`${t("admin.table.description")} features (one per line)`}
-          value={draft.features}
-          onChange={(value) => setDraft({ ...draft, features: value })}
+          label="Features (EN, one per line)"
+          value={draft.featuresEn}
+          onChange={(value) => setDraft({ ...draft, featuresEn: value })}
+        />
+        <ModalField
+          textarea
+          label="Features (AR, one per line)"
+          value={draft.featuresAr}
+          onChange={(value) => setDraft({ ...draft, featuresAr: value })}
         />
         <MediaUploader
           label={t("admin.table.image")}

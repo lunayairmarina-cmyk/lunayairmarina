@@ -29,7 +29,12 @@ export function Testimonials() {
   const items: TestimonialItem[] =
     remote.length > 0
       ? remote.map((item) => ({
-          name: item.clientName,
+          name: localizeValue(
+            typeof item.clientName === "string"
+              ? { en: item.clientName, ar: item.clientName }
+              : item.clientName,
+            language,
+          ),
           position: localizeValue(item.role, language),
           review: localizeValue(item.text, language),
         }))

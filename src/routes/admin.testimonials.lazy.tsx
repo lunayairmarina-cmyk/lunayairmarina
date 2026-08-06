@@ -8,22 +8,59 @@ import { useLanguage } from "@/lib/i18n";
 import { testimonialRecords } from "@/data/mock";
 import { loadCmsStore } from "@/lib/cms-store";
 import { describeSaveResult, saveTestimonials } from "@/services/adminCmsService";
-import type { TestimonialContent } from "@/types/content";
+import type { LocalizedString, TestimonialContent } from "@/types/content";
+import { localizeValue } from "@/providers/SiteContentProvider";
 
 export const Route = createLazyFileRoute("/admin/testimonials")({
   component: AdminTestimonialsPage,
 });
 
-const emptyDraft = { name: "", position: "", review: "" };
+type Draft = {
+  nameEn: string;
+  nameAr: string;
+  positionEn: string;
+  positionAr: string;
+  reviewEn: string;
+  reviewAr: string;
+};
+
+const emptyDraft = (): Draft => ({
+  nameEn: "",
+  nameAr: "",
+  positionEn: "",
+  positionAr: "",
+  reviewEn: "",
+  reviewAr: "",
+});
+
+function asLocalized(value: LocalizedString | string | undefined, fallback = ""): LocalizedString {
+  if (!value) return { en: fallback, ar: fallback };
+  if (typeof value === "string") return { en: value, ar: value };
+  return {
+    en: value.en || fallback,
+    ar: value.ar || value.en || fallback,
+  };
+}
+
+function displayName(row: TestimonialContent, language: "en" | "ar") {
+  return localizeValue(asLocalized(row.clientName), language);
+}
 
 function AdminTestimonialsPage() {
   const { t, language } = useLanguage();
   const initial = useMemo<TestimonialContent[]>(() => {
     const cms = loadCmsStore();
-    if (cms.testimonials.length) return cms.testimonials;
+    if (cms.testimonials.length) {
+      return cms.testimonials.map((row) => ({
+        ...row,
+        clientName: asLocalized(row.clientName),
+        role: asLocalized(row.role),
+        text: asLocalized(row.text),
+      }));
+    }
     return testimonialRecords.map((row, index) => ({
       id: row.id,
-      clientName: row.name,
+      clientName: { en: row.name, ar: row.name },
       role: { en: row.position, ar: row.position },
       text: { en: row.review, ar: row.review },
       order: index + 1,
@@ -33,7 +70,7 @@ function AdminTestimonialsPage() {
   const [rows, setRows] = useState(initial);
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [draft, setDraft] = useState(emptyDraft);
+  const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [status, setStatus] = useState<string | null>(null);
 
   const persist = async (next: TestimonialContent[]) => {
@@ -48,30 +85,40 @@ function AdminTestimonialsPage() {
   };
 
   const save = async () => {
+    if (!draft.nameEn.trim() && !draft.nameAr.trim()) return;
+    const clientName = {
+      en: draft.nameEn.trim() || draft.nameAr.trim(),
+      ar: draft.nameAr.trim() || draft.nameEn.trim(),
+    };
+    const role = {
+      en: draft.positionEn.trim() || draft.positionAr.trim(),
+      ar: draft.positionAr.trim() || draft.positionEn.trim(),
+    };
+    const text = {
+      en: draft.reviewEn.trim() || draft.reviewAr.trim(),
+      ar: draft.reviewAr.trim() || draft.reviewEn.trim(),
+    };
+
     const next = editingId
       ? rows.map((row) =>
           row.id === editingId
-            ? {
-                ...row,
-                clientName: draft.name,
-                role: { ...row.role, [language]: draft.position },
-                text: { ...row.text, [language]: draft.review },
-              }
+            ? { ...row, clientName, role, text }
             : row,
         )
       : [
           ...rows,
           {
             id: `t${Date.now()}`,
-            clientName: draft.name,
-            role: { en: draft.position, ar: draft.position },
-            text: { en: draft.review, ar: draft.review },
+            clientName,
+            role,
+            text,
             order: rows.length + 1,
           },
         ];
     await persist(next);
     setOpen(false);
     setEditingId(null);
+    setDraft(emptyDraft());
   };
 
   const columns: Column<TestimonialContent>[] = [
@@ -80,41 +127,43 @@ function AdminTestimonialsPage() {
       header: t("admin.table.image"),
       render: (row) => (
         <span className="grid size-11 place-items-center rounded-full bg-navy/6 text-xs text-navy">
-          {row.clientName.slice(0, 2).toUpperCase()}
+          {displayName(row, language).slice(0, 2).toUpperCase() || "LM"}
         </span>
       ),
     },
     {
       key: "name",
       header: t("admin.table.name"),
-      render: (row) => <span className="text-navy">{row.clientName}</span>,
+      render: (row) => <span className="text-navy">{displayName(row, language)}</span>,
     },
     {
       key: "position",
       header: t("admin.table.position"),
-      render: (row) => row.role[language],
+      render: (row) => localizeValue(asLocalized(row.role), language),
     },
     {
       key: "review",
       header: t("admin.table.review"),
       render: (row) => (
-        <span className="line-clamp-2 max-w-sm text-muted-foreground">{row.text[language]}</span>
+        <span className="line-clamp-2 max-w-sm text-muted-foreground">
+          {localizeValue(asLocalized(row.text), language)}
+        </span>
       ),
     },
   ];
 
   return (
     <AdminLayout title={t("admin.nav.testimonials")}>
-      <div className="mb-6 flex items-center justify-between gap-3">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {status ? <span className="text-xs text-navy/55">{status}</span> : <span />}
         <button
           type="button"
           onClick={() => {
             setEditingId(null);
-            setDraft(emptyDraft);
+            setDraft(emptyDraft());
             setOpen(true);
           }}
-          className="flex items-center gap-2 rounded-full bg-navy px-5 py-3 text-xs tracking-[0.18em] text-white uppercase transition-colors hover:bg-navy/90"
+          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-navy px-5 py-3 text-xs tracking-[0.18em] text-white uppercase transition-colors hover:bg-navy/90 sm:w-auto"
         >
           <Plus className="size-4" strokeWidth={1.5} />
           {t("admin.actions.add")}
@@ -131,11 +180,17 @@ function AdminTestimonialsPage() {
               icon={Pencil}
               label={t("admin.actions.edit")}
               onClick={() => {
+                const name = asLocalized(row.clientName);
+                const role = asLocalized(row.role);
+                const text = asLocalized(row.text);
                 setEditingId(row.id);
                 setDraft({
-                  name: row.clientName,
-                  position: row.role[language],
-                  review: row.text[language],
+                  nameEn: name.en,
+                  nameAr: name.ar,
+                  positionEn: role.en,
+                  positionAr: role.ar,
+                  reviewEn: text.en,
+                  reviewAr: text.ar,
                 });
                 setOpen(true);
               }}
@@ -156,21 +211,39 @@ function AdminTestimonialsPage() {
         onClose={() => setOpen(false)}
         onSubmit={() => void save()}
       >
+        <div className="grid gap-5 sm:grid-cols-2">
+          <ModalField
+            label={`${t("admin.table.name")} (EN)`}
+            value={draft.nameEn}
+            onChange={(value) => setDraft({ ...draft, nameEn: value })}
+          />
+          <ModalField
+            label={`${t("admin.table.name")} (AR)`}
+            value={draft.nameAr}
+            onChange={(value) => setDraft({ ...draft, nameAr: value })}
+          />
+          <ModalField
+            label={`${t("admin.table.position")} (EN)`}
+            value={draft.positionEn}
+            onChange={(value) => setDraft({ ...draft, positionEn: value })}
+          />
+          <ModalField
+            label={`${t("admin.table.position")} (AR)`}
+            value={draft.positionAr}
+            onChange={(value) => setDraft({ ...draft, positionAr: value })}
+          />
+        </div>
         <ModalField
-          label={t("admin.table.name")}
-          value={draft.name}
-          onChange={(value) => setDraft({ ...draft, name: value })}
-        />
-        <ModalField
-          label={t("admin.table.position")}
-          value={draft.position}
-          onChange={(value) => setDraft({ ...draft, position: value })}
+          textarea
+          label={`${t("admin.table.review")} (EN)`}
+          value={draft.reviewEn}
+          onChange={(value) => setDraft({ ...draft, reviewEn: value })}
         />
         <ModalField
           textarea
-          label={t("admin.table.review")}
-          value={draft.review}
-          onChange={(value) => setDraft({ ...draft, review: value })}
+          label={`${t("admin.table.review")} (AR)`}
+          value={draft.reviewAr}
+          onChange={(value) => setDraft({ ...draft, reviewAr: value })}
         />
       </Modal>
     </AdminLayout>

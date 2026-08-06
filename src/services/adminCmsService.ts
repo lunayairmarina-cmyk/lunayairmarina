@@ -21,7 +21,6 @@ import type {
   AboutContent,
   BlogContent,
   FaqContent,
-  FleetItem,
   GalleryContent,
   HomepageContent,
   ServiceContent,
@@ -32,8 +31,28 @@ import type {
   WhyContent,
 } from "@/types/content";
 import { companyInfo } from "@/data/mock";
+import { healGallerySrc } from "@/lib/gallery-src";
+import { cacheMediaDataUrl, mediaRefId, toMediaRef } from "@/lib/media-refs";
 
 export type SaveResult = { ok: true; sync: FirebaseSyncStatus } | { ok: false; error: string };
+
+const GALLERY_MANAGED_KEY = "lunaya.cms.galleryManaged";
+
+export function markGalleryManaged() {
+  try {
+    localStorage.setItem(GALLERY_MANAGED_KEY, "1");
+  } catch {
+    // ignore
+  }
+}
+
+export function isGalleryManaged(): boolean {
+  try {
+    return localStorage.getItem(GALLERY_MANAGED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 export function describeSaveResult(
   result: SaveResult,
@@ -51,11 +70,17 @@ function notifySiteReload() {
 
 async function mirrorFullCmsStore() {
   const store = loadCmsStore();
+  // Never mirror raw data-URL blobs into cms/v1 (hits the 1MB doc limit).
+  const gallery = store.gallery.map((item) => ({
+    ...item,
+    src: item.src.startsWith("data:") ? "" : item.src,
+  }));
   await setDoc(
     doc(getDb(), "cms", "v1"),
     {
       ...store,
-      // Avoid oversized recursive nesting issues; store as plain object.
+      gallery,
+      messages: store.messages.slice(0, 30),
       updatedAt: new Date().toISOString(),
     },
     { merge: true },
@@ -176,20 +201,6 @@ export async function saveTeam(team: TeamMember[]): Promise<SaveResult> {
   return { ok: true, sync };
 }
 
-export async function saveFleet(fleet: FleetItem[]): Promise<SaveResult> {
-  const sync = await tryFirebaseWrite(async () => {
-    const batch = writeBatch(getDb());
-    fleet.forEach((item) => {
-      const { id, ...data } = item;
-      batch.set(doc(getDb(), "fleet", id), data, { merge: true });
-    });
-    await batch.commit();
-  });
-  patchCmsStore({ fleet, firebaseSync: sync });
-  notifySiteReload();
-  return { ok: true, sync };
-}
-
 export async function saveServices(services: ServiceContent[]): Promise<SaveResult> {
   const sync = await tryFirebaseWrite(async () => {
     const batch = writeBatch(getDb());
@@ -205,17 +216,77 @@ export async function saveServices(services: ServiceContent[]): Promise<SaveResu
 }
 
 export async function saveGallery(gallery: GalleryContent[]): Promise<SaveResult> {
+  // Persist short refs only — never embed data: URLs (blows localStorage + Firestore limits).
+  const safe = gallery.map((item, index) => ({
+    id: item.id,
+    src: item.src.startsWith("data:") ? "" : healGallerySrc(item.id, item.src),
+    caption: item.caption,
+    span: item.span ?? "normal",
+    order: item.order ?? index + 1,
+  }));
+  const keepIds = new Set(safe.filter((item) => Boolean(item.src)).map((item) => item.id));
+  const previous = loadCmsStore().gallery;
+  markGalleryManaged();
+
   const sync = await tryFirebaseWrite(async () => {
-    const batch = writeBatch(getDb());
-    gallery.forEach((item) => {
+    const db = getDb();
+    const existing = await getDocs(collection(db, "gallery"));
+    const batch = writeBatch(db);
+
+    // Hard-delete removed gallery docs (and their media payloads when applicable).
+    for (const snap of existing.docs) {
+      if (keepIds.has(snap.id)) continue;
+      batch.delete(snap.ref);
+      const src = String((snap.data() as { src?: string }).src ?? "");
+      const mid = mediaRefId(src);
+      if (mid) batch.delete(doc(db, "media", mid));
+    }
+
+    // Also drop media for items removed from the local list but already missing remotely.
+    for (const item of previous) {
+      if (keepIds.has(item.id)) continue;
+      const mid = mediaRefId(item.src);
+      if (mid) batch.delete(doc(db, "media", mid));
+    }
+
+    for (const item of safe) {
+      if (!item.src) {
+        batch.delete(doc(db, "gallery", item.id));
+        continue;
+      }
       const { id, ...data } = item;
-      batch.set(doc(getDb(), "gallery", id), data, { merge: true });
-    });
+      batch.set(doc(db, "gallery", id), data, { merge: true });
+    }
+
     await batch.commit();
   });
-  patchCmsStore({ gallery, firebaseSync: sync });
+  patchCmsStore({
+    gallery: safe.filter((item) => Boolean(item.src)),
+    firebaseSync: sync,
+  });
   notifySiteReload();
   return { ok: true, sync };
+}
+
+export async function fetchGalleryFromFirebase(): Promise<GalleryContent[]> {
+  const snap = await getDocs(collection(getDb(), "gallery"));
+  const gallery = snap.docs
+    .map((item) => {
+      const data = item.data() as Omit<GalleryContent, "id">;
+      return {
+        id: item.id,
+        src: String(data.src ?? ""),
+        caption: data.caption ?? { en: "", ar: "" },
+        span: data.span ?? "normal",
+        order: typeof data.order === "number" ? data.order : 0,
+      } satisfies GalleryContent;
+    })
+    .filter((item) => Boolean(item.src))
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  if (gallery.length || isGalleryManaged()) {
+    patchCmsStore({ gallery, firebaseSync: "synced" });
+  }
+  return gallery;
 }
 
 export async function saveTestimonials(testimonials: TestimonialContent[]): Promise<SaveResult> {
@@ -412,10 +483,12 @@ async function fileToCompressedDataUrl(file: File): Promise<string> {
   return dataUrl;
 }
 
-/** Compress image on device and store data URL in Firestore `media` (no Storage). */
+/** Compress image on device and store data URL in Firestore `media` (no Storage).
+ * Returns a short `media:{id}` ref so CMS/localStorage stay small. */
 export async function uploadMediaFile(file: File, pathPrefix = "uploads"): Promise<string> {
   const dataUrl = await fileToCompressedDataUrl(file);
   const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  cacheMediaDataUrl(id, dataUrl);
   try {
     await setDoc(doc(getDb(), "media", id), {
       id,
@@ -426,9 +499,9 @@ export async function uploadMediaFile(file: File, pathPrefix = "uploads"): Promi
       createdAt: new Date().toISOString(),
     });
   } catch {
-    // Still return data URL so CMS fields work offline / if rules not published yet.
+    // Keep session cache so the UI still shows the image offline.
   }
-  return dataUrl;
+  return toMediaRef(id);
 }
 
 export function defaultSettingsFromMock(): SiteSettings {

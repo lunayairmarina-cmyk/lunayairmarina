@@ -82,6 +82,39 @@ function stripId<T extends object>(value: T & { id?: string }): T {
   return rest as T;
 }
 
+/** Merge CMS + remote lists by id (CMS wins on conflict; keep remote-only uploads). */
+function mergeById<T extends { id: string; order?: number }>(
+  cms: T[],
+  remote: T[],
+): T[] {
+  if (!cms.length) return remote;
+  if (!remote.length) return cms;
+  const map = new Map<string, T>();
+  for (const item of remote) map.set(item.id, item);
+  for (const item of cms) map.set(item.id, item);
+  return Array.from(map.values()).sort(
+    (a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER),
+  );
+}
+
+/**
+ * Gallery is a full snapshot from admin (including deletions).
+ * Once managed, never re-introduce remote-only ids that were removed in CMS.
+ */
+function mergeGallery(
+  cms: GalleryContent[],
+  remote: GalleryContent[],
+): GalleryContent[] {
+  try {
+    if (typeof localStorage !== "undefined" && localStorage.getItem("lunaya.cms.galleryManaged") === "1") {
+      return cms;
+    }
+  } catch {
+    // ignore
+  }
+  return mergeById(cms, remote);
+}
+
 function emptyBundle(): SiteBundle {
   return {
     settings: null,
@@ -277,7 +310,7 @@ function mergeCmsOverFirebase(remote: SiteBundle): SiteBundle {
     testimonials: cms.testimonials.length > 0 ? cms.testimonials : remote.testimonials,
     locations: remote.locations,
     blog: cms.blog.length > 0 ? cms.blog : remote.blog,
-    gallery: cms.gallery.length > 0 ? cms.gallery : remote.gallery,
+    gallery: mergeGallery(cms.gallery, remote.gallery),
     faq: cms.faq.length > 0 ? cms.faq : remote.faq,
     copy,
     fetchedAt: Date.now(),

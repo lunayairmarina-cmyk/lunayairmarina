@@ -100,24 +100,32 @@ function ContactPage() {
 
   const yachtTypeOptions = useMemo(
     () =>
-      ["motor", "sailing", "explorer", "superyacht", "catamaran", "other"].map((key) =>
-        t(`contact.form.yachtTypeOptions.${key}`),
+      (["motor", "sailing", "explorer", "superyacht", "catamaran", "other"] as const).map(
+        (key) => ({
+          key,
+          label: t(`contact.form.yachtTypeOptions.${key}`),
+        }),
       ),
     [t],
   );
 
   const yachtLocationOptions = useMemo(
     () =>
-      [
-        "jeddah",
-        "redSea",
-        "neom",
-        "dubai",
-        "abuDhabi",
-        "bahrain",
-        "otherGulf",
-        "other",
-      ].map((key) => t(`contact.form.yachtLocationOptions.${key}`)),
+      (
+        [
+          "jeddah",
+          "redSea",
+          "neom",
+          "dubai",
+          "abuDhabi",
+          "bahrain",
+          "otherGulf",
+          "other",
+        ] as const
+      ).map((key) => ({
+        key,
+        label: t(`contact.form.yachtLocationOptions.${key}`),
+      })),
     [t],
   );
 
@@ -335,8 +343,8 @@ function ContactPage() {
                       >
                         <option value="">{t("contact.form.yachtTypePlaceholder")}</option>
                         {yachtTypeOptions.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
+                          <option key={option.key} value={option.key}>
+                            {option.label}
                           </option>
                         ))}
                       </select>
@@ -368,8 +376,8 @@ function ContactPage() {
                       >
                         <option value="">{t("contact.form.yachtLocationPlaceholder")}</option>
                         {yachtLocationOptions.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
+                          <option key={option.key} value={option.key}>
+                            {option.label}
                           </option>
                         ))}
                       </select>
@@ -395,13 +403,11 @@ function ContactPage() {
                     >
                       <option value="">{t("contact.form.serviceNeededPlaceholder")}</option>
                       {serviceOptions.map((option) => (
-                        <option key={option.slug} value={option.label}>
+                        <option key={option.slug} value={option.slug}>
                           {option.label}
                         </option>
                       ))}
-                      <option value={t("contact.form.serviceOther")}>
-                        {t("contact.form.serviceOther")}
-                      </option>
+                      <option value="other">{t("contact.form.serviceOther")}</option>
                     </select>
                   </div>
 

@@ -1,9 +1,11 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ImagePlus, LoaderCircle } from "lucide-react";
 import { uploadMediaFile } from "@/services/adminCmsService";
 import { useLanguage } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { GalleryPicker } from "@/components/admin/GalleryPicker";
+import { resolveMediaSrc, resolveMediaSrcSync, isMediaRef } from "@/lib/media-refs";
+import { resolvePublicMediaSrc } from "@/lib/media";
 
 interface MediaUploaderProps {
   value?: string;
@@ -13,6 +15,13 @@ interface MediaUploaderProps {
   className?: string;
   /** Allow picking an existing site gallery image */
   allowGallery?: boolean;
+}
+
+function previewFor(value: string | undefined): string {
+  if (!value) return "";
+  if (isMediaRef(value)) return resolveMediaSrcSync(value, "");
+  if (value.startsWith("data:") || value.startsWith("blob:")) return value;
+  return resolvePublicMediaSrc(value, value);
 }
 
 export function MediaUploader({
@@ -27,6 +36,26 @@ export function MediaUploader({
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [preview, setPreview] = useState(() => previewFor(value));
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      if (!value) {
+        if (!cancelled) setPreview("");
+        return;
+      }
+      if (isMediaRef(value)) {
+        const src = await resolveMediaSrc(value, "");
+        if (!cancelled) setPreview(src);
+        return;
+      }
+      if (!cancelled) setPreview(previewFor(value));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [value]);
 
   const onPick = async (file: File | undefined) => {
     if (!file) return;
@@ -50,8 +79,8 @@ export function MediaUploader({
       ) : null}
       <div className="flex items-center gap-4">
         <div className="grid size-20 shrink-0 place-items-center overflow-hidden rounded-xl border border-navy/10 bg-[#faf8f4]">
-          {value ? (
-            <img src={value} alt="" className="size-full object-cover" />
+          {preview ? (
+            <img src={preview} alt="" className="size-full object-cover" />
           ) : (
             <ImagePlus className="size-5 text-navy/35" strokeWidth={1.5} />
           )}
@@ -70,9 +99,6 @@ export function MediaUploader({
             )}
             {t("admin.actions.upload")}
           </button>
-          <p className="text-[0.65rem] leading-relaxed text-navy/45">
-            {t("admin.cms.uploadDeviceHint")}
-          </p>
           {error ? <p className="text-xs text-red-500">{error}</p> : null}
         </div>
       </div>

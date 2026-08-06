@@ -19,7 +19,6 @@ import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminFaqRouteImport } from './routes/admin.faq'
-import { Route as AdminFleetRouteImport } from './routes/admin.fleet'
 import { Route as AdminGalleryRouteImport } from './routes/admin.gallery'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
@@ -89,11 +88,6 @@ const AdminFaqRoute = AdminFaqRouteImport.update({
   path: '/admin/faq',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/admin.faq.lazy').then((d) => d.Route))
-const AdminFleetRoute = AdminFleetRouteImport.update({
-  id: '/admin/fleet',
-  path: '/admin/fleet',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/admin.fleet.lazy').then((d) => d.Route))
 const AdminGalleryRoute = AdminGalleryRouteImport.update({
   id: '/admin/gallery',
   path: '/admin/gallery',
@@ -194,7 +188,6 @@ export interface FileRoutesByFullPath {
   '/admin/content': typeof AdminContentRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/faq': typeof AdminFaqRoute
-  '/admin/fleet': typeof AdminFleetRoute
   '/admin/gallery': typeof AdminGalleryRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -221,7 +214,6 @@ export interface FileRoutesByTo {
   '/admin/content': typeof AdminContentRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/faq': typeof AdminFaqRoute
-  '/admin/fleet': typeof AdminFleetRoute
   '/admin/gallery': typeof AdminGalleryRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -251,7 +243,6 @@ export interface FileRoutesById {
   '/admin/content': typeof AdminContentRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/faq': typeof AdminFaqRoute
-  '/admin/fleet': typeof AdminFleetRoute
   '/admin/gallery': typeof AdminGalleryRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -282,7 +273,6 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/dashboard'
     | '/admin/faq'
-    | '/admin/fleet'
     | '/admin/gallery'
     | '/admin/login'
     | '/admin/messages'
@@ -309,7 +299,6 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/dashboard'
     | '/admin/faq'
-    | '/admin/fleet'
     | '/admin/gallery'
     | '/admin/login'
     | '/admin/messages'
@@ -338,7 +327,6 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/dashboard'
     | '/admin/faq'
-    | '/admin/fleet'
     | '/admin/gallery'
     | '/admin/login'
     | '/admin/messages'
@@ -368,7 +356,6 @@ export interface RootRouteChildren {
   AdminContentRoute: typeof AdminContentRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminFaqRoute: typeof AdminFaqRoute
-  AdminFleetRoute: typeof AdminFleetRoute
   AdminGalleryRoute: typeof AdminGalleryRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
@@ -453,13 +440,6 @@ declare module '@tanstack/react-router' {
       path: '/admin/faq'
       fullPath: '/admin/faq'
       preLoaderRoute: typeof AdminFaqRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/fleet': {
-      id: '/admin/fleet'
-      path: '/admin/fleet'
-      fullPath: '/admin/fleet'
-      preLoaderRoute: typeof AdminFleetRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/gallery': {
@@ -614,7 +594,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminContentRoute: AdminContentRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminFaqRoute: AdminFaqRoute,
-  AdminFleetRoute: AdminFleetRoute,
   AdminGalleryRoute: AdminGalleryRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminMessagesRoute: AdminMessagesRoute,

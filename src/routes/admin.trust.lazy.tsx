@@ -4,6 +4,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ModalField } from "@/components/admin/Modal";
 import { useLanguage } from "@/lib/i18n";
+import { asLocalized, pairLocalized } from "@/lib/localized";
 import { loadCmsStore } from "@/lib/cms-store";
 import { describeSaveResult, saveTrust } from "@/services/adminCmsService";
 import type { LocalizedString, TrustContent } from "@/types/content";
@@ -16,16 +17,8 @@ export const Route = createLazyFileRoute("/admin/trust")({
 
 type TrustSlot = TrustContent["slots"][number] & { id: string };
 
-function asLocalized(value: unknown, fallback = ""): LocalizedString {
-  if (typeof value === "string") return { en: value, ar: value };
-  if (value && typeof value === "object") {
-    const record = value as Record<string, unknown>;
-    return {
-      en: typeof record.en === "string" ? record.en : fallback,
-      ar: typeof record.ar === "string" ? record.ar : fallback,
-    };
-  }
-  return { en: fallback, ar: fallback };
+function coerceLocalized(value: unknown, fallback = ""): LocalizedString {
+  return asLocalized(value as LocalizedString | string | undefined | null, fallback);
 }
 
 function makeSlotId() {
@@ -36,8 +29,8 @@ function normalizeSlot(raw: unknown, index: number): TrustSlot {
   const item = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   return {
     id: typeof item.id === "string" ? item.id : `trust-seed-${index}`,
-    title: asLocalized(item.title, "New slot"),
-    body: asLocalized(item.body, "Coming soon"),
+    title: coerceLocalized(item.title, "New slot"),
+    body: coerceLocalized(item.body, "Coming soon"),
   };
 }
 
@@ -93,13 +86,23 @@ function seedTrust(): { meta: Omit<TrustContent, "slots">; slots: TrustSlot[] } 
 
 function toTrustContent(meta: Omit<TrustContent, "slots">, slots: TrustSlot[]): TrustContent {
   return {
-    ...meta,
-    slots: slots.map(({ title, body }) => ({ title, body })),
+    eyebrow: pairLocalized(asLocalized(meta.eyebrow).en, asLocalized(meta.eyebrow).ar),
+    title: pairLocalized(asLocalized(meta.title).en, asLocalized(meta.title).ar),
+    lead: pairLocalized(asLocalized(meta.lead).en, asLocalized(meta.lead).ar),
+    cta: pairLocalized(asLocalized(meta.cta).en, asLocalized(meta.cta).ar),
+    slots: slots.map(({ title, body }) => {
+      const nextTitle = asLocalized(title);
+      const nextBody = asLocalized(body);
+      return {
+        title: pairLocalized(nextTitle.en, nextTitle.ar),
+        body: pairLocalized(nextBody.en, nextBody.ar),
+      };
+    }),
   };
 }
 
 function AdminTrustPage() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const seeded = seedTrust();
   const [meta, setMeta] = useState(seeded.meta);
   const [slots, setSlots] = useState<TrustSlot[]>(seeded.slots);
@@ -140,6 +143,11 @@ function AdminTrustPage() {
     setBusy(false);
   };
 
+  const eyebrow = asLocalized(meta.eyebrow);
+  const title = asLocalized(meta.title);
+  const lead = asLocalized(meta.lead);
+  const cta = asLocalized(meta.cta);
+
   return (
     <AdminLayout title={t("admin.nav.trust")}>
       <div className="mb-6 flex items-center justify-between gap-3">
@@ -158,33 +166,46 @@ function AdminTrustPage() {
         <section className="rounded-2xl border border-navy/8 bg-white p-6 shadow-sm">
           <div className="grid gap-4 lg:grid-cols-2">
             <ModalField
-              label="Eyebrow"
-              value={meta.eyebrow[language] ?? ""}
-              onChange={(value) =>
-                setMeta({ ...meta, eyebrow: { ...meta.eyebrow, [language]: value } })
-              }
+              label="Eyebrow (EN)"
+              value={eyebrow.en}
+              onChange={(value) => setMeta({ ...meta, eyebrow: { ...eyebrow, en: value } })}
             />
             <ModalField
-              label={t("admin.table.title")}
-              value={meta.title[language] ?? ""}
-              onChange={(value) =>
-                setMeta({ ...meta, title: { ...meta.title, [language]: value } })
-              }
+              label="Eyebrow (AR)"
+              value={eyebrow.ar}
+              onChange={(value) => setMeta({ ...meta, eyebrow: { ...eyebrow, ar: value } })}
+            />
+            <ModalField
+              label={`${t("admin.table.title")} (EN)`}
+              value={title.en}
+              onChange={(value) => setMeta({ ...meta, title: { ...title, en: value } })}
+            />
+            <ModalField
+              label={`${t("admin.table.title")} (AR)`}
+              value={title.ar}
+              onChange={(value) => setMeta({ ...meta, title: { ...title, ar: value } })}
             />
             <ModalField
               textarea
-              label="Lead"
-              value={meta.lead[language] ?? ""}
-              onChange={(value) =>
-                setMeta({ ...meta, lead: { ...meta.lead, [language]: value } })
-              }
+              label="Lead (EN)"
+              value={lead.en}
+              onChange={(value) => setMeta({ ...meta, lead: { ...lead, en: value } })}
             />
             <ModalField
-              label="CTA"
-              value={meta.cta[language] ?? ""}
-              onChange={(value) =>
-                setMeta({ ...meta, cta: { ...meta.cta, [language]: value } })
-              }
+              textarea
+              label="Lead (AR)"
+              value={lead.ar}
+              onChange={(value) => setMeta({ ...meta, lead: { ...lead, ar: value } })}
+            />
+            <ModalField
+              label="CTA (EN)"
+              value={cta.en}
+              onChange={(value) => setMeta({ ...meta, cta: { ...cta, en: value } })}
+            />
+            <ModalField
+              label="CTA (AR)"
+              value={cta.ar}
+              onChange={(value) => setMeta({ ...meta, cta: { ...cta, ar: value } })}
             />
           </div>
         </section>
@@ -208,51 +229,66 @@ function AdminTrustPage() {
           </div>
 
           <div className="space-y-4">
-            {slots.map((slot, index) => (
-              <div
-                key={slot.id}
-                className={`rounded-xl border p-4 transition-colors ${
-                  highlightId === slot.id
-                    ? "border-gold bg-gold/10"
-                    : "border-navy/8 bg-[#faf8f4]"
-                }`}
-              >
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <span className="text-[0.65rem] tracking-[0.16em] text-navy/40 uppercase">
-                    {t("admin.trust.slotLabel")} #{index + 1}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => removeSlot(slot.id)}
-                    aria-label={t("admin.actions.delete")}
-                    className="rounded-lg p-1.5 text-red-500 transition-colors hover:bg-red-50"
-                  >
-                    <Trash2 className="size-4" />
-                  </button>
+            {slots.map((slot, index) => {
+              const slotTitle = asLocalized(slot.title);
+              const slotBody = asLocalized(slot.body);
+              return (
+                <div
+                  key={slot.id}
+                  className={`rounded-xl border p-4 transition-colors ${
+                    highlightId === slot.id
+                      ? "border-gold bg-gold/10"
+                      : "border-navy/8 bg-[#faf8f4]"
+                  }`}
+                >
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <span className="text-[0.65rem] tracking-[0.16em] text-navy/40 uppercase">
+                      {t("admin.trust.slotLabel")} #{index + 1}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeSlot(slot.id)}
+                      aria-label={t("admin.actions.delete")}
+                      className="rounded-lg p-1.5 text-red-500 transition-colors hover:bg-red-50"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
+                  <div className="grid gap-3 lg:grid-cols-2">
+                    <ModalField
+                      label={`${t("admin.table.title")} (EN)`}
+                      value={slotTitle.en}
+                      onChange={(value) =>
+                        updateSlot(slot.id, { title: { ...slotTitle, en: value } })
+                      }
+                    />
+                    <ModalField
+                      label={`${t("admin.table.title")} (AR)`}
+                      value={slotTitle.ar}
+                      onChange={(value) =>
+                        updateSlot(slot.id, { title: { ...slotTitle, ar: value } })
+                      }
+                    />
+                    <ModalField
+                      textarea
+                      label={`${t("admin.table.description")} (EN)`}
+                      value={slotBody.en}
+                      onChange={(value) =>
+                        updateSlot(slot.id, { body: { ...slotBody, en: value } })
+                      }
+                    />
+                    <ModalField
+                      textarea
+                      label={`${t("admin.table.description")} (AR)`}
+                      value={slotBody.ar}
+                      onChange={(value) =>
+                        updateSlot(slot.id, { body: { ...slotBody, ar: value } })
+                      }
+                    />
+                  </div>
                 </div>
-                <div className="grid gap-3 lg:grid-cols-2">
-                  <ModalField
-                    label={t("admin.table.title")}
-                    value={slot.title[language] ?? ""}
-                    onChange={(value) =>
-                      updateSlot(slot.id, {
-                        title: { ...slot.title, [language]: value },
-                      })
-                    }
-                  />
-                  <ModalField
-                    textarea
-                    label={t("admin.table.description")}
-                    value={slot.body[language] ?? ""}
-                    onChange={(value) =>
-                      updateSlot(slot.id, {
-                        body: { ...slot.body, [language]: value },
-                      })
-                    }
-                  />
-                </div>
-              </div>
-            ))}
+              );
+            })}
             <div ref={listEndRef} />
           </div>
 

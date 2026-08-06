@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n";
 import { useOptionalSiteContent } from "@/providers/SiteContentProvider";
 import { galleryImages } from "@/data/mock";
-import { resolvePublicMediaSrc } from "@/lib/media";
+import { pickGallerySrc } from "@/lib/gallery-src";
 
 interface GalleryPickerProps {
   value?: string;
@@ -25,7 +25,7 @@ export function GalleryPicker({ value, onSelect, className }: GalleryPickerProps
             const local = galleryImages.find((g) => g.id === item.id);
             return {
               id: item.id,
-              src: local?.src ?? resolvePublicMediaSrc(item.src),
+              src: pickGallerySrc(item.src, item.id),
               caption: local?.caption ?? item.caption,
             };
           })

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -8,7 +8,8 @@ import { staggerContainer, staggerItem } from "@/components/shared/Reveal";
 import { useOptionalSiteContent } from "@/providers/SiteContentProvider";
 import { ContentSkeleton } from "@/components/shared/ContentState";
 import { galleryImages, type GalleryImage } from "@/data/mock";
-import { resolvePublicMediaSrc } from "@/lib/media";
+import { pickGallerySrc } from "@/lib/gallery-src";
+import { isMediaRef, resolveMediaSrc } from "@/lib/media-refs";
 
 const spanClass: Record<GalleryImage["span"], string> = {
   tall: "sm:row-span-2",
@@ -20,24 +21,28 @@ export function GallerySection({ limit }: { limit?: number }) {
   const { t, language } = useLanguage();
   const site = useOptionalSiteContent();
   const [active, setActive] = useState<GalleryImage | null>(null);
+  const [resolved, setResolved] = useState<Record<string, string>>({});
   const remote = site?.bundle?.gallery ?? [];
-  // Prefer curated local gallery (src + caption) so CMS legacy labels
-  // like "Main salon" on the aerial fleet shot never show mismatched.
+  const managed =
+    typeof localStorage !== "undefined" &&
+    localStorage.getItem("lunaya.cms.galleryManaged") === "1";
+
   const source: GalleryImage[] =
     remote.length > 0
       ? remote.map((item) => {
           const local = galleryImages.find((g) => g.id === item.id);
           return {
             id: item.id,
-            src: local?.src ?? resolvePublicMediaSrc(item.src),
-            caption: local?.caption ?? item.caption,
+            src: pickGallerySrc(item.src, item.id),
+            caption: local && !isMediaRef(item.src) ? local.caption : item.caption,
             span: local?.span ?? item.span,
             objectPosition: local?.objectPosition ?? "50% 45%",
           };
         })
-      : galleryImages;
+      : managed
+        ? []
+        : galleryImages;
 
-  // Drop duplicate image sources so the grid never shows the same photo twice.
   const seen = new Set<string>();
   const unique = source.filter((item) => {
     const key = item.src.split("?")[0] ?? item.src;
@@ -46,6 +51,25 @@ export function GallerySection({ limit }: { limit?: number }) {
     return true;
   });
   const items = limit ? unique.slice(0, limit) : unique;
+
+  const itemsKey = items.map((item) => `${item.id}:${item.src}`).join("|");
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const next: Record<string, string> = {};
+      await Promise.all(
+        items.map(async (item) => {
+          next[item.id] = await resolveMediaSrc(item.src, pickGallerySrc(item.src, item.id));
+        }),
+      );
+      if (!cancelled) setResolved(next);
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- resolve when ids/srcs change
+  }, [itemsKey]);
 
   if (site?.status === "loading" && remote.length === 0 && galleryImages.length === 0) {
     return (
@@ -56,6 +80,8 @@ export function GallerySection({ limit }: { limit?: number }) {
       </section>
     );
   }
+
+  const displaySrc = (image: GalleryImage) => resolved[image.id] || image.src;
 
   return (
     <section className="bg-[#f3efe7] py-24 lg:py-32">
@@ -80,14 +106,14 @@ export function GallerySection({ limit }: { limit?: number }) {
               key={image.id}
               variants={staggerItem}
               type="button"
-              onClick={() => setActive(image)}
+              onClick={() => setActive({ ...image, src: displaySrc(image) })}
               className={cn(
                 "group relative aspect-4/3 overflow-hidden text-start focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none sm:aspect-auto sm:min-h-0",
                 spanClass[image.span],
               )}
             >
               <img
-                src={image.src}
+                src={displaySrc(image)}
                 alt={image.caption[language]}
                 loading="lazy"
                 className="size-full object-cover"
