@@ -68,6 +68,7 @@ function BlogIndexPage() {
         title={t("blog.title")}
         subtitle={t("blog.subtitle")}
         image={headerImage}
+        imagePosition="50% 48%"
       />
 
       <section className="bg-background py-16 sm:py-20 lg:py-24">

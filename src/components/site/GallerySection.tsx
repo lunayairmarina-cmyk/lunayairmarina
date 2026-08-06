@@ -21,16 +21,31 @@ export function GallerySection({ limit }: { limit?: number }) {
   const site = useOptionalSiteContent();
   const [active, setActive] = useState<GalleryImage | null>(null);
   const remote = site?.bundle?.gallery ?? [];
+  // Prefer curated local gallery (src + caption) so CMS legacy labels
+  // like "Main salon" on the aerial fleet shot never show mismatched.
   const source: GalleryImage[] =
     remote.length > 0
-      ? remote.map((item) => ({
-          id: item.id,
-          src: resolvePublicMediaSrc(item.src),
-          caption: item.caption,
-          span: item.span,
-        }))
+      ? remote.map((item) => {
+          const local = galleryImages.find((g) => g.id === item.id);
+          return {
+            id: item.id,
+            src: local?.src ?? resolvePublicMediaSrc(item.src),
+            caption: local?.caption ?? item.caption,
+            span: local?.span ?? item.span,
+            objectPosition: local?.objectPosition ?? "50% 45%",
+          };
+        })
       : galleryImages;
-  const items = limit ? source.slice(0, limit) : source;
+
+  // Drop duplicate image sources so the grid never shows the same photo twice.
+  const seen = new Set<string>();
+  const unique = source.filter((item) => {
+    const key = item.src.split("?")[0] ?? item.src;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  const items = limit ? unique.slice(0, limit) : unique;
 
   if (site?.status === "loading" && remote.length === 0 && galleryImages.length === 0) {
     return (
@@ -76,6 +91,7 @@ export function GallerySection({ limit }: { limit?: number }) {
                 alt={image.caption[language]}
                 loading="lazy"
                 className="size-full object-cover"
+                style={{ objectPosition: image.objectPosition ?? "50% 45%" }}
               />
               <span className="absolute inset-0 bg-navy/15 transition-colors duration-500 sm:bg-navy/0 sm:group-hover:bg-navy/45" />
               <span className="absolute inset-0 flex items-end justify-center p-4 sm:items-center sm:p-6">

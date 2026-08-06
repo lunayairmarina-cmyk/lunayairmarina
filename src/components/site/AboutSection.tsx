@@ -5,7 +5,7 @@ import { Reveal } from "@/components/shared/Reveal";
 import { Counter } from "@/components/shared/Counter";
 import { useOptionalSiteContent, localizeOrFallback } from "@/providers/SiteContentProvider";
 import { resolvePublicMediaSrc } from "@/lib/media";
-import aboutImageFallback from "@/assets/about/yacht_lunaiyar.png";
+import aboutImageFallback from "@/assets/about/yacht_side_transom_landscape.png";
 
 interface Stat {
   value: number;
@@ -53,9 +53,9 @@ export function AboutSection({ variant = "home" }: { variant?: "home" | "page" }
                 src={aboutImage}
                 alt="Luxury yacht berthed at a marina at dusk"
                 loading="lazy"
-                width={1200}
-                height={900}
-                className="aspect-[5/4] w-full object-cover"
+                width={1600}
+                height={1200}
+                className="aspect-[4/3] w-full object-cover object-[center_42%]"
               />
             </div>
           </Reveal>
@@ -91,9 +91,9 @@ export function AboutSection({ variant = "home" }: { variant?: "home" | "page" }
               src={aboutImage}
               alt="Luxury yacht berthed at a marina at dusk"
               loading="lazy"
-              width={1200}
-              height={1400}
-              className="aspect-[4/5] w-full object-cover"
+              width={1600}
+              height={1200}
+              className="aspect-[4/3] w-full object-cover object-[center_42%]"
             />
           </Reveal>
 

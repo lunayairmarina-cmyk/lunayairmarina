@@ -23,7 +23,7 @@ import {
   featureSlides,
   galleryScreens,
 } from "@/data/application";
-import aboutMarina from "@/assets/about/yacht_lunaiyar.png";
+import aboutMarina from "@/assets/about/yacht_side_transom_landscape.png";
 import { cn } from "@/lib/utils";
 
 const overviewIcons = {

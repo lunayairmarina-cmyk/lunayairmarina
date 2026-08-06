@@ -98,6 +98,29 @@ function ContactPage() {
     [t],
   );
 
+  const yachtTypeOptions = useMemo(
+    () =>
+      ["motor", "sailing", "explorer", "superyacht", "catamaran", "other"].map((key) =>
+        t(`contact.form.yachtTypeOptions.${key}`),
+      ),
+    [t],
+  );
+
+  const yachtLocationOptions = useMemo(
+    () =>
+      [
+        "jeddah",
+        "redSea",
+        "neom",
+        "dubai",
+        "abuDhabi",
+        "bahrain",
+        "otherGulf",
+        "other",
+      ].map((key) => t(`contact.form.yachtLocationOptions.${key}`)),
+    [t],
+  );
+
   const channels = [
     {
       icon: Phone,
@@ -293,14 +316,31 @@ function ContactPage() {
                       ltr
                       onChange={(value) => setForm({ ...form, phone: value })}
                     />
-                    <Field
-                      id="page-contact-yacht-type"
-                      label={t("contact.form.yachtType")}
-                      placeholder={t("contact.form.yachtTypePlaceholder")}
-                      value={form.yachtType}
-                      required
-                      onChange={(value) => setForm({ ...form, yachtType: value })}
-                    />
+                    <div>
+                      <label
+                        htmlFor="page-contact-yacht-type"
+                        className="text-[0.6rem] tracking-[0.22em] text-muted-foreground uppercase"
+                      >
+                        {t("contact.form.yachtType")}
+                        <span className="ms-1 text-gold">*</span>
+                      </label>
+                      <select
+                        id="page-contact-yacht-type"
+                        required
+                        value={form.yachtType}
+                        onChange={(event) =>
+                          setForm({ ...form, yachtType: event.target.value })
+                        }
+                        className="mt-2 w-full appearance-none border-b border-navy/20 bg-transparent py-3 text-sm text-navy outline-none transition-colors focus:border-gold"
+                      >
+                        <option value="">{t("contact.form.yachtTypePlaceholder")}</option>
+                        {yachtTypeOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                     <Field
                       id="page-contact-yacht-length"
                       label={t("contact.form.yachtLength")}
@@ -309,14 +349,31 @@ function ContactPage() {
                       required
                       onChange={(value) => setForm({ ...form, yachtLength: value })}
                     />
-                    <Field
-                      id="page-contact-yacht-location"
-                      label={t("contact.form.yachtLocation")}
-                      placeholder={t("contact.form.yachtLocationPlaceholder")}
-                      value={form.yachtLocation}
-                      required
-                      onChange={(value) => setForm({ ...form, yachtLocation: value })}
-                    />
+                    <div>
+                      <label
+                        htmlFor="page-contact-yacht-location"
+                        className="text-[0.6rem] tracking-[0.22em] text-muted-foreground uppercase"
+                      >
+                        {t("contact.form.yachtLocation")}
+                        <span className="ms-1 text-gold">*</span>
+                      </label>
+                      <select
+                        id="page-contact-yacht-location"
+                        required
+                        value={form.yachtLocation}
+                        onChange={(event) =>
+                          setForm({ ...form, yachtLocation: event.target.value })
+                        }
+                        className="mt-2 w-full appearance-none border-b border-navy/20 bg-transparent py-3 text-sm text-navy outline-none transition-colors focus:border-gold"
+                      >
+                        <option value="">{t("contact.form.yachtLocationPlaceholder")}</option>
+                        {yachtLocationOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
                   <div className="mt-5 sm:mt-6">

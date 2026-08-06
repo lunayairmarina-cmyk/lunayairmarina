@@ -1,9 +1,13 @@
-import yacht1 from "@/assets/fleet/fleet-01.jpg";
-import yacht2 from "@/assets/fleet/fleet-02.jpg";
-import aboutMarina from "@/assets/about/yacht_lunaiyar.png";
+import serviceYachtMgmt from "@/assets/services/service-yacht-management.jpg";
+import serviceAgency from "@/assets/services/service-yacht-agency.jpg";
+import serviceMarina from "@/assets/services/service-marina.jpg";
+import serviceCrew from "@/assets/services/service-crew.jpg";
+import aboutMarina from "@/assets/about/yacht_side_transom_landscape.png";
 import gallery1 from "@/assets/gallery/gallery-01-marina.jpg";
 import gallery2 from "@/assets/gallery/gallery-02-deck.jpg";
-import gallery3 from "@/assets/gallery/gallery-03-lounge.jpg";
+import gallery6 from "@/assets/gallery/gallery-06-crew.jpg";
+import gallery5 from "@/assets/gallery/gallery-05-arrival.jpg";
+import gallery8 from "@/assets/gallery/gallery-08-bridge.jpg";
 
 export const SERVICE_SLUGS = [
   "yacht-management-360",
@@ -23,37 +27,37 @@ export interface ServiceDefinition {
 export const SERVICE_DEFINITIONS: ServiceDefinition[] = [
   {
     slug: "yacht-management-360",
-    coverImage: yacht1,
+    coverImage: serviceYachtMgmt,
     gallery: [
       { src: aboutMarina, captionKey: "g1" },
       { src: gallery1, captionKey: "g2" },
-      { src: gallery2, captionKey: "g3" },
+      { src: gallery8, captionKey: "g3" },
     ],
   },
   {
     slug: "visiting-yacht-agency",
-    coverImage: yacht2,
+    coverImage: serviceAgency,
     gallery: [
-      { src: gallery2, captionKey: "g1" },
+      { src: gallery5, captionKey: "g1" },
       { src: aboutMarina, captionKey: "g2" },
-      { src: gallery3, captionKey: "g3" },
+      { src: gallery2, captionKey: "g3" },
     ],
   },
   {
     slug: "marina-management",
-    coverImage: aboutMarina,
+    coverImage: serviceMarina,
     gallery: [
-      { src: gallery3, captionKey: "g1" },
-      { src: yacht2, captionKey: "g2" },
-      { src: gallery1, captionKey: "g3" },
+      { src: gallery1, captionKey: "g1" },
+      { src: gallery2, captionKey: "g2" },
+      { src: serviceMarina, captionKey: "g3" },
     ],
   },
   {
     slug: "crew-management",
-    coverImage: gallery3,
+    coverImage: serviceCrew,
     gallery: [
-      { src: yacht1, captionKey: "g1" },
-      { src: gallery2, captionKey: "g2" },
+      { src: gallery6, captionKey: "g1" },
+      { src: serviceYachtMgmt, captionKey: "g2" },
       { src: aboutMarina, captionKey: "g3" },
     ],
   },

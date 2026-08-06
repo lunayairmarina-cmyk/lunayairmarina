@@ -103,7 +103,7 @@ export function useAdminAuth() {
     async (email?: string, password?: string): Promise<{ ok: boolean; error?: string }> => {
       setAuthError(null);
       const normalized = (email ?? "").trim().toLowerCase();
-      const pass = password ?? "";
+      const pass = (password ?? "").trim();
       if (!normalized || !pass) {
         const error = "admin.authCredentialsRequired";
         setAuthError(error);
@@ -123,11 +123,11 @@ export function useAdminAuth() {
               ? String((signInError as { code?: string }).code)
               : "";
 
-          // User missing in Auth (or privacy-masked invalid-credential): try first-time create.
-          const canBootstrap =
+          // Only first-run bootstrap may create the Super Admin. Never treat a wrong
+          // password as an invite for a regular user.
+          const maybeMissingUser =
             code === "auth/user-not-found" || code === "auth/invalid-credential";
-
-          if (!canBootstrap) throw signInError;
+          if (!maybeMissingUser) throw signInError;
 
           try {
             const created = await bootstrapSuperAdminIfNeeded(normalized, pass);
@@ -140,9 +140,11 @@ export function useAdminAuth() {
               "code" in bootstrapError
                 ? String((bootstrapError as { code?: string }).code)
                 : "";
-            // Email exists in Auth but password is wrong.
             if (bootstrapCode.includes("email-already-in-use")) throw signInError;
-            throw bootstrapError;
+            throw bootstrapError instanceof Error &&
+              bootstrapError.message === "EMAIL_EXISTS_WRONG_PASSWORD"
+              ? signInError
+              : bootstrapError;
           }
         }
 

@@ -3,7 +3,7 @@
  * Physical files live under src/assets/{brand,hero,about,headers,gallery,fleet,admin}/
  */
 import heroMain from "@/assets/hero/hero-main.webp";
-import aboutMarina from "@/assets/about/yacht_lunaiyar.png";
+import aboutMarina from "@/assets/about/yacht_side_transom_landscape.png";
 import adminLoginBg from "@/assets/admin/admin-login-bg.jpg";
 import fleet01 from "@/assets/fleet/fleet-01.jpg";
 import fleet02 from "@/assets/fleet/fleet-02.jpg";
@@ -12,11 +12,19 @@ import gallery01 from "@/assets/gallery/gallery-01-marina.jpg";
 import gallery02 from "@/assets/gallery/gallery-02-deck.jpg";
 import gallery03 from "@/assets/gallery/gallery-03-lounge.jpg";
 import gallery04 from "@/assets/gallery/gallery-04-sunset.jpg";
+import gallery05 from "@/assets/gallery/gallery-05-arrival.jpg";
+import gallery06 from "@/assets/gallery/gallery-06-crew.jpg";
+import gallery07 from "@/assets/gallery/gallery-07-harbor.jpg";
+import gallery08 from "@/assets/gallery/gallery-08-bridge.jpg";
 import headerAbout from "@/assets/headers/header-about.webp";
 import headerBlog from "@/assets/headers/header-blog.webp";
 import headerContact from "@/assets/headers/header-contact.webp";
 import headerServices from "@/assets/headers/header-services.webp";
 import logo from "@/assets/brand/logo.png";
+import serviceYachtMgmt from "@/assets/services/service-yacht-management.jpg";
+import serviceAgency from "@/assets/services/service-yacht-agency.jpg";
+import serviceMarina from "@/assets/services/service-marina.jpg";
+import serviceCrew from "@/assets/services/service-crew.jpg";
 
 /** New canonical filenames */
 const ASSET_BY_FILENAME: Record<string, string> = {
@@ -25,6 +33,7 @@ const ASSET_BY_FILENAME: Record<string, string> = {
   "about-marina.jpg": aboutMarina,
   "about-marina.webp": aboutMarina,
   "yacht_lunaiyar.png": aboutMarina,
+  "yacht_side_transom_landscape.png": aboutMarina,
   "fleet-01.jpg": fleet01,
   "fleet-02.jpg": fleet02,
   "fleet-03.jpg": fleet03,
@@ -32,6 +41,14 @@ const ASSET_BY_FILENAME: Record<string, string> = {
   "gallery-02-deck.jpg": gallery02,
   "gallery-03-lounge.jpg": gallery03,
   "gallery-04-sunset.jpg": gallery04,
+  "gallery-05-arrival.jpg": gallery05,
+  "gallery-06-crew.jpg": gallery06,
+  "gallery-07-harbor.jpg": gallery07,
+  "gallery-08-bridge.jpg": gallery08,
+  "service-yacht-management.jpg": serviceYachtMgmt,
+  "service-yacht-agency.jpg": serviceAgency,
+  "service-marina.jpg": serviceMarina,
+  "service-crew.jpg": serviceCrew,
   "logo.png": logo,
 
   // Legacy aliases (CMS / older Firestore paths)
@@ -82,7 +99,7 @@ export function resolvePublicMediaSrc(src: string | undefined | null, fallback =
   if (value.startsWith("/assets/")) return value;
 
   if (value.startsWith("/images/") || value.startsWith("/videos/")) {
-    if (/about-marina|yacht_lunaiyar/i.test(value)) return aboutMarina;
+    if (/about-marina|yacht_lunaiyar|yacht_side_transom/i.test(value)) return aboutMarina;
     // Prefer WebP siblings for known optimized folders (hero/headers/about).
     if (
       value.startsWith("/images/hero/") ||

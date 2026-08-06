@@ -25,7 +25,7 @@ export function FleetSection({ limit }: { limit?: number }) {
               <img
                 src={resolvePublicMediaSrc(yacht.image)}
                 alt={yacht.yachtName}
-                className="aspect-[16/10] w-full object-cover"
+                className="aspect-[16/10] w-full object-cover object-[center_45%]"
                 loading="lazy"
               />
               <div className="p-5">

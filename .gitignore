@@ -19,6 +19,9 @@ dist-ssr
 .env
 .env.local
 
+# Local image source packs (import scripts consume these)
+public/images/New folder/
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars

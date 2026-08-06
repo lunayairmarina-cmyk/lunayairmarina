@@ -1,5 +1,5 @@
 import heroYacht from "@/assets/hero/hero-main.webp";
-import aboutMarina from "@/assets/about/yacht_lunaiyar.png";
+import aboutMarina from "@/assets/about/yacht_side_transom_landscape.png";
 import yacht1 from "@/assets/fleet/fleet-01.jpg";
 import yacht2 from "@/assets/fleet/fleet-02.jpg";
 import yacht3 from "@/assets/fleet/fleet-03.jpg";
@@ -7,6 +7,14 @@ import gallery1 from "@/assets/gallery/gallery-01-marina.jpg";
 import gallery2 from "@/assets/gallery/gallery-02-deck.jpg";
 import gallery3 from "@/assets/gallery/gallery-03-lounge.jpg";
 import gallery4 from "@/assets/gallery/gallery-04-sunset.jpg";
+import gallery5 from "@/assets/gallery/gallery-05-arrival.jpg";
+import gallery6 from "@/assets/gallery/gallery-06-crew.jpg";
+import gallery7 from "@/assets/gallery/gallery-07-harbor.jpg";
+import gallery8 from "@/assets/gallery/gallery-08-bridge.jpg";
+import serviceYachtMgmt from "@/assets/services/service-yacht-management.jpg";
+import serviceAgency from "@/assets/services/service-yacht-agency.jpg";
+import serviceMarina from "@/assets/services/service-marina.jpg";
+import serviceCrew from "@/assets/services/service-crew.jpg";
 
 export const images = {
   heroYacht,
@@ -35,6 +43,8 @@ export interface GalleryImage {
   src: string;
   caption: { en: string; ar: string };
   span: "tall" | "wide" | "normal";
+  /** Keep LM brand visible under object-cover crops */
+  objectPosition?: string;
 }
 
 export interface ServiceRecord {
@@ -93,36 +103,9 @@ export const yachts: Yacht[] = [
     name: "Meridian",
     image: yacht3,
     length: "52 m",
-    category: { en: "Sailing Yacht", ar: "يخت شراعي" },
+    category: { en: "Ocean Yacht", ar: "يخت محيطي" },
     capacity: 10,
     crew: 8,
-  },
-  {
-    id: "y4",
-    name: "Northern Pearl",
-    image: heroYacht,
-    length: "64 m",
-    category: { en: "Superyacht", ar: "يخت فائق" },
-    capacity: 16,
-    crew: 14,
-  },
-  {
-    id: "y5",
-    name: "Serenity Bay",
-    image: aboutMarina,
-    length: "34 m",
-    category: { en: "Motor Yacht", ar: "يخت آلي" },
-    capacity: 10,
-    crew: 6,
-  },
-  {
-    id: "y6",
-    name: "Red Sea Lady",
-    image: gallery1,
-    length: "29 m",
-    category: { en: "Cruiser", ar: "يخت سياحي" },
-    capacity: 8,
-    crew: 5,
   },
 ];
 
@@ -130,42 +113,99 @@ export const galleryImages: GalleryImage[] = [
   {
     id: "g1",
     src: gallery1,
-    caption: { en: "Sundeck jacuzzi", ar: "جاكوزي السطح العلوي" },
+    caption: {
+      en: "Illuminated stern at night",
+      ar: "مؤخرة اليخت المضيئة ليلًا",
+    },
     span: "tall",
+    objectPosition: "50% 42%",
   },
   {
     id: "g2",
-    src: gallery2,
-    caption: { en: "Marina operations", ar: "عمليات المارينا" },
+    src: gallery3,
+    caption: {
+      en: "Transom branding at golden hour",
+      ar: "شعار الترانزم عند الغروب",
+    },
     span: "normal",
+    objectPosition: "50% 48%",
   },
   {
     id: "g3",
-    src: gallery3,
-    caption: { en: "Professional crew", ar: "طاقم محترف" },
+    src: gallery2,
+    caption: {
+      en: "Brand mark on the hull",
+      ar: "شعار المارينا على الهيكل",
+    },
     span: "normal",
+    objectPosition: "50% 45%",
   },
   {
     id: "g4",
-    src: gallery4,
-    caption: { en: "Main salon", ar: "الصالون الرئيسي" },
+    src: gallery8,
+    caption: {
+      en: "Owner briefing on the bridge",
+      ar: "اجتماع المالك في غرفة القيادة",
+    },
     span: "normal",
+    objectPosition: "48% 40%",
   },
   {
     id: "g5",
     src: heroYacht,
-    caption: { en: "Open water cruising", ar: "الإبحار في المياه المفتوحة" },
+    caption: {
+      en: "Bow cutting open water",
+      ar: "مقدمة اليخت في المياه المفتوحة",
+    },
     span: "normal",
+    objectPosition: "45% 50%",
   },
-  { id: "g6", src: yacht2, caption: { en: "Private anchorage", ar: "مرسى خاص" }, span: "normal" },
-  { id: "g7", src: aboutMarina, caption: { en: "Berthing at dusk", ar: "الرسو عند الغروب" }, span: "normal" },
-  { id: "g8", src: yacht3, caption: { en: "Sailing at golden hour", ar: "إبحار عند الغروب" }, span: "normal" },
+  {
+    id: "g6",
+    src: gallery5,
+    caption: {
+      en: "Visiting yacht at the pier",
+      ar: "يخت زائر عند الرصيف",
+    },
+    span: "normal",
+    objectPosition: "50% 45%",
+  },
+  {
+    id: "g7",
+    src: gallery6,
+    caption: {
+      en: "Crew on deck briefing",
+      ar: "إحاطة الطاقم على السطح",
+    },
+    span: "normal",
+    objectPosition: "50% 40%",
+  },
+  {
+    id: "g8",
+    src: gallery4,
+    caption: {
+      en: "Fleet convoy from the air",
+      ar: "قافلة اليخوت من الجو",
+    },
+    span: "normal",
+    objectPosition: "55% 55%",
+  },
+  {
+    id: "g9",
+    src: gallery7,
+    caption: {
+      en: "Harbor panorama",
+      ar: "بانوراما الميناء",
+    },
+    span: "normal",
+    objectPosition: "60% 45%",
+  },
 ];
 
 export const serviceRecords: ServiceRecord[] = [
   {
     id: "s1",
-    image: heroYacht,
+    image: serviceYachtMgmt,
     title: { en: "360° Yacht Management", ar: "إدارة يخوت ٣٦٠ درجة" },
     description: {
       en: "Complete operational, technical and financial yacht management.",
@@ -175,7 +215,7 @@ export const serviceRecords: ServiceRecord[] = [
   },
   {
     id: "s2",
-    image: gallery2,
+    image: serviceAgency,
     title: { en: "Visiting Yacht Agency", ar: "وكالة اليخوت الزائرة" },
     description: {
       en: "Permits, clearance and logistics for international yachts.",
@@ -185,7 +225,7 @@ export const serviceRecords: ServiceRecord[] = [
   },
   {
     id: "s3",
-    image: aboutMarina,
+    image: serviceMarina,
     title: { en: "Marina Management", ar: "إدارة المارينا" },
     description: {
       en: "Professional marina operations and berthing solutions.",
@@ -195,7 +235,7 @@ export const serviceRecords: ServiceRecord[] = [
   },
   {
     id: "s4",
-    image: gallery3,
+    image: serviceCrew,
     title: { en: "Crew Management", ar: "إدارة الطواقم" },
     description: {
       en: "Recruitment and management of marine professionals.",

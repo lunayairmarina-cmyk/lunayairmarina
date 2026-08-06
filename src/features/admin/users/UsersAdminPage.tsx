@@ -170,16 +170,32 @@ export function UsersAdminPage() {
             draft.role === "custom" ? draft.permissions : permissionsForRole(draft.role),
           active: draft.active,
         });
-        persistLocal([...rows, created]);
+        const withoutDup = rows.filter(
+          (row) => row.id !== created.id && row.email !== created.email,
+        );
+        persistLocal([...withoutDup, created]);
         setNotice(t("admin.users.savedFirebase"));
       }
       setOpen(false);
       setEditingId(null);
       setDraft(emptyDraft);
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : t("admin.users.saveFailed");
-      setNotice(message);
+      const raw = error instanceof Error ? error.message : "";
+      const code =
+        error && typeof error === "object" && "code" in error
+          ? String((error as { code?: string }).code ?? "")
+          : "";
+      if (raw === "EMAIL_EXISTS_WRONG_PASSWORD") {
+        setNotice(t("admin.users.emailExistsWrongPassword"));
+      } else if (raw === "SUPER_ADMIN_REQUIRED") {
+        setNotice(t("admin.users.superAdminRequired"));
+      } else if (code.includes("email-already-in-use")) {
+        setNotice(t("admin.users.emailInUse"));
+      } else if (code.includes("permission-denied") || raw.includes("permission")) {
+        setNotice(t("admin.users.permissionDenied"));
+      } else {
+        setNotice(raw || t("admin.users.saveFailed"));
+      }
     } finally {
       setBusy(false);
     }

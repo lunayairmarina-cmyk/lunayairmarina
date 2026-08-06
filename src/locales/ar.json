@@ -203,7 +203,7 @@
         "gallery": {
           "g1": "صورة الخدمة",
           "g2": "فريق الجسر يتابع البيانات التقنية لحظة بلحظة",
-          "g3": "مراجعة الصيانة قبل وصول الضيوف"
+          "g3": "اجتماع المالك في غرفة القيادة قبل الإبحار"
         }
       },
       "visiting-yacht-agency": {
@@ -610,7 +610,7 @@
   "gallery": {
     "eyebrow": "المعرض",
     "title": "الحياة على المتن",
-    "subtitle": "لحظات من مرافئنا وأسطحنا والمياه التي نعمل فيها.",
+    "subtitle": "إضاءة المؤخرة، هوية الهيكل، المياه المفتوحة والفريق الذي يدير كل رحلة.",
     "close": "إغلاق",
     "viewAll": "عرض المعرض"
   },
@@ -741,11 +741,29 @@
       "phone": "رقم الهاتف",
       "phonePlaceholder": "+966 5X XXX XXXX",
       "yachtType": "نوع اليخت",
-      "yachtTypePlaceholder": "يخت آلي / شراعي / استكشاف",
+      "yachtTypePlaceholder": "اختر نوع اليخت",
+      "yachtTypeOptions": {
+        "motor": "يخت آلي",
+        "sailing": "يخت شراعي",
+        "explorer": "يخت استكشاف",
+        "superyacht": "يخت فائق",
+        "catamaran": "كاتاماران",
+        "other": "أخرى"
+      },
       "yachtLength": "طول اليخت",
       "yachtLengthPlaceholder": "مثال: 42 م",
       "yachtLocation": "موقع اليخت",
-      "yachtLocationPlaceholder": "جدة / البحر الأحمر / دبي",
+      "yachtLocationPlaceholder": "اختر الموقع",
+      "yachtLocationOptions": {
+        "jeddah": "جدة",
+        "redSea": "البحر الأحمر",
+        "neom": "نيوم / مشروع البحر الأحمر",
+        "dubai": "دبي",
+        "abuDhabi": "أبوظبي",
+        "bahrain": "البحرين",
+        "otherGulf": "موقع خليجي آخر",
+        "other": "أخرى"
+      },
       "serviceNeeded": "الخدمة المطلوبة",
       "serviceNeededPlaceholder": "اختر الخدمة",
       "serviceOther": "خدمة أخرى / استشارة عامة",
@@ -779,7 +797,7 @@
     "loginFailed": "فشل تسجيل الدخول. راجع الإيميل وكلمة المرور وإعدادات Firebase Auth.",
     "authCredentialsRequired": "الإيميل وكلمة المرور مطلوبان.",
     "authProviderDisabled": "Email/Password مش مفعّل في Firebase. افتح Console → Authentication → Sign-in method → فعّل Email/Password في مشروع lunayairmarina-2d694.",
-    "authInvalidCredentials": "الإيميل أو كلمة المرور غير صحيحة.",
+    "authInvalidCredentials": "الإيميل أو كلمة المرور غير صحيحة. لو نسيت كلمة المرور: من Users اضغط أيقونة المفتاح لإرسال رابط إعادة التعيين، أو احذف المستخدم وأنشئه من جديد بكلمة مرور معروفة.",
     "authUserNotFound": "المستخدم غير موجود. أنشئه من Users أو سجّل أول مرة لإنشاء Super Admin.",
     "authEmailInUse": "الإيميل مسجّل بالفعل. استخدم كلمة المرور الصحيحة.",
     "authWeakPassword": "كلمة المرور ضعيفة (٦ أحرف على الأقل).",
@@ -1079,13 +1097,17 @@
       "cannotEditSelfRole": "لا يمكنك إزالة دور المدير العام عن حسابك.",
       "subtitleFirebase": "أنشئ أدمن بإيميل وكلمة مرور. الحسابات تُحفظ في Firebase Authentication والملف في Firestore.",
       "passwordRequired": "كلمة المرور مطلوبة (٦ أحرف على الأقل) عند إنشاء مستخدم.",
-      "passwordHint": "كلمة المرور تُحفظ بأمان في Firebase Auth (لا تُخزن كنص واضح).",
+      "passwordHint": "كلمة المرور تُحفظ في Firebase Auth. بعد الحفظ يقدر يدخل بنفس الإيميل وكلمة المرور مع صلاحياته.",
       "newPasswordOptional": "كلمة مرور جديدة (اختياري)",
       "editPasswordHint": "اتركها فارغة للإبقاء على كلمة المرور. إن ملأتها يُرسل إيميل إعادة تعيين.",
       "resetPassword": "إرسال إعادة تعيين كلمة المرور",
       "resetSent": "تم إرسال إيميل إعادة تعيين كلمة المرور.",
-      "savedFirebase": "تم إنشاء المستخدم في Firebase Auth + Firestore.",
-      "saveFailed": "تعذر حفظ المستخدم في Firebase. تأكد من تفعيل Email/Password ونشر القواعد."
+      "savedFirebase": "تم الحفظ في Firebase Auth + Firestore. يقدر يسجّل الدخول الآن بنفس الإيميل وكلمة المرور.",
+      "saveFailed": "تعذر حفظ المستخدم في Firebase. تأكد من تفعيل Email/Password ونشر القواعد.",
+      "emailExistsWrongPassword": "الإيميل موجود في Firebase Auth لكن كلمة المرور غير مطابقة. اضغط أيقونة المفتاح لإرسال Reset، أو أعد الإضافة بنفس كلمة المرور الصحيحة لربط الصلاحيات.",
+      "superAdminRequired": "لازم تكون مسجّل كـ Super Admin لإضافة مستخدمين.",
+      "emailInUse": "هذا الإيميل مستخدم بالفعل في Firebase Auth.",
+      "permissionDenied": "صلاحيات Firestore ترفض الكتابة. تأكد إن حسابك Super Admin والقواعد منشورة."
     }
   },
   "common": {

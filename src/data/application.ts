@@ -20,8 +20,6 @@ const appImg = (name: string) => `${APP_SCREEN_BASE}/${name}.jpg?v=${APP_SCREEN_
 
 export const appScreens = {
   homeapp: appImg("homeapp"),
-  welcome: appImg("welcome"),
-  welcomeAlt: appImg("welcome-alt"),
   schedule: appImg("schedule"),
   certifications: appImg("certifications"),
   supportCenter: appImg("support-center"),
@@ -33,7 +31,6 @@ export const appScreens = {
   profileCaptain: appImg("profile-captain"),
   createTour: appImg("create-tour"),
   tourDetails: appImg("tour-details"),
-  ownerRegistration: appImg("owner-registration"),
 } as const;
 
 /** Feature carousel: screenshot + i18n key (one unique screen each) */

@@ -25,6 +25,7 @@ function ServicesPage() {
         title={t("services.title")}
         subtitle={t("services.subtitle")}
         image={headerImage}
+        imagePosition="50% 45%"
       />
       <ServicesSection variant="page" />
       <WhyChooseUs variant="home" />

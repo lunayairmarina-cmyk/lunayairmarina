@@ -203,7 +203,7 @@
         "gallery": {
           "g1": "Service image",
           "g2": "Bridge team tracking technical data in real time",
-          "g3": "Maintenance review before guest arrival"
+          "g3": "Owner briefing on the bridge before departure"
         }
       },
       "visiting-yacht-agency": {
@@ -610,7 +610,7 @@
   "gallery": {
     "eyebrow": "Gallery",
     "title": "Life On Board",
-    "subtitle": "Moments from our marinas, decks and the waters we operate in.",
+    "subtitle": "Stern lights, hull branding, open water and the people who run each voyage.",
     "close": "Close",
     "viewAll": "View Gallery"
   },
@@ -741,11 +741,29 @@
       "phone": "Phone number",
       "phonePlaceholder": "+966 5X XXX XXXX",
       "yachtType": "Yacht type",
-      "yachtTypePlaceholder": "Motor yacht / sailing / explorer",
+      "yachtTypePlaceholder": "Select yacht type",
+      "yachtTypeOptions": {
+        "motor": "Motor yacht",
+        "sailing": "Sailing yacht",
+        "explorer": "Explorer yacht",
+        "superyacht": "Superyacht",
+        "catamaran": "Catamaran",
+        "other": "Other"
+      },
       "yachtLength": "Yacht length",
       "yachtLengthPlaceholder": "e.g. 42 m",
       "yachtLocation": "Yacht location",
-      "yachtLocationPlaceholder": "Jeddah / Red Sea / Dubai",
+      "yachtLocationPlaceholder": "Select location",
+      "yachtLocationOptions": {
+        "jeddah": "Jeddah",
+        "redSea": "Red Sea",
+        "neom": "NEOM / Red Sea Project",
+        "dubai": "Dubai",
+        "abuDhabi": "Abu Dhabi",
+        "bahrain": "Bahrain",
+        "otherGulf": "Other Gulf location",
+        "other": "Other"
+      },
       "serviceNeeded": "Service required",
       "serviceNeededPlaceholder": "Select a service",
       "serviceOther": "Other / general consultation",
@@ -779,7 +797,7 @@
     "loginFailed": "Login failed. Check email, password and Firebase Auth settings.",
     "authCredentialsRequired": "Email and password are required.",
     "authProviderDisabled": "Email/Password is disabled in Firebase. Open Console → Authentication → Sign-in method → Enable Email/Password for project lunayairmarina-2d694.",
-    "authInvalidCredentials": "Invalid email or password.",
+    "authInvalidCredentials": "Invalid email or password. Forgot it? From Users, click the key icon to email a reset link, or delete and recreate the user with a known password.",
     "authUserNotFound": "User not found. Create it from Users, or first login bootstraps Super Admin.",
     "authEmailInUse": "Email already registered. Use the correct password.",
     "authWeakPassword": "Password is too weak (min 6 characters).",
@@ -1079,13 +1097,17 @@
       "cannotEditSelfRole": "You cannot remove your own Super Admin role.",
       "subtitleFirebase": "Create admins with email + password. Accounts are stored in Firebase Authentication and profiles in Firestore.",
       "passwordRequired": "Password is required (min 6 characters) when creating a user.",
-      "passwordHint": "Password is saved securely in Firebase Auth (never stored as plain text).",
+      "passwordHint": "Password is stored in Firebase Auth. After save, the user can sign in with that email/password and their assigned permissions.",
       "newPasswordOptional": "New password (optional)",
       "editPasswordHint": "Leave empty to keep the current password. If filled, a password-reset email is sent.",
       "resetPassword": "Reset password email",
       "resetSent": "Password reset email sent.",
-      "savedFirebase": "User created in Firebase Auth + Firestore.",
-      "saveFailed": "Could not save user to Firebase. Check Auth Email/Password is enabled and rules are deployed."
+      "savedFirebase": "Saved to Firebase Auth + Firestore. They can sign in now with the same email and password.",
+      "saveFailed": "Could not save user to Firebase. Check Auth Email/Password is enabled and rules are deployed.",
+      "emailExistsWrongPassword": "This email already exists in Firebase Auth with a different password. Use the key icon to send a reset, or re-add with the correct password to attach roles.",
+      "superAdminRequired": "You must be signed in as Super Admin to create users.",
+      "emailInUse": "This email is already used in Firebase Auth.",
+      "permissionDenied": "Firestore rules blocked the write. Confirm you are Super Admin and rules are published."
     }
   },
   "common": {

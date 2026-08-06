@@ -310,14 +310,14 @@ async function main() {
   console.log("✓ faq/*");
 
   const gallerySeed = [
-    { id: "g1", src: media.gallery1, caption: L("Sundeck jacuzzi", "جاكوزي السطح العلوي"), span: "tall" },
-    { id: "g2", src: media.gallery2, caption: L("Marina operations", "عمليات المارينا"), span: "normal" },
-    { id: "g3", src: media.gallery3, caption: L("Professional crew", "طاقم محترف"), span: "normal" },
-    { id: "g4", src: media.gallery4, caption: L("Main salon", "الصالون الرئيسي"), span: "normal" },
-    { id: "g5", src: media.heroImage, caption: L("Open water cruising", "الإبحار في المياه المفتوحة"), span: "normal" },
-    { id: "g6", src: media.yacht2, caption: L("Private anchorage", "مرسى خاص"), span: "normal" },
-    { id: "g7", src: media.about, caption: L("Berthing at dusk", "الرسو عند الغروب"), span: "normal" },
-    { id: "g8", src: media.yacht3, caption: L("Sailing at golden hour", "إبحار عند الغروب"), span: "normal" },
+    { id: "g1", src: media.gallery1, caption: L("Illuminated stern at night", "مؤخرة اليخت المضيئة ليلًا"), span: "tall" },
+    { id: "g2", src: media.gallery3, caption: L("Transom branding at golden hour", "شعار الترانزم عند الغروب"), span: "normal" },
+    { id: "g3", src: media.gallery2, caption: L("Brand mark on the hull", "شعار المارينا على الهيكل"), span: "normal" },
+    { id: "g4", src: media.gallery4, caption: L("Owner briefing on the bridge", "اجتماع المالك في غرفة القيادة"), span: "normal" },
+    { id: "g5", src: media.heroImage, caption: L("Bow cutting open water", "مقدمة اليخت في المياه المفتوحة"), span: "normal" },
+    { id: "g6", src: media.yacht2, caption: L("Visiting yacht at the pier", "يخت زائر عند الرصيف"), span: "normal" },
+    { id: "g7", src: media.about, caption: L("Crew on deck briefing", "إحاطة الطاقم على السطح"), span: "normal" },
+    { id: "g8", src: media.yacht3, caption: L("Fleet convoy from the air", "قافلة اليخوت من الجو"), span: "normal" },
   ];
   for (let i = 0; i < gallerySeed.length; i++) {
     const item = gallerySeed[i]!;

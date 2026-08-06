@@ -6,6 +6,10 @@ interface PageHeaderProps {
   subtitle?: string;
   image: string;
   compact?: boolean;
+  /** Put title on the opposite side (e.g. clear a logo on the right in RTL). */
+  alignContent?: "start" | "end";
+  /** CSS object-position for the background photo */
+  imagePosition?: string;
 }
 
 /** Above-the-fold header: always visible on first paint (no opacity:0 Motion gate). */
@@ -15,6 +19,8 @@ export function PageHeader({
   subtitle,
   image,
   compact = false,
+  alignContent = "start",
+  imagePosition,
 }: PageHeaderProps) {
   const webp = image.replace(/\.(jpe?g|png)(\?.*)?$/i, ".webp$2");
   const canWebp =
@@ -39,14 +45,30 @@ export function PageHeader({
             aria-hidden
             fetchPriority="high"
             decoding="async"
-            className="size-full object-cover object-[center_40%] sm:object-center"
+            className={cn(
+              "size-full object-cover",
+              imagePosition ? undefined : "object-[center_40%] sm:object-center",
+            )}
+            style={imagePosition ? { objectPosition: imagePosition } : undefined}
           />
         </picture>
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050d18]/70 via-[#050d18]/25 to-transparent sm:from-[#050d18]/55 sm:via-transparent" />
+        <div
+          className={cn(
+            "absolute inset-0",
+            alignContent === "end"
+              ? "bg-gradient-to-t from-[#050d18]/75 via-[#050d18]/30 to-transparent sm:bg-gradient-to-l sm:from-transparent sm:via-[#050d18]/35 sm:to-[#050d18]/65"
+              : "bg-gradient-to-t from-[#050d18]/70 via-[#050d18]/25 to-transparent sm:from-[#050d18]/55 sm:via-transparent",
+          )}
+        />
       </div>
 
       <div className="container-luxe relative z-10 w-full">
-        <div className="max-w-xl text-start">
+        <div
+          className={cn(
+            "max-w-xl",
+            alignContent === "end" ? "ms-auto text-start sm:max-w-lg" : "text-start",
+          )}
+        >
           {eyebrow ? <span className="eyebrow block">{eyebrow}</span> : null}
           <h1 className="type-display-l mt-3 whitespace-pre-line text-balance text-white sm:mt-4">
             {title}

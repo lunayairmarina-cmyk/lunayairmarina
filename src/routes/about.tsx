@@ -10,7 +10,7 @@ import { useLanguage } from "@/lib/i18n";
 import { buildSeoHead } from "@/services/seoService";
 import { usePageHeaderImage } from "@/hooks/usePageHeaderImage";
 import aboutHeader from "@/assets/headers/header-about.jpg";
-import aboutImage from "@/assets/about/yacht_lunaiyar.png";
+import aboutImage from "@/assets/about/yacht_side_transom_landscape.png";
 
 export const Route = createFileRoute("/about")({
   head: () => buildSeoHead("about", "/about"),
@@ -92,9 +92,9 @@ function AboutPage() {
               src={aboutImage}
               alt=""
               loading="lazy"
-              width={1200}
-              height={1400}
-              className="aspect-[4/5] w-full object-cover lg:aspect-[5/6]"
+              width={1600}
+              height={1200}
+              className="aspect-[4/3] w-full object-cover object-[center_42%]"
             />
             <div className="absolute bottom-0 inset-inline-start-0 border border-gold/40 bg-navy px-7 py-6 text-white sm:inset-inline-start-6 sm:bottom-6">
               <p className="text-[0.65rem] tracking-[0.22em] text-gold uppercase">

@@ -134,7 +134,7 @@ export function ServicesSection({
                     <img
                       src={cover}
                       alt=""
-                      className="absolute inset-0 size-full object-cover"
+                      className="absolute inset-0 size-full object-cover object-[center_45%]"
                     />
                   ) : null}
                   <div className="absolute inset-0 bg-gradient-to-t from-navy/35 via-transparent to-transparent" />
