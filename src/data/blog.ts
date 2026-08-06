@@ -1,7 +1,7 @@
 import gallery1 from "@/assets/gallery/gallery-01-marina.jpg";
 import gallery2 from "@/assets/gallery/gallery-02-deck.jpg";
 import yacht1 from "@/assets/fleet/fleet-01.jpg";
-import aboutMarina from "@/assets/about/about-marina.jpg";
+import aboutMarina from "@/assets/about/yacht_lunaiyar.png";
 import type { Language } from "@/lib/i18n";
 import { loadCmsStore } from "@/lib/cms-store";
 import { absoluteUrl as siteAbsoluteUrl } from "@/lib/site";

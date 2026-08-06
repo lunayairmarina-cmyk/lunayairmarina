@@ -4,7 +4,8 @@ import { useLanguage } from "@/lib/i18n";
 import { Reveal } from "@/components/shared/Reveal";
 import { Counter } from "@/components/shared/Counter";
 import { useOptionalSiteContent, localizeOrFallback } from "@/providers/SiteContentProvider";
-import aboutImageFallback from "@/assets/about/about-marina.webp";
+import { resolvePublicMediaSrc } from "@/lib/media";
+import aboutImageFallback from "@/assets/about/yacht_lunaiyar.png";
 
 interface Stat {
   value: number;
@@ -15,7 +16,7 @@ interface Stat {
 export function AboutSection({ variant = "home" }: { variant?: "home" | "page" }) {
   const { t, tv, language } = useLanguage();
   const about = useOptionalSiteContent()?.bundle?.about;
-  const aboutImage = about?.image || aboutImageFallback;
+  const aboutImage = resolvePublicMediaSrc(about?.image, aboutImageFallback);
   const eyebrow = about
     ? localizeOrFallback(about.eyebrow, language, t("about.eyebrow"))
     : t("about.eyebrow");

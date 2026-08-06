@@ -1,5 +1,5 @@
 import heroYacht from "@/assets/hero/hero-main.webp";
-import aboutMarina from "@/assets/about/about-marina.jpg";
+import aboutMarina from "@/assets/about/yacht_lunaiyar.png";
 import yacht1 from "@/assets/fleet/fleet-01.jpg";
 import yacht2 from "@/assets/fleet/fleet-02.jpg";
 import yacht3 from "@/assets/fleet/fleet-03.jpg";

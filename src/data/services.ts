@@ -1,6 +1,6 @@
 import yacht1 from "@/assets/fleet/fleet-01.jpg";
 import yacht2 from "@/assets/fleet/fleet-02.jpg";
-import aboutMarina from "@/assets/about/about-marina.jpg";
+import aboutMarina from "@/assets/about/yacht_lunaiyar.png";
 import gallery1 from "@/assets/gallery/gallery-01-marina.jpg";
 import gallery2 from "@/assets/gallery/gallery-02-deck.jpg";
 import gallery3 from "@/assets/gallery/gallery-03-lounge.jpg";

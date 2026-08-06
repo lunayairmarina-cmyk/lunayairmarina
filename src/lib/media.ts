@@ -3,7 +3,7 @@
  * Physical files live under src/assets/{brand,hero,about,headers,gallery,fleet,admin}/
  */
 import heroMain from "@/assets/hero/hero-main.webp";
-import aboutMarina from "@/assets/about/about-marina.webp";
+import aboutMarina from "@/assets/about/yacht_lunaiyar.png";
 import adminLoginBg from "@/assets/admin/admin-login-bg.jpg";
 import fleet01 from "@/assets/fleet/fleet-01.jpg";
 import fleet02 from "@/assets/fleet/fleet-02.jpg";
@@ -24,6 +24,7 @@ const ASSET_BY_FILENAME: Record<string, string> = {
   "hero-main.webp": heroMain,
   "about-marina.jpg": aboutMarina,
   "about-marina.webp": aboutMarina,
+  "yacht_lunaiyar.png": aboutMarina,
   "fleet-01.jpg": fleet01,
   "fleet-02.jpg": fleet02,
   "fleet-03.jpg": fleet03,
@@ -73,12 +74,15 @@ export function resolvePublicMediaSrc(src: string | undefined | null, fallback =
     value.startsWith("http://") ||
     value.startsWith("https://")
   ) {
+    // Prefer the updated branded yacht asset over legacy about-marina uploads.
+    if (/about-marina/i.test(value)) return aboutMarina;
     return value;
   }
 
   if (value.startsWith("/assets/")) return value;
 
   if (value.startsWith("/images/") || value.startsWith("/videos/")) {
+    if (/about-marina|yacht_lunaiyar/i.test(value)) return aboutMarina;
     // Prefer WebP siblings for known optimized folders (hero/headers/about).
     if (
       value.startsWith("/images/hero/") ||

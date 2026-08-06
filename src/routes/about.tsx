@@ -10,7 +10,7 @@ import { useLanguage } from "@/lib/i18n";
 import { buildSeoHead } from "@/services/seoService";
 import { usePageHeaderImage } from "@/hooks/usePageHeaderImage";
 import aboutHeader from "@/assets/headers/header-about.jpg";
-import aboutImage from "@/assets/about/about-marina.jpg";
+import aboutImage from "@/assets/about/yacht_lunaiyar.png";
 
 export const Route = createFileRoute("/about")({
   head: () => buildSeoHead("about", "/about"),
