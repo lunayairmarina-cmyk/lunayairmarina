@@ -28,6 +28,17 @@ function emptyLocalized() {
   return { en: "", ar: "" };
 }
 
+function seoCheckLabel(
+  check: ReturnType<typeof scoreSeo>["checks"][number],
+  t: (key: string) => string,
+) {
+  const template = t(`admin.seo.checks.${check.id}`);
+  if (typeof check.current === "number") {
+    return template.replace("{{n}}", String(check.current));
+  }
+  return template;
+}
+
 function ensureMeta(meta: SeoPageMeta): SeoPageMeta {
   return {
     title: meta.title ?? emptyLocalized(),
@@ -243,7 +254,7 @@ export function SeoForm() {
                       check.ok ? "text-emerald-700" : "text-navy/55",
                     )}
                   >
-                    {check.ok ? "✓" : "○"} {check.label}
+                    {check.ok ? "✓" : "○"} {seoCheckLabel(check, t)}
                   </li>
                 ))}
               </ul>

@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { getSiteContent, clearContentCache } from "@/services/content";
-import { CMS_UPDATED_EVENT } from "@/lib/cms-store";
+import { CMS_BROADCAST_CHANNEL, CMS_STORAGE_KEY, CMS_UPDATED_EVENT } from "@/lib/cms-store";
 import type { LocalizedString, SiteBundle } from "@/types/content";
 
 type Lang = "en" | "ar";
@@ -55,9 +55,11 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [bundle, setBundle] = useState<SiteBundle | null>(null);
 
-  const load = useCallback(async (force = false) => {
-    setStatus("loading");
-    setError(null);
+  const load = useCallback(async (force = false, quiet = false) => {
+    if (!quiet) {
+      setStatus("loading");
+      setError(null);
+    }
     try {
       if (force) clearContentCache();
       const next = await getSiteContent({ force });
@@ -65,7 +67,7 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
       setStatus("ready");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load content");
-      setStatus("error");
+      if (!quiet) setStatus("error");
     }
   }, []);
 
@@ -75,10 +77,33 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const onCms = () => {
-      void load(true);
+      void load(true, true);
+    };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key && event.key !== CMS_STORAGE_KEY) return;
+      onCms();
     };
     window.addEventListener(CMS_UPDATED_EVENT, onCms);
-    return () => window.removeEventListener(CMS_UPDATED_EVENT, onCms);
+    window.addEventListener("storage", onStorage);
+
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel(CMS_BROADCAST_CHANNEL);
+      channel.onmessage = () => onCms();
+    } catch {
+      // ignore
+    }
+
+    const poll = window.setInterval(() => {
+      void load(true, true);
+    }, 60_000);
+
+    return () => {
+      window.removeEventListener(CMS_UPDATED_EVENT, onCms);
+      window.removeEventListener("storage", onStorage);
+      window.clearInterval(poll);
+      channel?.close();
+    };
   }, [load]);
 
   const value = useMemo<SiteContentContextValue>(
@@ -86,7 +111,7 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
       status,
       error,
       bundle,
-      reload: () => load(true),
+      reload: () => load(true, true),
       localize: localizeValue,
     }),
     [status, error, bundle, load],

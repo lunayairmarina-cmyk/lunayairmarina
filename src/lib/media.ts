@@ -25,6 +25,7 @@ import serviceYachtMgmt from "@/assets/services/service-yacht-management.jpg";
 import serviceAgency from "@/assets/services/service-yacht-agency.jpg";
 import serviceMarina from "@/assets/services/service-marina.jpg";
 import serviceCrew from "@/assets/services/service-crew.jpg";
+import { isMediaRef, resolveMediaSrcSync } from "@/lib/media-refs";
 
 /** New canonical filenames */
 const ASSET_BY_FILENAME: Record<string, string> = {
@@ -80,10 +81,15 @@ const ASSET_BY_FILENAME: Record<string, string> = {
 /**
  * Normalize CMS/Firestore media URLs.
  * Fixes legacy `/src/assets/...` paths that break in the browser.
+ * Never returns a raw `media:` ref (invalid as img src) — uses memory cache or fallback.
  */
 export function resolvePublicMediaSrc(src: string | undefined | null, fallback = gallery01): string {
   if (!src || !src.trim()) return fallback;
   const value = src.trim();
+
+  if (isMediaRef(value)) {
+    return resolveMediaSrcSync(value, fallback);
+  }
 
   if (
     value.startsWith("data:") ||
@@ -91,7 +97,9 @@ export function resolvePublicMediaSrc(src: string | undefined | null, fallback =
     value.startsWith("http://") ||
     value.startsWith("https://")
   ) {
-    // Prefer the updated branded yacht asset over legacy about-marina uploads.
+    // Never rewrite permanent Firebase Storage CMS uploads.
+    if (/firebasestorage\.googleapis\.com/i.test(value)) return value;
+    // Prefer the branded yacht asset over legacy about-marina hosted URLs.
     if (/about-marina/i.test(value)) return aboutMarina;
     return value;
   }

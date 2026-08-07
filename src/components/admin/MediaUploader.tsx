@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { ImagePlus, LoaderCircle } from "lucide-react";
-import { uploadMediaFile } from "@/services/adminCmsService";
+import { CheckCircle2, ImagePlus, LoaderCircle } from "lucide-react";
+import { MediaUploadError, uploadMediaFile } from "@/services/adminCmsService";
 import { useLanguage } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { GalleryPicker } from "@/components/admin/GalleryPicker";
@@ -35,7 +35,9 @@ export function MediaUploader({
   const { t } = useLanguage();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const [preview, setPreview] = useState(() => previewFor(value));
 
   useEffect(() => {
@@ -61,13 +63,26 @@ export function MediaUploader({
     if (!file) return;
     setBusy(true);
     setError(null);
+    setSuccess(false);
+    setProgress(0);
     try {
-      const url = await uploadMediaFile(file, pathPrefix);
+      const url = await uploadMediaFile(file, {
+        pathPrefix,
+        onProgress: setProgress,
+      });
       onChange(url);
-    } catch {
-      setError(t("admin.cms.uploadFailed"));
+      setPreview(previewFor(url) || url);
+      setSuccess(true);
+      window.setTimeout(() => setSuccess(false), 2500);
+    } catch (err) {
+      const code = err instanceof MediaUploadError ? err.code : "UPLOAD_FAILED";
+      if (code === "INVALID_TYPE") setError(t("admin.cms.uploadInvalidType"));
+      else if (code === "FILE_TOO_LARGE") setError(t("admin.cms.uploadTooLarge"));
+      else if (code === "TOO_LARGE_AFTER_COMPRESS") setError(t("admin.cms.uploadCompressFailed"));
+      else setError(t("admin.cms.uploadFailed"));
     } finally {
       setBusy(false);
+      setProgress(0);
       if (inputRef.current) inputRef.current.value = "";
     }
   };
@@ -94,12 +109,30 @@ export function MediaUploader({
           >
             {busy ? (
               <LoaderCircle className="size-3.5 animate-spin" strokeWidth={1.6} />
+            ) : success ? (
+              <CheckCircle2 className="size-3.5 text-emerald-600" strokeWidth={1.6} />
             ) : (
               <ImagePlus className="size-3.5" strokeWidth={1.6} />
             )}
-            {t("admin.actions.upload")}
+            {busy
+              ? t("admin.cms.uploading")
+              : success
+                ? t("admin.cms.uploadSuccess")
+                : t("admin.actions.upload")}
           </button>
+          {busy ? (
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-navy/10">
+              <div
+                className="h-full rounded-full bg-gold transition-[width] duration-200"
+                style={{ width: `${Math.max(progress, 8)}%` }}
+              />
+            </div>
+          ) : null}
+          {busy && progress > 0 ? (
+            <p className="text-[0.65rem] text-navy/45">{progress}%</p>
+          ) : null}
           {error ? <p className="text-xs text-red-500">{error}</p> : null}
+          <p className="text-[0.65rem] text-navy/40">{t("admin.cms.uploadHint")}</p>
         </div>
       </div>
       {allowGallery ? (
@@ -111,7 +144,7 @@ export function MediaUploader({
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
+        accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
         className="hidden"
         onChange={(event) => void onPick(event.target.files?.[0])}
       />

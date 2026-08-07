@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import {
@@ -40,10 +48,37 @@ function authErrorKey(error: unknown): string {
   return "admin.loginFailed";
 }
 
-export function useAdminAuth() {
+function readSessionUser(): AdminUser | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(SESSION_STORAGE_KEY);
+    if (!raw) return null;
+    const session = JSON.parse(raw) as { userId?: string };
+    if (!session.userId) return null;
+    return loadAdminUsers().find((item) => item.id === session.userId && item.active) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+interface AdminAuthContextValue {
+  authed: boolean | null;
+  user: AdminUser | null;
+  login: (email?: string, password?: string) => Promise<{ ok: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  can: (permission: AdminPermission) => boolean;
+  refresh: () => Promise<AdminUser[]>;
+  authError: string | null;
+  isSuperAdmin: boolean;
+}
+
+const AdminAuthContext = createContext<AdminAuthContextValue | null>(null);
+
+export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
-  const [authed, setAuthed] = useState<boolean | null>(null);
-  const [user, setUser] = useState<AdminUser | null>(null);
+  const sessionUser = useMemo(() => readSessionUser(), []);
+  const [authed, setAuthed] = useState<boolean | null>(() => (sessionUser ? true : null));
+  const [user, setUser] = useState<AdminUser | null>(() => sessionUser);
   const [authError, setAuthError] = useState<string | null>(null);
 
   const applyUser = useCallback((next: AdminUser | null) => {
@@ -63,20 +98,11 @@ export function useAdminAuth() {
     const auth = getFirebaseAuth();
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
-        try {
-          const raw = window.localStorage.getItem(SESSION_STORAGE_KEY);
-          if (raw) {
-            const session = JSON.parse(raw) as { userId: string };
-            const local = loadAdminUsers().find(
-              (item) => item.id === session.userId && item.active,
-            );
-            if (local) {
-              applyUser(local);
-              return;
-            }
-          }
-        } catch {
-          // ignore
+        const local = readSessionUser();
+        if (local) {
+          // Keep sidebar/session stable while Firebase auth is briefly null during route changes.
+          applyUser(local);
+          return;
         }
         applyUser(null);
         return;
@@ -93,7 +119,8 @@ export function useAdminAuth() {
         const users = await fetchAdminUsersFromFirebase();
         if (users.length) mergeUsersCache(users);
       } catch {
-        applyUser(null);
+        // Keep existing session user if Firebase profile refresh fails.
+        if (!readSessionUser()) applyUser(null);
       }
     });
     return () => unsub();
@@ -115,7 +142,6 @@ export function useAdminAuth() {
       try {
         let credential;
         try {
-          // Prefer signing into an existing Firebase Authentication user.
           credential = await signInWithEmailAndPassword(auth, normalized, pass);
         } catch (signInError) {
           const code =
@@ -123,8 +149,6 @@ export function useAdminAuth() {
               ? String((signInError as { code?: string }).code)
               : "";
 
-          // Only first-run bootstrap may create the Super Admin. Never treat a wrong
-          // password as an invite for a regular user.
           const maybeMissingUser =
             code === "auth/user-not-found" || code === "auth/invalid-credential";
           if (!maybeMissingUser) throw signInError;
@@ -215,14 +239,27 @@ export function useAdminAuth() {
     }
   }, []);
 
-  return {
-    authed,
-    user,
-    login,
-    logout,
-    can,
-    refresh: refreshUsers,
-    authError,
-    isSuperAdmin: isSuperAdmin(user),
-  };
+  const value = useMemo<AdminAuthContextValue>(
+    () => ({
+      authed,
+      user,
+      login,
+      logout,
+      can,
+      refresh: refreshUsers,
+      authError,
+      isSuperAdmin: isSuperAdmin(user),
+    }),
+    [authed, user, login, logout, can, refreshUsers, authError],
+  );
+
+  return <AdminAuthContext.Provider value={value}>{children}</AdminAuthContext.Provider>;
+}
+
+export function useAdminAuth(): AdminAuthContextValue {
+  const ctx = useContext(AdminAuthContext);
+  if (!ctx) {
+    throw new Error("useAdminAuth must be used within AdminAuthProvider");
+  }
+  return ctx;
 }

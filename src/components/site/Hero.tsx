@@ -4,7 +4,7 @@ import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/lib/i18n";
 import { useOptionalSiteContent, localizeOrFallback } from "@/providers/SiteContentProvider";
-import { resolvePublicMediaSrc } from "@/lib/media";
+import { useResolvedMediaSrc } from "@/hooks/useResolvedMediaSrc";
 
 const HERO_MP4_FALLBACK = "/videos/lunayair.mp4";
 /** Stable public URL — matches homepage `<link rel="preload">` for LCP. */
@@ -14,7 +14,7 @@ export function Hero() {
   const { t, language } = useLanguage();
   const site = useOptionalSiteContent();
   const homepage = site?.bundle?.homepage;
-  const heroImage = resolvePublicMediaSrc(homepage?.heroImage, HERO_POSTER_FALLBACK);
+  const heroImage = useResolvedMediaSrc(homepage?.heroImage, HERO_POSTER_FALLBACK);
   const heroVideo =
     homepage?.heroVideo && homepage.heroVideo !== "/videos/hero.mp4"
       ? homepage.heroVideo

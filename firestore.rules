@@ -71,7 +71,7 @@ service cloud.firestore {
       allow update, delete: if isActiveAdmin();
     }
 
-    // Uploaded media (data URLs) — public read for site images, admin write
+    // Uploaded media registry (Storage HTTPS url and/or legacy dataUrl) — public read
     match /media/{id} {
       allow read: if true;
       allow write: if isActiveAdmin();

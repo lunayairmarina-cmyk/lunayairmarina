@@ -2,7 +2,7 @@ import { useLanguage } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { Reveal } from "@/components/shared/Reveal";
 import { useOptionalSiteContent, localizeValue } from "@/providers/SiteContentProvider";
-import { resolvePublicMediaSrc } from "@/lib/media";
+import { ResolvedImage } from "@/components/shared/ResolvedImage";
 
 export function FleetSection({ limit }: { limit?: number }) {
   const { t, language } = useLanguage();
@@ -22,8 +22,8 @@ export function FleetSection({ limit }: { limit?: number }) {
         <div className="mt-10 grid gap-6 sm:mt-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           {items.map((yacht, index) => (
             <Reveal key={yacht.id} delay={index * 0.05} className="overflow-hidden border border-navy/10 bg-white">
-              <img
-                src={resolvePublicMediaSrc(yacht.image)}
+              <ResolvedImage
+                src={yacht.image}
                 alt={yacht.yachtName}
                 className="aspect-[16/10] w-full object-cover object-[center_45%]"
                 loading="lazy"

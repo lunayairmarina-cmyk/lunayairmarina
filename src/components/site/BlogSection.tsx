@@ -8,7 +8,8 @@ import { getPublishedPosts, tx, type BlogPost } from "@/data/blog";
 import type { BlogContent, SiteBundle } from "@/types/content";
 import { ContentEmpty } from "@/components/shared/ContentState";
 import { useOptionalSiteContent } from "@/providers/SiteContentProvider";
-import { isUsableBlogSlug, resolvePublicMediaSrc } from "@/lib/media";
+import { isUsableBlogSlug } from "@/lib/media";
+import { ResolvedImage } from "@/components/shared/ResolvedImage";
 
 function formatDate(value: string, language: string) {
   return new Intl.DateTimeFormat(language === "ar" ? "ar-SA" : "en-GB", {
@@ -27,9 +28,7 @@ function mapRemotePosts(bundle: SiteBundle | null | undefined): BlogPost[] {
       if (post.blocks && post.excerpt && typeof post.title === "object") {
         return {
           ...(post as unknown as BlogPost),
-          coverImage: resolvePublicMediaSrc(
-            (post as unknown as BlogPost).coverImage || post.image,
-          ),
+          coverImage: (post as unknown as BlogPost).coverImage || post.image,
         };
       }
       const title =
@@ -43,7 +42,7 @@ function mapRemotePosts(bundle: SiteBundle | null | undefined): BlogPost[] {
           (typeof post.content === "string"
             ? { en: post.content.slice(0, 160), ar: post.content.slice(0, 160) }
             : post.content),
-        coverImage: resolvePublicMediaSrc(post.image),
+        coverImage: post.image,
         coverAlt: title,
         author: post.author ?? { en: "lunayairmarina", ar: "lunayairmarina" },
         publishedAt: post.date,
@@ -115,7 +114,7 @@ export function BlogSection({ limit = 3 }: { limit?: number }) {
             {posts.map((post) => (
               <motion.article key={post.id} variants={staggerItem} className="group flex flex-col">
                 <Link to="/blog/$slug" params={{ slug: post.slug }} className="overflow-hidden">
-                  <img
+                  <ResolvedImage
                     src={post.coverImage}
                     alt={tx(post.coverAlt, language)}
                     loading="lazy"

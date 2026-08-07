@@ -9,6 +9,7 @@ import { useLanguage } from "@/lib/i18n";
 import { asLocalized, pairLocalized } from "@/lib/localized";
 import { loadCmsStore } from "@/lib/cms-store";
 import { describeSaveResult, saveTeam } from "@/services/adminCmsService";
+import { ResolvedImage } from "@/components/shared/ResolvedImage";
 import type { TeamMember } from "@/types/content";
 
 export const Route = createLazyFileRoute("/admin/team")({
@@ -105,7 +106,11 @@ function AdminTeamPage() {
         header: t("admin.table.image"),
         render: (row) =>
           row.image ? (
-            <img src={row.image} alt="" className="size-12 rounded-full object-cover" />
+            <ResolvedImage
+              src={row.image}
+              alt=""
+              className="size-12 rounded-full object-cover"
+            />
           ) : (
             <span className="grid size-12 place-items-center rounded-full bg-navy/6 text-xs">
               {row.name[language].slice(0, 2).toUpperCase()}

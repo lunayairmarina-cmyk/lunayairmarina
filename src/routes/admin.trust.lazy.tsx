@@ -247,7 +247,10 @@ function AdminTrustPage() {
                     </span>
                     <button
                       type="button"
-                      onClick={() => removeSlot(slot.id)}
+                      onClick={() => {
+                        if (!window.confirm(t("admin.actions.confirmDelete"))) return;
+                        removeSlot(slot.id);
+                      }}
                       aria-label={t("admin.actions.delete")}
                       className="rounded-lg p-1.5 text-red-500 transition-colors hover:bg-red-50"
                     >

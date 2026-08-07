@@ -16,6 +16,7 @@ import type {
 
 export const CMS_STORAGE_KEY = "lunayairmarina.cms.v1";
 export const CMS_UPDATED_EVENT = "lunayairmarina-cms-updated";
+export const CMS_BROADCAST_CHANNEL = "lunayairmarina-cms-broadcast";
 
 export type SeoPageId = "home" | "about" | "services" | "contact" | "blog" | "application";
 

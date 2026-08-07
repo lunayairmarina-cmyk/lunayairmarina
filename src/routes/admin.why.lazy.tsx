@@ -153,12 +153,13 @@ function AdminWhyPage() {
                   <div className="mb-3 flex justify-end">
                     <button
                       type="button"
-                      onClick={() =>
+                      onClick={() => {
+                        if (!window.confirm(t("admin.actions.confirmDelete"))) return;
                         setData({
                           ...data,
                           items: data.items.filter((_, i) => i !== index),
-                        })
-                      }
+                        });
+                      }}
                       className="text-red-500"
                       aria-label={t("admin.actions.delete")}
                     >

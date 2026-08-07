@@ -1,6 +1,8 @@
 import { collection, doc, getDocs, setDoc, writeBatch } from "firebase/firestore";
-import { getDb } from "@/lib/firebase";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { getDb, getFirebaseStorage } from "@/lib/firebase";
 import {
+  CMS_BROADCAST_CHANNEL,
   CMS_UPDATED_EVENT,
   deepMergeCopy,
   diffCopyAgainstLocale,
@@ -49,7 +51,12 @@ const STABLE_PAGE_HEADERS: Record<PageHeaderId, string> = {
 function normalizePageHeaderUrl(pageId: PageHeaderId, imageUrl: string): string {
   const value = imageUrl.trim();
   if (!value) return STABLE_PAGE_HEADERS[pageId];
-  if (value.startsWith("media:") || value.startsWith("data:") || value.startsWith("blob:")) {
+  if (
+    value.startsWith("media:") ||
+    value.startsWith("data:") ||
+    value.startsWith("blob:") ||
+    /^https?:\/\//i.test(value)
+  ) {
     return value;
   }
   if (value.startsWith("/images/headers/")) {
@@ -86,8 +93,14 @@ export function describeSaveResult(
 
 function notifySiteReload() {
   clearContentCache();
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event(CMS_UPDATED_EVENT));
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(CMS_UPDATED_EVENT));
+  try {
+    const channel = new BroadcastChannel(CMS_BROADCAST_CHANNEL);
+    channel.postMessage({ type: "cms-updated", at: Date.now() });
+    channel.close();
+  } catch {
+    // Older browsers / restricted contexts
   }
 }
 
@@ -225,11 +238,20 @@ export async function saveTeam(team: TeamMember[]): Promise<SaveResult> {
 }
 
 export async function saveServices(services: ServiceContent[]): Promise<SaveResult> {
+  const keepIds = new Set(services.map((service) => service.id || service.slug).filter(Boolean));
   const sync = await tryFirebaseWrite(async () => {
-    const batch = writeBatch(getDb());
+    const db = getDb();
+    const existing = await getDocs(collection(db, "services"));
+    const batch = writeBatch(db);
+
+    for (const snap of existing.docs) {
+      if (!keepIds.has(snap.id)) batch.delete(snap.ref);
+    }
+
     services.forEach((service) => {
-      const { id, ...data } = service;
-      batch.set(doc(getDb(), "services", id || service.slug), data, { merge: true });
+      const docId = service.id || service.slug;
+      const { id: _id, ...data } = service;
+      batch.set(doc(db, "services", docId), { ...data, id: docId }, { merge: true });
     });
     await batch.commit();
   });
@@ -479,57 +501,291 @@ export async function fetchMessagesFromFirebase(): Promise<CmsMessage[]> {
   return messages;
 }
 
-const MAX_IMAGE_EDGE = 1400;
-const JPEG_QUALITY = 0.72;
-const MAX_DATA_URL_CHARS = 700_000; // keep under Firestore ~1MB doc limit
+const MAX_IMAGE_EDGE = 1920;
+const JPEG_QUALITY = 0.82;
+const MAX_DATA_URL_CHARS = 700_000; // under Firestore ~1MB doc limit
+const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const STORAGE_BLOCKED_KEY = "lunaya.cms.storageBlocked";
 
-async function fileToCompressedDataUrl(file: File): Promise<string> {
-  if (!file.type.startsWith("image/")) {
-    throw new Error("Only images can be uploaded without Firebase Storage.");
+export type UploadMediaOptions = {
+  pathPrefix?: string;
+  onProgress?: (percent: number) => void;
+};
+
+export class MediaUploadError extends Error {
+  code: "INVALID_TYPE" | "FILE_TOO_LARGE" | "UPLOAD_FAILED" | "TOO_LARGE_AFTER_COMPRESS";
+  constructor(code: MediaUploadError["code"], message?: string) {
+    super(message || code);
+    this.code = code;
+  }
+}
+
+function assertValidImageFile(file: File) {
+  if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+    throw new MediaUploadError("INVALID_TYPE");
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    throw new MediaUploadError("FILE_TOO_LARGE");
+  }
+}
+
+function extensionForType(type: string) {
+  if (type === "image/png") return "png";
+  if (type === "image/webp") return "webp";
+  return "jpg";
+}
+
+function isStorageBlocked(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.sessionStorage.getItem(STORAGE_BLOCKED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markStorageBlocked() {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(STORAGE_BLOCKED_KEY, "1");
+  } catch {
+    // ignore
+  }
+}
+
+function clearStorageBlocked() {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.removeItem(STORAGE_BLOCKED_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+async function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new MediaUploadError("UPLOAD_FAILED"));
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function fileToUploadBlob(
+  file: File,
+  quality = JPEG_QUALITY,
+  maxEdge = MAX_IMAGE_EDGE,
+): Promise<{ blob: Blob; contentType: string }> {
+  // Small non-JPEG files can skip re-encode.
+  if (file.size <= 900_000 && (file.type === "image/png" || file.type === "image/webp")) {
+    return { blob: file, contentType: file.type };
   }
 
   const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(bitmap.width, bitmap.height));
+  const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
   const width = Math.max(1, Math.round(bitmap.width * scale));
   const height = Math.max(1, Math.round(bitmap.height * scale));
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Canvas unavailable.");
+  if (!ctx) throw new MediaUploadError("UPLOAD_FAILED", "Canvas unavailable.");
   ctx.drawImage(bitmap, 0, 0, width, height);
   bitmap.close();
 
-  let quality = JPEG_QUALITY;
-  let dataUrl = canvas.toDataURL("image/jpeg", quality);
-  while (dataUrl.length > MAX_DATA_URL_CHARS && quality > 0.4) {
-    quality -= 0.08;
-    dataUrl = canvas.toDataURL("image/jpeg", quality);
-  }
-  if (dataUrl.length > MAX_DATA_URL_CHARS) {
-    throw new Error("Image is too large after compression.");
-  }
-  return dataUrl;
+  // Prefer JPEG for Firestore size limits (png/webp often stay too large as data URLs).
+  const contentType = "image/jpeg";
+  const blob = await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (result) => {
+        if (!result) reject(new MediaUploadError("UPLOAD_FAILED", "Compression failed."));
+        else resolve(result);
+      },
+      contentType,
+      quality,
+    );
+  });
+
+  return { blob, contentType };
 }
 
-/** Compress image on device and store data URL in Firestore `media` (no Storage).
- * Returns a short `media:{id}` ref so CMS/localStorage stay small. */
-export async function uploadMediaFile(file: File, pathPrefix = "uploads"): Promise<string> {
-  const dataUrl = await fileToCompressedDataUrl(file);
+async function fileToCompressedDataUrl(file: File): Promise<{ dataUrl: string; contentType: string }> {
+  const attempts: Array<{ quality: number; maxEdge: number }> = [
+    { quality: 0.82, maxEdge: 1920 },
+    { quality: 0.72, maxEdge: 1600 },
+    { quality: 0.62, maxEdge: 1280 },
+    { quality: 0.52, maxEdge: 1024 },
+  ];
+
+  let lastError: unknown;
+  for (const attempt of attempts) {
+    try {
+      const { blob, contentType } = await fileToUploadBlob(file, attempt.quality, attempt.maxEdge);
+      const dataUrl = await blobToDataUrl(blob);
+      if (dataUrl.length <= MAX_DATA_URL_CHARS) {
+        return { dataUrl, contentType };
+      }
+      lastError = new MediaUploadError("TOO_LARGE_AFTER_COMPRESS");
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (lastError instanceof MediaUploadError) throw lastError;
+  throw new MediaUploadError("TOO_LARGE_AFTER_COMPRESS");
+}
+
+async function uploadToFirebaseStorage(
+  blob: Blob,
+  contentType: string,
+  pathPrefix: string,
+  onProgress?: (percent: number) => void,
+): Promise<{ id: string; url: string; storagePath: string; contentType: string }> {
+  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const ext = extensionForType(contentType);
+  const safePrefix = pathPrefix.replace(/^\/+|\/+$/g, "") || "uploads";
+  const storagePath = `uploads/${safePrefix}/${id}.${ext}`;
+  const storageRef = ref(getFirebaseStorage(), storagePath);
+
+  await new Promise<void>((resolve, reject) => {
+    const task = uploadBytesResumable(storageRef, blob, {
+      contentType,
+      cacheControl: "public,max-age=31536000",
+    });
+    const timer = window.setTimeout(() => {
+      try {
+        task.cancel();
+      } catch {
+        // ignore
+      }
+      reject(new Error("storage-upload-timeout"));
+    }, 20_000);
+
+    task.on(
+      "state_changed",
+      (snapshot) => {
+        if (!onProgress || !snapshot.totalBytes) return;
+        const percent = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+        onProgress(Math.min(99, Math.max(0, percent)));
+      },
+      (error) => {
+        window.clearTimeout(timer);
+        reject(error);
+      },
+      () => {
+        window.clearTimeout(timer);
+        resolve();
+      },
+    );
+  });
+
+  const url = await getDownloadURL(storageRef);
+  onProgress?.(100);
+  return { id, url, storagePath, contentType };
+}
+
+async function saveMediaToFirestore(input: {
+  id: string;
+  pathPrefix: string;
+  name: string;
+  contentType: string;
+  dataUrl?: string;
+  url?: string;
+  storagePath?: string;
+  fallbackReason?: string;
+}) {
+  await setDoc(doc(getDb(), "media", input.id), {
+    id: input.id,
+    pathPrefix: input.pathPrefix,
+    name: input.name,
+    contentType: input.contentType,
+    ...(input.url ? { url: input.url } : {}),
+    ...(input.storagePath ? { storagePath: input.storagePath } : {}),
+    ...(input.dataUrl ? { dataUrl: input.dataUrl } : {}),
+    ...(input.fallbackReason ? { fallbackReason: input.fallbackReason } : {}),
+    createdAt: new Date().toISOString(),
+  });
+}
+
+/**
+ * Upload image permanently.
+ * Saves compressed image to Firestore `media/{id}` (works today with existing rules).
+ * Optionally upgrades to Firebase Storage HTTPS when `VITE_FIREBASE_STORAGE_UPLOADS=1`
+ * and Storage rules/CORS are deployed.
+ */
+export async function uploadMediaFile(
+  file: File,
+  pathPrefixOrOptions: string | UploadMediaOptions = "uploads",
+): Promise<string> {
+  const options =
+    typeof pathPrefixOrOptions === "string"
+      ? { pathPrefix: pathPrefixOrOptions }
+      : pathPrefixOrOptions;
+  const pathPrefix = options.pathPrefix || "uploads";
+
+  assertValidImageFile(file);
+  options.onProgress?.(8);
+
+  const preferStorage =
+    String((import.meta.env as Record<string, string | undefined>).VITE_FIREBASE_STORAGE_UPLOADS || "")
+      .trim()
+      .toLowerCase() === "1" && !isStorageBlocked();
+
+  if (preferStorage) {
+    try {
+      const prepared = await fileToUploadBlob(file);
+      options.onProgress?.(20);
+      const uploaded = await uploadToFirebaseStorage(
+        prepared.blob,
+        prepared.contentType,
+        pathPrefix,
+        options.onProgress,
+      );
+      cacheMediaDataUrl(uploaded.id, uploaded.url);
+      await saveMediaToFirestore({
+        id: uploaded.id,
+        pathPrefix,
+        name: file.name,
+        contentType: uploaded.contentType,
+        url: uploaded.url,
+        storagePath: uploaded.storagePath,
+      });
+      clearStorageBlocked();
+      options.onProgress?.(100);
+      return uploaded.url;
+    } catch (storageError) {
+      markStorageBlocked();
+      if (typeof console !== "undefined") {
+        console.warn(
+          "[media-upload] Firebase Storage unavailable (rules/CORS). Saving permanently to Firestore instead.",
+          storageError,
+        );
+      }
+    }
+  }
+
+  options.onProgress?.(35);
+  const { dataUrl, contentType } = await fileToCompressedDataUrl(file);
+  options.onProgress?.(70);
   const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   cacheMediaDataUrl(id, dataUrl);
   try {
-    await setDoc(doc(getDb(), "media", id), {
+    await saveMediaToFirestore({
       id,
       pathPrefix,
       name: file.name,
-      contentType: "image/jpeg",
+      contentType,
       dataUrl,
-      createdAt: new Date().toISOString(),
+      fallbackReason: preferStorage ? "storage-blocked" : "firestore-primary",
     });
-  } catch {
-    // Keep session cache so the UI still shows the image offline.
+  } catch (error) {
+    throw new MediaUploadError(
+      "UPLOAD_FAILED",
+      error instanceof Error ? error.message : "Firestore media save failed",
+    );
   }
+  options.onProgress?.(100);
   return toMediaRef(id);
 }
 

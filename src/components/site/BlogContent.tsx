@@ -2,6 +2,7 @@ import type { BlogBlock, BlogInline } from "@/data/blog";
 import { tx } from "@/data/blog";
 import type { Language } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { ResolvedImage } from "@/components/shared/ResolvedImage";
 
 function InlineSpans({ spans, language }: { spans: BlogInline[]; language: Language }) {
   return (
@@ -40,8 +41,9 @@ export function BlogContent({
           return (
             <Tag
               key={block.id}
+              id={block.id}
               className={cn(
-                "text-navy",
+                "scroll-mt-28 text-navy",
                 block.level === 2 ? "font-display text-3xl sm:text-4xl" : "text-2xl",
               )}
             >
@@ -61,7 +63,7 @@ export function BlogContent({
         if (block.type === "image") {
           return (
             <figure key={block.id} className="overflow-hidden">
-              <img
+              <ResolvedImage
                 src={block.src}
                 alt={tx(block.alt, language)}
                 loading="lazy"

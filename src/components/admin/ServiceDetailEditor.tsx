@@ -90,7 +90,7 @@ function applyLangDraft(
 
 export function ServiceDetailEditor() {
   const { t } = useLanguage();
-  const [slug, setSlug] = useState<(typeof SERVICE_SLUGS)[number]>(SERVICE_SLUGS[0]!);
+  const [slug, setSlug] = useState<string>(SERVICE_SLUGS[0]!);
   const baseCopy = useMemo(() => {
     const cms = loadCmsStore();
     return {
@@ -107,7 +107,7 @@ export function ServiceDetailEditor() {
   const [status, setStatus] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const switchSlug = (next: (typeof SERVICE_SLUGS)[number]) => {
+  const switchSlug = (next: string) => {
     setSlug(next);
     setDraftEn(readDetail(copy.en, next));
     setDraftAr(readDetail(copy.ar, next));
@@ -158,6 +158,11 @@ export function ServiceDetailEditor() {
     setSaving(false);
   };
 
+  const cmsSlugs = useMemo(() => {
+    const fromCms = loadCmsStore().services.map((item) => item.slug).filter(Boolean);
+    return Array.from(new Set([...SERVICE_SLUGS, ...fromCms]));
+  }, [slug, status]);
+
   return (
     <div className="mt-8 rounded-2xl border border-navy/8 bg-white p-6 shadow-sm">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -179,7 +184,7 @@ export function ServiceDetailEditor() {
       </div>
 
       <div className="mb-5 flex flex-wrap gap-2">
-        {SERVICE_SLUGS.map((item) => (
+        {cmsSlugs.map((item) => (
           <button
             key={item}
             type="button"

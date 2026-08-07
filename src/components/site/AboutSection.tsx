@@ -4,7 +4,7 @@ import { useLanguage } from "@/lib/i18n";
 import { Reveal } from "@/components/shared/Reveal";
 import { Counter } from "@/components/shared/Counter";
 import { useOptionalSiteContent, localizeOrFallback } from "@/providers/SiteContentProvider";
-import { resolvePublicMediaSrc } from "@/lib/media";
+import { useResolvedMediaSrc } from "@/hooks/useResolvedMediaSrc";
 import aboutImageFallback from "@/assets/about/yacht_side_transom_landscape.png";
 
 interface Stat {
@@ -16,7 +16,7 @@ interface Stat {
 export function AboutSection({ variant = "home" }: { variant?: "home" | "page" }) {
   const { t, tv, language } = useLanguage();
   const about = useOptionalSiteContent()?.bundle?.about;
-  const aboutImage = resolvePublicMediaSrc(about?.image, aboutImageFallback);
+  const aboutImage = useResolvedMediaSrc(about?.image, aboutImageFallback);
   const eyebrow = about
     ? localizeOrFallback(about.eyebrow, language, t("about.eyebrow"))
     : t("about.eyebrow");

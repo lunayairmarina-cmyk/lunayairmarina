@@ -2,7 +2,7 @@ import { useLanguage } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { Reveal } from "@/components/shared/Reveal";
 import { useOptionalSiteContent, localizeValue } from "@/providers/SiteContentProvider";
-import { resolvePublicMediaSrc } from "@/lib/media";
+import { ResolvedImage } from "@/components/shared/ResolvedImage";
 
 export function TeamSection() {
   const { language } = useLanguage();
@@ -21,8 +21,8 @@ export function TeamSection() {
           {team.map((member, index) => (
             <Reveal key={member.id} delay={index * 0.05} className="border border-navy/10 bg-white p-6">
               {member.image ? (
-                <img
-                  src={resolvePublicMediaSrc(member.image)}
+                <ResolvedImage
+                  src={member.image}
                   alt={localizeValue(member.name, language)}
                   className="aspect-[4/5] w-full object-cover"
                   loading="lazy"

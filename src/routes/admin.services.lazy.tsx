@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { CheckCircle2, CircleDashed, Pencil, Plus, Trash2 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { DataTable, RowAction, StatusBadge, type Column } from "@/components/admin/DataTable";
 import { Modal, ModalField } from "@/components/admin/Modal";
@@ -11,7 +11,7 @@ import { serviceRecords } from "@/data/mock";
 import { SERVICE_SLUGS } from "@/data/services";
 import { loadCmsStore } from "@/lib/cms-store";
 import { describeSaveResult, saveServices } from "@/services/adminCmsService";
-import { ServiceDetailEditor } from "@/components/admin/ServiceDetailEditor";
+import { ResolvedImage } from "@/components/shared/ResolvedImage";
 import type { ServiceContent } from "@/types/content";
 
 export const Route = createLazyFileRoute("/admin/services")({
@@ -28,6 +28,21 @@ type Draft = {
   image: string;
   slug: string;
 };
+
+function isServiceActive(row: ServiceContent) {
+  return (row.details as { status?: string } | undefined)?.status !== "draft";
+}
+
+function slugifyService(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 60);
+}
 
 const emptyDraft = (): Draft => ({
   titleEn: "",
@@ -121,7 +136,7 @@ function AdminServicesPage() {
       row.id === editing.id
         ? {
             ...row,
-            slug: draft.slug || row.slug,
+            slug: slugifyService(draft.slug || draft.titleEn) || row.slug,
             image: draft.image || row.image,
             title: pairLocalized(draft.titleEn, draft.titleAr),
             description: pairLocalized(draft.descriptionEn, draft.descriptionAr),
@@ -135,9 +150,10 @@ function AdminServicesPage() {
 
   const addNew = async () => {
     const id = `s${Date.now()}`;
+    const slugBase = `service-${Date.now()}`;
     const row: ServiceContent = {
       id,
-      slug: `service-${Date.now()}`,
+      slug: slugBase,
       title: { en: "New service", ar: "خدمة جديدة" },
       description: { en: "Service description", ar: "وصف الخدمة" },
       image: serviceRecords[0]?.image ?? "",
@@ -149,13 +165,35 @@ function AdminServicesPage() {
     openEdit(row);
   };
 
+  const toggleStatus = async (row: ServiceContent) => {
+    const nextStatus = isServiceActive(row) ? "draft" : "active";
+    await persist(
+      rows.map((item) =>
+        item.id === row.id
+          ? {
+              ...item,
+              details: {
+                ...(item.details ?? {}),
+                status: nextStatus,
+              },
+            }
+          : item,
+      ),
+    );
+  };
+
   const columns: Column<ServiceContent>[] = useMemo(
     () => [
       {
         key: "image",
         header: t("admin.table.image"),
         render: (row) => (
-          <img src={row.image} alt="" loading="lazy" className="size-14 rounded-md object-cover" />
+          <ResolvedImage
+            src={row.image}
+            alt=""
+            loading="lazy"
+            className="size-14 rounded-md object-cover"
+          />
         ),
       },
       {
@@ -176,17 +214,24 @@ function AdminServicesPage() {
         key: "status",
         header: t("admin.table.status"),
         render: (row) => {
-          const active = (row.details as { status?: string } | undefined)?.status !== "draft";
+          const active = isServiceActive(row);
           return (
-            <StatusBadge
-              label={active ? t("admin.status.active") : t("admin.status.draft")}
-              tone={active ? "active" : "draft"}
-            />
+            <button
+              type="button"
+              onClick={() => void toggleStatus(row)}
+              title={active ? t("admin.actions.setDraft") : t("admin.actions.setActive")}
+              className="rounded-full transition hover:opacity-80"
+            >
+              <StatusBadge
+                label={active ? t("admin.status.active") : t("admin.status.draft")}
+                tone={active ? "active" : "draft"}
+              />
+            </button>
           );
         },
       },
     ],
-    [language, t],
+    [language, rows, t],
   );
 
   return (
@@ -207,17 +252,25 @@ function AdminServicesPage() {
         columns={columns}
         rows={rows}
         getRowId={(row) => row.id}
-        actions={(row) => (
-          <>
-            <RowAction icon={Pencil} label={t("admin.actions.edit")} onClick={() => openEdit(row)} />
-            <RowAction
-              icon={Trash2}
-              tone="danger"
-              label={t("admin.actions.delete")}
-              onClick={() => void persist(rows.filter((item) => item.id !== row.id))}
-            />
-          </>
-        )}
+        actions={(row) => {
+          const active = isServiceActive(row);
+          return (
+            <>
+              <RowAction
+                icon={active ? CircleDashed : CheckCircle2}
+                label={active ? t("admin.actions.setDraft") : t("admin.actions.setActive")}
+                onClick={() => void toggleStatus(row)}
+              />
+              <RowAction icon={Pencil} label={t("admin.actions.edit")} onClick={() => openEdit(row)} />
+              <RowAction
+                icon={Trash2}
+                tone="danger"
+                label={t("admin.actions.delete")}
+                onClick={() => void persist(rows.filter((item) => item.id !== row.id))}
+              />
+            </>
+          );
+        }}
       />
 
       <Modal
@@ -250,11 +303,11 @@ function AdminServicesPage() {
           value={draft.descriptionAr}
           onChange={(value) => setDraft({ ...draft, descriptionAr: value })}
         />
-        <ModalField
-          label="Slug"
-          value={draft.slug}
-          onChange={(value) => setDraft({ ...draft, slug: value })}
-        />
+          <ModalField
+            label={t("admin.blog.slug")}
+            value={draft.slug}
+            onChange={(value) => setDraft({ ...draft, slug: slugifyService(value) })}
+          />
         <ModalField
           textarea
           label="Features (EN, one per line)"
@@ -274,8 +327,6 @@ function AdminServicesPage() {
           onChange={(url) => setDraft({ ...draft, image: url })}
         />
       </Modal>
-
-      <ServiceDetailEditor />
     </AdminLayout>
   );
 }

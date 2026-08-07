@@ -1,9 +1,8 @@
-import { useMemo } from "react";
 import { loadCmsStore, type PageHeaderId } from "@/lib/cms-store";
 import { useOptionalSiteContent } from "@/providers/SiteContentProvider";
 import { isFragileGallerySrc } from "@/lib/gallery-src";
-import { isMediaRef, resolveMediaSrcSync } from "@/lib/media-refs";
-import { resolvePublicMediaSrc } from "@/lib/media";
+import { isMediaRef } from "@/lib/media-refs";
+import { useResolvedMediaSrc } from "@/hooks/useResolvedMediaSrc";
 
 /** Stable public header paths (survive Vite hash changes across deploys). */
 const STABLE_HEADERS: Record<PageHeaderId, string> = {
@@ -14,30 +13,20 @@ const STABLE_HEADERS: Record<PageHeaderId, string> = {
   application: "/images/headers/header-about.webp",
 };
 
-function isUsableHeaderSrc(src: string | undefined | null): src is string {
-  if (!src || !src.trim()) return false;
-  if (isMediaRef(src)) {
-    // Only usable if already resolved in-session.
-    return Boolean(resolveMediaSrcSync(src, ""));
-  }
-  if (isFragileGallerySrc(src)) return false;
-  return true;
+function pickHeaderCandidate(pageId: PageHeaderId, fallback: string): string {
+  const stable = STABLE_HEADERS[pageId] || fallback;
+  const fromCms = loadCmsStore().pageHeaders[pageId];
+  if (!fromCms?.trim()) return stable;
+  if (isMediaRef(fromCms)) return fromCms;
+  if (isFragileGallerySrc(fromCms)) return stable;
+  return fromCms;
 }
 
 export function usePageHeaderImage(pageId: PageHeaderId, fallback: string) {
   const site = useOptionalSiteContent();
-  return useMemo(() => {
-    const stable = STABLE_HEADERS[pageId] || fallback;
-    const fromCms = loadCmsStore().pageHeaders[pageId];
-
-    if (isUsableHeaderSrc(fromCms)) {
-      if (isMediaRef(fromCms)) {
-        return resolveMediaSrcSync(fromCms, stable);
-      }
-      return resolvePublicMediaSrc(fromCms, stable);
-    }
-
-    // Prefer stable /images/headers over hashed /assets/... fallbacks.
-    return stable || fallback;
-  }, [pageId, fallback, site?.bundle?.fetchedAt]);
+  const stable = STABLE_HEADERS[pageId] || fallback;
+  // Re-read when CMS bundle refreshes
+  void site?.bundle?.fetchedAt;
+  const candidate = pickHeaderCandidate(pageId, fallback);
+  return useResolvedMediaSrc(candidate, stable);
 }

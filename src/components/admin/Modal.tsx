@@ -2,6 +2,7 @@ import { useEffect, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { X } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 interface ModalProps {
   open: boolean;
@@ -11,6 +12,8 @@ interface ModalProps {
   children: ReactNode;
   submitLabel?: string;
   busy?: boolean;
+  /** Wider modal for complex editors (blog, etc.) */
+  size?: "md" | "lg";
 }
 
 export function Modal({
@@ -21,6 +24,7 @@ export function Modal({
   children,
   submitLabel,
   busy = false,
+  size = "md",
 }: ModalProps) {
   const { t } = useLanguage();
 
@@ -50,7 +54,10 @@ export function Modal({
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             onClick={(event) => event.stopPropagation()}
-            className="admin-hide-scrollbar flex max-h-[min(92dvh,100%)] w-full max-w-xl flex-col overflow-hidden rounded-t-2xl border border-navy/8 bg-white shadow-luxe sm:max-h-[88vh] sm:rounded-2xl"
+            className={cn(
+              "admin-hide-scrollbar flex max-h-[min(92dvh,100%)] w-full flex-col overflow-hidden rounded-t-2xl border border-navy/8 bg-white shadow-luxe sm:max-h-[88vh] sm:rounded-2xl",
+              size === "lg" ? "max-w-3xl" : "max-w-xl",
+            )}
           >
             <div className="flex shrink-0 items-center justify-between gap-3 border-b border-navy/8 px-4 py-3.5 sm:gap-4 sm:px-6 sm:py-5">
               <h2 className="min-w-0 truncate font-display text-base text-navy sm:text-lg">
@@ -102,12 +109,14 @@ export function ModalField({
   onChange,
   textarea = false,
   type = "text",
+  placeholder,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   textarea?: boolean;
   type?: string;
+  placeholder?: string;
 }) {
   return (
     <label className="flex flex-col gap-2">
@@ -116,6 +125,7 @@ export function ModalField({
         <textarea
           rows={4}
           value={value}
+          placeholder={placeholder}
           onChange={(event) => onChange(event.target.value)}
           className="resize-none rounded-xl border border-navy/10 bg-[#faf8f4] px-4 py-3 text-sm outline-none transition-colors focus:border-navy/30"
         />
@@ -123,6 +133,7 @@ export function ModalField({
         <input
           type={type}
           value={value}
+          placeholder={placeholder}
           onChange={(event) => onChange(event.target.value)}
           className="rounded-xl border border-navy/10 bg-[#faf8f4] px-4 py-3 text-sm outline-none transition-colors focus:border-navy/30"
         />

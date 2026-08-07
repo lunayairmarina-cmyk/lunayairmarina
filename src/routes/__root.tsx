@@ -12,6 +12,7 @@ import type { ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { LanguageProvider } from "@/lib/i18n";
 import { SiteContentProvider } from "@/providers/SiteContentProvider";
+import { AdminAuthProvider } from "@/hooks/useAdminAuth";
 import { companyInfo } from "@/data/mock";
 import { absoluteUrl, DEFAULT_LOGO_PATH, DEFAULT_OG_IMAGE_PATH, getSiteUrl } from "@/lib/site";
 import { ScrollToTop } from "@/components/shared/ScrollToTop";
@@ -239,8 +240,10 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <SiteContentProvider>
         <LanguageProvider>
-          <ScrollToTop />
-          <Outlet />
+          <AdminAuthProvider>
+            <ScrollToTop />
+            <Outlet />
+          </AdminAuthProvider>
         </LanguageProvider>
       </SiteContentProvider>
     </QueryClientProvider>

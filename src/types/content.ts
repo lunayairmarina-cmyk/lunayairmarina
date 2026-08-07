@@ -101,9 +101,15 @@ export interface BlogContent {
   date: string;
   status?: "published" | "draft";
   author?: LocalizedString;
+  category?: LocalizedString;
   blocks?: unknown[];
   seoTitle?: LocalizedString;
   seoDescription?: LocalizedString;
+  coverImage?: string;
+  coverAlt?: LocalizedString;
+  tags?: LocalizedString[];
+  featured?: boolean;
+  focusKeyword?: LocalizedString;
   [key: string]: unknown;
 }
 

@@ -1,20 +1,20 @@
-import { Link, createFileRoute, notFound } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, Check } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { Reveal } from "@/components/shared/Reveal";
 import { useLanguage } from "@/lib/i18n";
-import { getServiceBySlug, isServiceSlug } from "@/data/services";
-import { useOptionalSiteContent } from "@/providers/SiteContentProvider";
+import { getServiceBySlug, type ServiceDefinition } from "@/data/services";
+import { localizeValue, useOptionalSiteContent } from "@/providers/SiteContentProvider";
 import { buildServiceSeoHead } from "@/services/seoService";
-import { resolvePublicMediaSrc } from "@/lib/media";
+import { useResolvedMediaSrc } from "@/hooks/useResolvedMediaSrc";
+import { ResolvedImage } from "@/components/shared/ResolvedImage";
+import type { ServiceContent } from "@/types/content";
 
 export const Route = createFileRoute("/services/$slug")({
-  loader: ({ params }) => {
-    if (!isServiceSlug(params.slug)) throw notFound();
-    const service = getServiceBySlug(params.slug);
-    if (!service) throw notFound();
-    return service;
-  },
+  loader: ({ params }) => ({
+    slug: params.slug,
+    staticDef: getServiceBySlug(params.slug),
+  }),
   head: ({ params }) => buildServiceSeoHead(params.slug),
   component: ServiceDetailPage,
 });
@@ -51,22 +51,92 @@ interface ServiceDetailCopy {
   gallery: Record<string, string>;
 }
 
+function isPublished(remote?: ServiceContent) {
+  if (!remote) return true;
+  return (remote.details as { status?: string } | undefined)?.status !== "draft";
+}
+
+function buildCopyFromCms(
+  remote: ServiceContent,
+  language: "en" | "ar",
+  t: (key: string) => string,
+): ServiceDetailCopy {
+  const title = localizeValue(remote.title, language);
+  const description = localizeValue(remote.description, language);
+  const features = remote.features
+    .map((feature) => localizeValue(feature, language))
+    .filter(Boolean);
+  const benefits = features.length > 0 ? features : [description].filter(Boolean);
+
+  return {
+    title,
+    intro: description,
+    summary: description,
+    meta: {
+      investmentLabel: language === "ar" ? "الاستثمار" : "Investment",
+      investmentValue: "—",
+      galleryLabel: language === "ar" ? "المعرض" : "Gallery",
+      galleryValue: String(remote.gallery?.length || 1),
+      benefitsLabel: language === "ar" ? "المزايا" : "Benefits",
+      benefitsValue: String(benefits.length),
+      categoryLabel: language === "ar" ? "التصنيف" : "Category",
+      categoryValue: language === "ar" ? "خدمة" : "Service",
+    },
+    startCta: t("services.cta"),
+    exploreCta: language === "ar" ? "استكشف التفاصيل" : "Explore details",
+    detailEyebrow: language === "ar" ? "التفاصيل" : "Details",
+    detailTitle: title,
+    detailBody: description,
+    benefitsEyebrow: language === "ar" ? "المزايا" : "Benefits",
+    benefitsLead: language === "ar" ? "ماذا تحصل عليه" : "What you get",
+    benefits,
+    valueEyebrow: language === "ar" ? "القيمة" : "Value",
+    valueTitle: title,
+    valueLead: description,
+    values: benefits.slice(0, 3).map((item) => ({
+      title: item,
+      description: "",
+    })),
+    galleryEyebrow: language === "ar" ? "المعرض" : "Gallery",
+    galleryTitle: language === "ar" ? "لمحات من الخدمة" : "Service glimpses",
+    galleryLead: description,
+    gallery: {},
+  };
+}
+
 function ServiceDetailPage() {
-  const service = Route.useLoaderData();
-  const { slug } = Route.useParams();
-  const { t, tv } = useLanguage();
+  const { slug, staticDef } = Route.useLoaderData() as {
+    slug: string;
+    staticDef: ServiceDefinition | null;
+  };
+  const { t, tv, language } = useLanguage();
   const remote = useOptionalSiteContent()?.bundle?.services?.find((item) => item.slug === slug);
-  const coverImage = resolvePublicMediaSrc(remote?.image || service.coverImage, service.coverImage);
+  const published = isPublished(remote);
+
+  const fallbackCover = staticDef?.coverImage || remote?.image || "";
+  const coverImage = useResolvedMediaSrc(remote?.image || staticDef?.coverImage, fallbackCover);
   const galleryItems =
     remote?.gallery && remote.gallery.length > 0
       ? remote.gallery.map((item, index) => ({
-          src: resolvePublicMediaSrc(item.src, service.coverImage),
+          src: item.src,
           captionKey: `g${index + 1}`,
         }))
-      : service.gallery;
-  const copy = tv<ServiceDetailCopy | undefined>(`services.details.${slug}`);
+      : staticDef?.gallery ??
+        (remote?.image
+          ? [{ src: remote.image, captionKey: "g1" }]
+          : fallbackCover
+            ? [{ src: fallbackCover, captionKey: "g1" }]
+            : []);
 
-  if (!copy?.meta || !Array.isArray(copy.benefits) || !Array.isArray(copy.values)) {
+  const localeCopy = tv<ServiceDetailCopy | undefined>(`services.details.${slug}`);
+  const copy =
+    localeCopy?.meta && Array.isArray(localeCopy.benefits) && Array.isArray(localeCopy.values)
+      ? localeCopy
+      : remote
+        ? buildCopyFromCms(remote, language, t)
+        : undefined;
+
+  if ((!remote && !staticDef) || (remote && !published && !staticDef) || !copy) {
     return (
       <SiteLayout>
         <div className="container-luxe flex min-h-[50vh] flex-col items-center justify-center py-24 text-center">
@@ -88,10 +158,13 @@ function ServiceDetailPage() {
 
   return (
     <SiteLayout>
-      {/* Hero */}
       <section className="relative overflow-hidden pt-12 pb-16 lg:pb-24">
         <div className="absolute inset-0">
-          <img src={coverImage} alt="" className="size-full object-cover" />
+          {coverImage ? (
+            <img src={coverImage} alt="" className="size-full object-cover" />
+          ) : (
+            <div className="size-full bg-navy" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-navy/70 via-navy/25 to-transparent" />
         </div>
 
@@ -133,8 +206,13 @@ function ServiceDetailPage() {
             <div className="border border-white/15 bg-white/5 p-6 backdrop-blur-md sm:p-8">
               <dl className="space-y-5">
                 {metaRows.map(([label, value]) => (
-                  <div key={label} className="flex items-end justify-between gap-4 border-b border-white/10 pb-4 last:border-0 last:pb-0">
-                    <dt className="text-[0.65rem] tracking-[0.18em] text-white/50 uppercase">{label}</dt>
+                  <div
+                    key={label}
+                    className="flex items-end justify-between gap-4 border-b border-white/10 pb-4 last:border-0 last:pb-0"
+                  >
+                    <dt className="text-[0.65rem] tracking-[0.18em] text-white/50 uppercase">
+                      {label}
+                    </dt>
                     <dd className="text-sm font-medium text-gold">{value}</dd>
                   </div>
                 ))}
@@ -144,7 +222,6 @@ function ServiceDetailPage() {
         </div>
       </section>
 
-      {/* Detailed description + benefits */}
       <section id="details" className="bg-background py-24 lg:py-32">
         <div className="container-luxe grid gap-14 lg:grid-cols-2 lg:gap-20">
           <Reveal>
@@ -159,7 +236,10 @@ function ServiceDetailPage() {
             <h2 className="mt-4 font-display text-3xl text-navy sm:text-4xl">{copy.benefitsLead}</h2>
             <ul className="mt-8 space-y-5">
               {copy.benefits.map((benefit) => (
-                <li key={benefit} className="flex items-start gap-3 border-s-2 border-gold/50 ps-4 text-sm leading-relaxed text-navy/75 sm:text-base">
+                <li
+                  key={benefit}
+                  className="flex items-start gap-3 border-s-2 border-gold/50 ps-4 text-sm leading-relaxed text-navy/75 sm:text-base"
+                >
                   <Check className="mt-0.5 size-4 shrink-0 text-gold" strokeWidth={2} />
                   {benefit}
                 </li>
@@ -169,7 +249,6 @@ function ServiceDetailPage() {
         </div>
       </section>
 
-      {/* Added value */}
       <section className="bg-sand py-24 lg:py-32">
         <div className="container-luxe">
           <Reveal className="mx-auto max-w-2xl text-center">
@@ -190,42 +269,43 @@ function ServiceDetailPage() {
         </div>
       </section>
 
-      {/* Gallery */}
-      <section className="bg-background py-24 lg:py-32">
-        <div className="container-luxe">
-          <Reveal className="max-w-2xl">
-            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">{copy.galleryEyebrow}</p>
-            <h2 className="mt-4 font-display text-3xl text-navy sm:text-5xl">{copy.galleryTitle}</h2>
-            <p className="mt-5 text-base leading-relaxed text-muted-foreground">{copy.galleryLead}</p>
-          </Reveal>
+      {galleryItems.length > 0 ? (
+        <section className="bg-background py-24 lg:py-32">
+          <div className="container-luxe">
+            <Reveal className="max-w-2xl">
+              <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">{copy.galleryEyebrow}</p>
+              <h2 className="mt-4 font-display text-3xl text-navy sm:text-5xl">{copy.galleryTitle}</h2>
+              <p className="mt-5 text-base leading-relaxed text-muted-foreground">{copy.galleryLead}</p>
+            </Reveal>
 
-          <div className="mt-14 grid gap-5 md:grid-cols-3">
-            {galleryItems.map((item, index) => (
-              <Reveal key={item.captionKey} delay={index * 0.07}>
-                <figure className="group relative overflow-hidden">
-                  <img
-                    src={item.src}
-                    alt={copy.gallery[item.captionKey] ?? copy.title}
-                    loading="lazy"
-                    className="aspect-[4/5] w-full object-cover"
-                  />
-                  <span
-                    aria-hidden
-                    className="absolute inset-0 bg-navy/0 transition-colors duration-500 group-hover:bg-navy/55"
-                  />
-                  <figcaption className="pointer-events-none absolute inset-0 flex items-center justify-center p-6 text-center text-sm leading-relaxed text-white opacity-0 transition-all duration-500 group-hover:opacity-100 sm:text-base">
-                    <span className="translate-y-2 transition-transform duration-500 group-hover:translate-y-0">
-                      {copy.gallery[item.captionKey] ?? copy.title}
-                    </span>
-                  </figcaption>
-                </figure>
-              </Reveal>
-            ))}
+            <div className="mt-14 grid gap-5 md:grid-cols-3">
+              {galleryItems.map((item, index) => (
+                <Reveal key={item.captionKey} delay={index * 0.07}>
+                  <figure className="group relative overflow-hidden">
+                    <ResolvedImage
+                      src={item.src}
+                      fallback={fallbackCover}
+                      alt={copy.gallery[item.captionKey] ?? copy.title}
+                      loading="lazy"
+                      className="aspect-[4/5] w-full object-cover"
+                    />
+                    <span
+                      aria-hidden
+                      className="absolute inset-0 bg-navy/0 transition-colors duration-500 group-hover:bg-navy/55"
+                    />
+                    <figcaption className="pointer-events-none absolute inset-0 flex items-center justify-center p-6 text-center text-sm leading-relaxed text-white opacity-0 transition-all duration-500 group-hover:opacity-100 sm:text-base">
+                      <span className="translate-y-2 transition-transform duration-500 group-hover:translate-y-0">
+                        {copy.gallery[item.captionKey] ?? copy.title}
+                      </span>
+                    </figcaption>
+                  </figure>
+                </Reveal>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
-      {/* CTA */}
       <section className="bg-[#061525] py-20 lg:py-24">
         <div className="container-luxe flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
           <div>

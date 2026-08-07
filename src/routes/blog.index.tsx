@@ -3,6 +3,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHeader } from "@/components/site/PageHeader";
 import { Reveal } from "@/components/shared/Reveal";
+import { ResolvedImage } from "@/components/shared/ResolvedImage";
 import { useLanguage } from "@/lib/i18n";
 import {
   buildBlogListJsonLd,
@@ -58,8 +59,8 @@ function BlogIndexPage() {
     };
   }, []);
 
-  const featured = posts[0];
-  const rest = posts.slice(1);
+  const featured = posts.find((post) => post.featured) ?? posts[0];
+  const rest = posts.filter((post) => post.id !== featured?.id);
 
   return (
     <SiteLayout>
@@ -85,7 +86,7 @@ function BlogIndexPage() {
                       params={{ slug: featured.slug }}
                       className="overflow-hidden"
                     >
-                      <img
+                      <ResolvedImage
                         src={featured.coverImage}
                         alt={tx(featured.coverAlt, language)}
                         loading="lazy"
@@ -133,7 +134,7 @@ function BlogIndexPage() {
                           params={{ slug: post.slug }}
                           className="overflow-hidden"
                         >
-                          <img
+                          <ResolvedImage
                             src={post.coverImage}
                             alt={tx(post.coverAlt, language)}
                             loading="lazy"

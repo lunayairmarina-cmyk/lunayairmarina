@@ -4,25 +4,23 @@ import { ArrowRight } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { staggerContainer, staggerItem } from "@/components/shared/Reveal";
-import {
-  SERVICE_SLUGS,
-  getServiceBySlug,
-  type ServiceSlug,
-} from "@/data/services";
+import { getServiceBySlug } from "@/data/services";
 import { useOptionalSiteContent, localizeValue } from "@/providers/SiteContentProvider";
+import { ResolvedImage } from "@/components/shared/ResolvedImage";
+import type { ServiceContent } from "@/types/content";
 
 interface ServiceItem {
+  id: string;
   title: string;
   description: string;
   features: string[];
-  slug?: string;
+  slug: string;
+  image?: string;
 }
 
-function resolveSlug(item: ServiceItem, index: number): ServiceSlug {
-  const candidate = item.slug ?? SERVICE_SLUGS[index];
-  return (SERVICE_SLUGS.includes(candidate as ServiceSlug)
-    ? candidate
-    : SERVICE_SLUGS[index]) as ServiceSlug;
+function isPublishedService(item: ServiceContent) {
+  const status = (item.details as { status?: string } | undefined)?.status;
+  return status !== "draft";
 }
 
 export function ServicesSection({
@@ -36,13 +34,28 @@ export function ServicesSection({
   const remote = useOptionalSiteContent()?.bundle?.services ?? [];
   const items: ServiceItem[] =
     remote.length > 0
-      ? remote.map((item) => ({
-          title: localizeValue(item.title, language),
-          description: localizeValue(item.description, language),
-          features: item.features.map((f) => localizeValue(f, language)),
-          slug: item.slug,
-        }))
-      : (tv<ServiceItem[]>("services.items") ?? []);
+      ? remote
+          .filter(isPublishedService)
+          .slice()
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+          .map((item) => ({
+            id: item.id,
+            title: localizeValue(item.title, language),
+            description: localizeValue(item.description, language),
+            features: item.features.map((f) => localizeValue(f, language)),
+            slug: item.slug,
+            image: item.image,
+          }))
+      : (tv<Array<{ title: string; description: string; features: string[]; slug?: string }>>(
+          "services.items",
+        ) ?? []).map((item, index) => ({
+          id: item.slug ?? `locale-${index}`,
+          title: item.title,
+          description: item.description,
+          features: item.features,
+          slug: item.slug ?? `service-${index + 1}`,
+          image: undefined,
+        }));
   const isPage = variant === "page" || detailed;
 
   if (!isPage) {
@@ -64,32 +77,29 @@ export function ServicesSection({
             viewport={{ once: true, margin: "-60px" }}
             className="mt-14 divide-y divide-navy-foreground/10 border-y border-navy-foreground/10"
           >
-            {items.map((item, index) => {
-              const slug = resolveSlug(item, index);
-              return (
-                <motion.li key={slug} variants={staggerItem}>
-                  <Link
-                    to="/services/$slug"
-                    params={{ slug }}
-                    className="group grid gap-4 py-8 sm:grid-cols-[5rem_1fr_auto] sm:items-center sm:gap-8"
-                  >
-                    <span className="font-display text-3xl text-gold/80 transition-colors group-hover:text-gold">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <div>
-                      <h3 className="text-xl text-navy-foreground sm:text-2xl">{item.title}</h3>
-                      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-navy-foreground/60 sm:text-base">
-                        {item.description}
-                      </p>
-                    </div>
-                    <ArrowRight
-                      className="hidden size-5 text-gold/50 transition-transform duration-500 group-hover:translate-x-1 group-hover:text-gold sm:block rtl:rotate-180 rtl:group-hover:-translate-x-1"
-                      strokeWidth={1.4}
-                    />
-                  </Link>
-                </motion.li>
-              );
-            })}
+            {items.map((item, index) => (
+              <motion.li key={item.id || item.slug} variants={staggerItem}>
+                <Link
+                  to="/services/$slug"
+                  params={{ slug: item.slug }}
+                  className="group grid gap-4 py-8 sm:grid-cols-[5rem_1fr_auto] sm:items-center sm:gap-8"
+                >
+                  <span className="font-display text-3xl text-gold/80 transition-colors group-hover:text-gold">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div>
+                    <h3 className="text-xl text-navy-foreground sm:text-2xl">{item.title}</h3>
+                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-navy-foreground/60 sm:text-base">
+                      {item.description}
+                    </p>
+                  </div>
+                  <ArrowRight
+                    className="hidden size-5 text-gold/50 transition-transform duration-500 group-hover:translate-x-1 group-hover:text-gold sm:block rtl:rotate-180 rtl:group-hover:-translate-x-1"
+                    strokeWidth={1.4}
+                  />
+                </Link>
+              </motion.li>
+            ))}
           </motion.ol>
 
           <div className="mt-12">
@@ -116,23 +126,24 @@ export function ServicesSection({
           className="grid gap-6 sm:grid-cols-2 sm:gap-7 lg:gap-8"
         >
           {items.map((item, index) => {
-            const slug = resolveSlug(item, index);
-            const cover = getServiceBySlug(slug)?.coverImage;
+            const staticCover = getServiceBySlug(item.slug)?.coverImage;
+            const cover = item.image || staticCover;
 
             return (
               <motion.article
-                key={slug}
+                key={item.id || item.slug}
                 variants={staggerItem}
                 className="group flex flex-col overflow-hidden border border-navy/12 bg-[#fbfaf8] transition-colors duration-500 hover:border-gold/45"
               >
                 <Link
                   to="/services/$slug"
-                  params={{ slug }}
+                  params={{ slug: item.slug }}
                   className="relative block aspect-[16/10] overflow-hidden bg-navy"
                 >
                   {cover ? (
-                    <img
+                    <ResolvedImage
                       src={cover}
+                      fallback={staticCover}
                       alt=""
                       className="absolute inset-0 size-full object-cover object-[center_45%]"
                     />
@@ -162,7 +173,7 @@ export function ServicesSection({
 
                   <Link
                     to="/services/$slug"
-                    params={{ slug }}
+                    params={{ slug: item.slug }}
                     className="type-cta mt-7 inline-flex w-fit items-center gap-2 border-b border-navy/15 pb-1.5 text-navy transition-colors hover:border-gold hover:text-gold"
                   >
                     {t("services.cta")}

@@ -1,10 +1,34 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // Storage is intentionally unused (cost). Images are stored in Firestore as compressed data URLs.
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isActiveAdmin() {
+      return signedIn()
+        && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid))
+        && firestore.get(/databases/(default)/documents/admins/$(request.auth.uid)).data.active == true;
+    }
+
+    function isImage() {
+      return request.resource.contentType.matches('image/jpeg')
+        || request.resource.contentType.matches('image/png')
+        || request.resource.contentType.matches('image/webp');
+    }
+
+    // Permanent CMS uploads — public read; any signed-in admin Auth user can write.
+    // (Auth users in this app are admins; avoids Storage↔Firestore rule lookup failures.)
+    match /uploads/{allPaths=**} {
+      allow read: if true;
+      allow write: if signedIn()
+        && isImage()
+        && request.resource.size < 10 * 1024 * 1024;
+      allow delete: if isActiveAdmin() || signedIn();
+    }
+
     match /{allPaths=**} {
-      allow read: if false;
-      allow write: if false;
+      allow read, write: if false;
     }
   }
 }

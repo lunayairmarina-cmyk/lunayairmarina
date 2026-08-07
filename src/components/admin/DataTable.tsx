@@ -139,16 +139,30 @@ export function RowAction({
   label,
   onClick,
   tone = "default",
+  confirm,
+  confirmMessage,
 }: {
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   label: string;
   onClick: () => void;
   tone?: "default" | "danger";
+  /** Defaults to true for danger actions */
+  confirm?: boolean;
+  confirmMessage?: string;
 }) {
+  const { t } = useLanguage();
+  const needsConfirm = confirm ?? tone === "danger";
+
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={() => {
+        if (needsConfirm) {
+          const message = confirmMessage || t("admin.actions.confirmDelete");
+          if (!window.confirm(message)) return;
+        }
+        onClick();
+      }}
       aria-label={label}
       title={label}
       className={cn(

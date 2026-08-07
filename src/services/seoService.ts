@@ -250,7 +250,11 @@ export function pickSeo(
 
 export type SeoScore = {
   score: number;
-  checks: Array<{ id: string; ok: boolean; label: string }>;
+  checks: Array<{
+    id: "titleLen" | "descLen" | "focusTitle" | "focusDesc" | "keywords" | "og" | "canonical";
+    ok: boolean;
+    current?: number;
+  }>;
 };
 
 export function scoreSeo(meta: SeoPageMeta, language: "en" | "ar" = "en"): SeoScore {
@@ -265,14 +269,14 @@ export function scoreSeo(meta: SeoPageMeta, language: "en" | "ar" = "en"): SeoSc
   const hasKeywords = keywords.split(",").map((k) => k.trim()).filter(Boolean).length >= 2;
   const hasOg = Boolean(meta.ogImage);
   const hasCanonical = Boolean(meta.canonicalPath);
-  const checks = [
-    { id: "titleLen", ok: titleOk, label: `Title length ${title.length}/30–60` },
-    { id: "descLen", ok: descOk, label: `Description length ${description.length}/120–160` },
-    { id: "focusTitle", ok: !focus || focusInTitle, label: "Focus keyword in title" },
-    { id: "focusDesc", ok: !focus || focusInDesc, label: "Focus keyword in description" },
-    { id: "keywords", ok: hasKeywords, label: "At least 2 keywords" },
-    { id: "og", ok: hasOg, label: "Open Graph image set" },
-    { id: "canonical", ok: hasCanonical, label: "Canonical path set" },
+  const checks: SeoScore["checks"] = [
+    { id: "titleLen", ok: titleOk, current: title.length },
+    { id: "descLen", ok: descOk, current: description.length },
+    { id: "focusTitle", ok: !focus || focusInTitle },
+    { id: "focusDesc", ok: !focus || focusInDesc },
+    { id: "keywords", ok: hasKeywords },
+    { id: "og", ok: hasOg },
+    { id: "canonical", ok: hasCanonical },
   ];
   const passed = checks.filter((c) => c.ok).length;
   return { score: Math.round((passed / checks.length) * 100), checks };

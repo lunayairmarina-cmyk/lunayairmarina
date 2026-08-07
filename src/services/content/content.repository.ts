@@ -32,7 +32,8 @@ import type {
 } from "@/types/content";
 
 const CACHE_KEY = "lunayairmarina.content.bundle.v3";
-const CACHE_TTL_MS = 1000 * 60 * 10;
+/** Short TTL so public visitors pick up admin Firebase updates quickly. */
+const CACHE_TTL_MS = 1000 * 30;
 
 let memoryCache: SiteBundle | null = null;
 let inflight: Promise<SiteBundle> | null = null;
@@ -253,6 +254,18 @@ function sanitizeHomepageForBundle(
   return homepage;
 }
 
+/** Firebase is source of truth; keep local-only rows (offline / failed sync). */
+function preferRemoteCollection<T extends { id: string }>(local: T[], remote: T[]): T[] {
+  if (remote.length === 0) return local;
+  if (local.length === 0) return remote;
+  const map = new Map<string, T>();
+  for (const item of remote) map.set(item.id, item);
+  for (const item of local) {
+    if (!map.has(item.id)) map.set(item.id, item);
+  }
+  return Array.from(map.values());
+}
+
 function mergeCmsOverFirebase(remote: SiteBundle): SiteBundle {
   const cms = loadCmsStore();
   const enLocaleDict = enLocale as Record<string, unknown>;
@@ -304,14 +317,14 @@ function mergeCmsOverFirebase(remote: SiteBundle): SiteBundle {
     about: cms.about ?? remote.about,
     why: cms.why ?? remote.why,
     trust: cms.trust ?? remote.trust,
-    services: cms.services.length > 0 ? cms.services : remote.services,
-    fleet: cms.fleet.length > 0 ? cms.fleet : remote.fleet,
-    team: cms.team.length > 0 ? cms.team : remote.team,
-    testimonials: cms.testimonials.length > 0 ? cms.testimonials : remote.testimonials,
+    services: preferRemoteCollection(cms.services, remote.services),
+    fleet: preferRemoteCollection(cms.fleet, remote.fleet),
+    team: preferRemoteCollection(cms.team, remote.team),
+    testimonials: preferRemoteCollection(cms.testimonials, remote.testimonials),
     locations: remote.locations,
-    blog: cms.blog.length > 0 ? cms.blog : remote.blog,
+    blog: preferRemoteCollection(cms.blog, remote.blog),
     gallery: mergeGallery(cms.gallery, remote.gallery),
-    faq: cms.faq.length > 0 ? cms.faq : remote.faq,
+    faq: preferRemoteCollection(cms.faq, remote.faq),
     copy,
     fetchedAt: Date.now(),
   };

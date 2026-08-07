@@ -34,6 +34,10 @@ export interface BlogPost {
   focusKeyword: Localized;
   tags: Localized[];
   blocks: BlogBlock[];
+  /** Optional category label (EN/AR) shown on the article */
+  category?: Localized;
+  /** Show in “trending / featured” surfaces when true */
+  featured?: boolean;
 }
 
 export const BLOG_STORAGE_KEY = "lunayairmarina.blog.posts.v2";
@@ -350,6 +354,8 @@ export function normalizePost(raw: unknown): BlogPost | null {
     focusKeyword: asLocalized(post.focusKeyword),
     tags,
     blocks,
+    category: post.category ? asLocalized(post.category) : undefined,
+    featured: Boolean(post.featured),
   };
 }
 

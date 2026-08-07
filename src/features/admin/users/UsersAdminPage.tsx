@@ -301,6 +301,7 @@ export function UsersAdminPage() {
             <RowAction
               icon={Trash2}
               tone="danger"
+              confirm={false}
               label={t("admin.actions.delete")}
               onClick={() => {
                 if (!canDeleteUser(currentUser, row, rows)) {
@@ -311,6 +312,7 @@ export function UsersAdminPage() {
                   );
                   return;
                 }
+                if (!window.confirm(t("admin.actions.confirmDelete"))) return;
                 void deleteAdminUserProfile(row.id)
                   .then(() => persistLocal(rows.filter((item) => item.id !== row.id)))
                   .catch(() => setNotice(t("admin.users.saveFailed")));

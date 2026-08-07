@@ -13,6 +13,7 @@ import {
   isGalleryManaged,
   markGalleryManaged,
   saveGallery,
+  MediaUploadError,
   uploadMediaFile,
 } from "@/services/adminCmsService";
 import type { GalleryContent } from "@/types/content";
@@ -149,17 +150,24 @@ function AdminGalleryPage() {
     setBusy(true);
     setStatus(null);
     try {
-      const ref = await uploadMediaFile(file, "images/gallery");
+      const url = await uploadMediaFile(file, {
+        pathPrefix: "images/gallery",
+      });
       const item: GalleryContent = {
         id: `g${Date.now()}`,
-        src: ref,
+        src: url,
         caption: { en: file.name.replace(/\.[^.]+$/, ""), ar: file.name.replace(/\.[^.]+$/, "") },
         span: "normal",
         order: items.length + 1,
       };
       await persist([...items, item]);
-    } catch {
-      setStatus(t("admin.cms.uploadFailed"));
+      setStatus(t("admin.cms.uploadSuccess"));
+    } catch (err) {
+      const code = err instanceof MediaUploadError ? err.code : "UPLOAD_FAILED";
+      if (code === "INVALID_TYPE") setStatus(t("admin.cms.uploadInvalidType"));
+      else if (code === "FILE_TOO_LARGE") setStatus(t("admin.cms.uploadTooLarge"));
+      else if (code === "TOO_LARGE_AFTER_COMPRESS") setStatus(t("admin.cms.uploadCompressFailed"));
+      else setStatus(t("admin.cms.uploadFailed"));
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -188,7 +196,7 @@ function AdminGalleryPage() {
         <input
           ref={inputRef}
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
           className="hidden"
           onChange={(event) => void onUpload(event.target.files?.[0])}
         />
@@ -236,7 +244,10 @@ function AdminGalleryPage() {
                   <button
                     type="button"
                     aria-label={t("admin.actions.delete")}
-                    onClick={() => void persist(items.filter((item) => item.id !== image.id))}
+                    onClick={() => {
+                      if (!window.confirm(t("admin.actions.confirmDelete"))) return;
+                      void persist(items.filter((item) => item.id !== image.id));
+                    }}
                     className="text-red-500 transition-colors hover:text-red-600"
                   >
                     <Trash2 className="size-4" strokeWidth={1.5} />

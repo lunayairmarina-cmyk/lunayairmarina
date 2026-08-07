@@ -5,6 +5,7 @@ import { useLanguage } from "@/lib/i18n";
 import { useOptionalSiteContent } from "@/providers/SiteContentProvider";
 import { galleryImages } from "@/data/mock";
 import { pickGallerySrc } from "@/lib/gallery-src";
+import { ResolvedImage } from "@/components/shared/ResolvedImage";
 
 interface GalleryPickerProps {
   value?: string;
@@ -25,7 +26,7 @@ export function GalleryPicker({ value, onSelect, className }: GalleryPickerProps
             const local = galleryImages.find((g) => g.id === item.id);
             return {
               id: item.id,
-              src: pickGallerySrc(item.src, item.id),
+              src: item.src,
               caption: local?.caption ?? item.caption,
             };
           })
@@ -77,8 +78,9 @@ export function GalleryPicker({ value, onSelect, className }: GalleryPickerProps
                       : "border-transparent hover:border-navy/20",
                   )}
                 >
-                  <img
+                  <ResolvedImage
                     src={item.src}
+                    fallback={pickGallerySrc(item.src, item.id)}
                     alt={item.caption[language]}
                     className="size-full object-cover"
                     loading="lazy"

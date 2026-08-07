@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { BlogContent } from "@/components/site/BlogContent";
+import { ResolvedImage } from "@/components/shared/ResolvedImage";
 import { useLanguage } from "@/lib/i18n";
 import {
   DEFAULT_BLOG_POSTS,
@@ -99,7 +100,7 @@ function BlogPostPage() {
       <article className="bg-background pb-24">
         <header className="relative overflow-hidden pt-12">
           <div className="absolute inset-0">
-            <img
+            <ResolvedImage
               src={post.coverImage}
               alt={tx(post.coverAlt, language)}
               className="size-full object-cover"
@@ -121,6 +122,11 @@ function BlogPostPage() {
               {tx(post.excerpt, language)}
             </p>
             <div className="mt-8 flex flex-wrap gap-4 text-sm text-white/65">
+              {tx(post.category, language) ? (
+                <span className="rounded-full border border-white/25 px-3 py-1 text-[0.65rem] tracking-[0.14em] text-white/80 uppercase">
+                  {tx(post.category, language)}
+                </span>
+              ) : null}
               <span>
                 {t("blog.by")} {tx(post.author, language)}
               </span>
@@ -176,7 +182,7 @@ function BlogPostPage() {
                   params={{ slug: item.slug }}
                   className="group border border-border p-2 transition-colors hover:border-gold/50"
                 >
-                  <img
+                  <ResolvedImage
                     src={item.coverImage}
                     alt={tx(item.coverAlt, language)}
                     className="aspect-[16/10] w-full object-cover"
