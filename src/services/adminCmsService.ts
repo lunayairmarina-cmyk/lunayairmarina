@@ -31,12 +31,35 @@ import type {
   WhyContent,
 } from "@/types/content";
 import { companyInfo } from "@/data/mock";
-import { healGallerySrc } from "@/lib/gallery-src";
+import { healGallerySrc, isFragileGallerySrc } from "@/lib/gallery-src";
 import { cacheMediaDataUrl, mediaRefId, toMediaRef } from "@/lib/media-refs";
 
 export type SaveResult = { ok: true; sync: FirebaseSyncStatus } | { ok: false; error: string };
 
 const GALLERY_MANAGED_KEY = "lunaya.cms.galleryManaged";
+
+const STABLE_PAGE_HEADERS: Record<PageHeaderId, string> = {
+  about: "/images/headers/header-about.webp",
+  services: "/images/headers/header-services.webp",
+  contact: "/images/headers/header-contact.webp",
+  blog: "/images/headers/header-blog.webp",
+  application: "/images/headers/header-about.webp",
+};
+
+function normalizePageHeaderUrl(pageId: PageHeaderId, imageUrl: string): string {
+  const value = imageUrl.trim();
+  if (!value) return STABLE_PAGE_HEADERS[pageId];
+  if (value.startsWith("media:") || value.startsWith("data:") || value.startsWith("blob:")) {
+    return value;
+  }
+  if (value.startsWith("/images/headers/")) {
+    return value.replace(/\.(jpe?g|png)(\?.*)?$/i, ".webp$2");
+  }
+  if (isFragileGallerySrc(value) || value.startsWith("/assets/")) {
+    return STABLE_PAGE_HEADERS[pageId];
+  }
+  return value;
+}
 
 export function markGalleryManaged() {
   try {
@@ -354,10 +377,11 @@ export async function savePageHeader(
   pageId: PageHeaderId,
   imageUrl: string,
 ): Promise<SaveResult> {
+  const normalized = normalizePageHeaderUrl(pageId, imageUrl);
   const sync = await tryFirebaseWrite(async () => {
-    await setDoc(doc(getDb(), "pageHeaders", pageId), { imageUrl }, { merge: true });
+    await setDoc(doc(getDb(), "pageHeaders", pageId), { imageUrl: normalized }, { merge: true });
   });
-  const pageHeaders = { ...loadCmsStore().pageHeaders, [pageId]: imageUrl };
+  const pageHeaders = { ...loadCmsStore().pageHeaders, [pageId]: normalized };
   patchCmsStore({ pageHeaders, firebaseSync: sync });
   notifySiteReload();
   return { ok: true, sync };
@@ -366,14 +390,19 @@ export async function savePageHeader(
 export async function saveAllPageHeaders(
   pageHeaders: Partial<Record<PageHeaderId, string>>,
 ): Promise<SaveResult> {
+  const normalized: Partial<Record<PageHeaderId, string>> = {};
+  (Object.keys(pageHeaders) as PageHeaderId[]).forEach((id) => {
+    const value = pageHeaders[id];
+    if (value) normalized[id] = normalizePageHeaderUrl(id, value);
+  });
   const sync = await tryFirebaseWrite(async () => {
     const batch = writeBatch(getDb());
-    Object.entries(pageHeaders).forEach(([id, imageUrl]) => {
+    Object.entries(normalized).forEach(([id, imageUrl]) => {
       if (imageUrl) batch.set(doc(getDb(), "pageHeaders", id), { imageUrl }, { merge: true });
     });
     await batch.commit();
   });
-  patchCmsStore({ pageHeaders, firebaseSync: sync });
+  patchCmsStore({ pageHeaders: { ...loadCmsStore().pageHeaders, ...normalized }, firebaseSync: sync });
   notifySiteReload();
   return { ok: true, sync };
 }
