@@ -20,6 +20,7 @@ import { ScrollToTop } from "@/components/shared/ScrollToTop";
 const siteUrl = getSiteUrl();
 const ogCover = absoluteUrl(DEFAULT_OG_IMAGE_PATH, siteUrl);
 const brandLogo = absoluteUrl(DEFAULT_LOGO_PATH, siteUrl);
+const customPhone = "+966531561212";
 
 const organizationSchema = {
   "@context": "https://schema.org",
@@ -30,10 +31,10 @@ const organizationSchema = {
       name: "lunayairmarina",
       url: siteUrl,
       email: companyInfo.email,
-      telephone: companyInfo.phoneDisplay,
+      telephone: customPhone,
       logo: brandLogo,
       sameAs: Object.values(companyInfo.social).filter(Boolean),
-      areaServed: ["SA", "AE", "BH", "QA", "KW", "OM"],
+      areaServed: ["SA", "AE", "BH", "QA", "KW", "OM", "EG", "Red Sea", "Mediterranean", "Europe"],
     },
     {
       "@type": "LocalBusiness",
@@ -41,7 +42,7 @@ const organizationSchema = {
       name: "lunayairmarina",
       image: ogCover,
       url: siteUrl,
-      telephone: companyInfo.phoneDisplay,
+      telephone: customPhone,
       email: companyInfo.email,
       address: {
         "@type": "PostalAddress",
@@ -50,8 +51,9 @@ const organizationSchema = {
         addressCountry: "SA",
       },
       priceRange: "$$$$",
+      areaServed: ["Saudi Arabia", "GCC", "Egypt", "Red Sea", "Mediterranean", "Europe"],
       description:
-        "Professional yacht management solutions for yacht owners in Saudi Arabia and the Gulf region.",
+        "Premier 360° yacht management and superyacht support across Saudi Arabia, the GCC, Egypt, Red Sea, Mediterranean, and Europe.",
     },
     {
       "@type": "WebSite",
@@ -64,12 +66,24 @@ const organizationSchema = {
     {
       "@type": "Service",
       "@id": `${siteUrl}/#yacht-management`,
-      name: "360° Yacht Management",
-      serviceType: "Yacht Management",
+      name: "360° Yacht Management & Regional Operations",
+      serviceType: "Yacht Management & Superyacht Support",
       provider: { "@id": `${siteUrl}/#organization` },
-      areaServed: ["Saudi Arabia", "Arabian Gulf", "Red Sea"],
+      areaServed: [
+        "Saudi Arabia",
+        "United Arab Emirates",
+        "Qatar",
+        "Bahrain",
+        "Kuwait",
+        "Oman",
+        "Egypt",
+        "Red Sea",
+        "Arabian Gulf",
+        "Mediterranean",
+        "Europe"
+      ],
       description:
-        "Integrated operational, technical and financial yacht management for owners.",
+        "Comprehensive operational, technical, crew, and financial yacht management focusing on Saudi Arabia and the GCC, Egypt, expanding to the Red Sea, Mediterranean, and Europe.",
     },
   ],
 };
@@ -136,16 +150,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "lunayairmarina | إدارة يخوت احترافية — Yacht Management Saudi Arabia" },
+      { 
+        title: "lunayairmarina | إدارة يخوت فاخرة في السعودية والخليج — Yacht Management Saudi Arabia & GCC" 
+      },
       {
         name: "description",
         content:
-          "إدارة يخوت ٣٦٠ درجة في جدة والبحر الأحمر والخليج — 360° yacht management, marina ops, visiting yacht agency and crew. lunayairmarina.",
+          "إدارة يخوت ٣٦٠ درجة في السعودية ودول الخليج، مصر، البحر الأحمر، المتوسط وأوروبا. خدمات الطواقم، تشغيل المارينا، ودعم اليخوت الفاخرة بمعايير عالمية. تواصل معنا: +966531561212",
       },
       {
         name: "keywords",
         content:
-          "إدارة يخوت السعودية, إدارة يخوت جدة, lunayairmarina, yacht management Saudi Arabia, marina management, Red Sea yacht management",
+          "إدارة يخوت السعودية, إدارة يخوت دبي, إدارة يخوت مصر, yacht management Saudi Arabia, superyacht management GCC, Egypt yacht services, Red Sea yacht agency, Mediterranean yacht management, European yacht management, تشغيل مارينا, وكالة يخوت زائرة, خدمات طواقم اليخوت, lunayairmarina",
       },
       { name: "author", content: "lunayairmarina" },
       { property: "og:type", content: "website" },
@@ -155,25 +171,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:url", content: siteUrl },
       {
         property: "og:title",
-        content: "lunayairmarina | إدارة يخوت احترافية — Yacht Management Saudi Arabia & Gulf",
+        content: "lunayairmarina | إدارة يخوت فاخرة — Yacht Management Saudi Arabia & GCC",
       },
       {
         property: "og:description",
         content:
-          "إدارة يخوت ٣٦٠، تشغيل مارينا، وكالة اليخوت الزائرة وخدمات الطواقم في جدة والخليج. Professional yacht management for Red Sea & Gulf owners.",
+          "الوجهة الأولى لإدارة اليخوت وتشغيل المارينا في السعودية ودول الخليج، مصر، البحر الأحمر، المتوسط وأوروبا. حلول متكاملة ٣٦٠ درجة لمالكي اليخوت الفاخرة.",
       },
       { property: "og:image", content: ogCover },
       { property: "og:image:secure_url", content: ogCover },
-      { property: "og:image:alt", content: "lunayairmarina — إدارة يخوت | Yacht Management" },
+      { property: "og:image:alt", content: "lunayairmarina — إدارة يخوت فاخرة | Luxury Yacht Management" },
       { name: "twitter:card", content: "summary_large_image" },
       {
         name: "twitter:title",
-        content: "lunayairmarina | إدارة يخوت احترافية — Yacht Management Saudi Arabia",
+        content: "lunayairmarina | إدارة يخوت احترافية — Yacht Management Saudi Arabia & GCC",
       },
       {
         name: "twitter:description",
         content:
-          "إدارة يخوت احترافية في السعودية والخليج — 360° yacht management, marina ops and crew.",
+          "خدمات إدارة اليخوت الفاخرة الشاملة في السعودية والخليج، مصر، البحر الأحمر، المتوسط وأوروبا. Discover elite yacht solutions.",
       },
       { name: "twitter:image", content: ogCover },
     ],
@@ -187,7 +203,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
-        // Fewer weights + display=swap — avoids blocking first paint on unused font faces.
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500;600&family=Noto+Kufi+Arabic:wght@400;500;700&display=swap",
       },
@@ -197,6 +212,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=7", sizes: "180x180" },
     ],
     scripts: [
+      {
+        async: true,
+        src: "https://www.googletagmanager.com/gtag/js?id=G-VLSMRG4M9M",
+      },
+      {
+        children: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-VLSMRG4M9M');`,
+      },
       {
         type: "application/ld+json",
         children: JSON.stringify(organizationSchema),
