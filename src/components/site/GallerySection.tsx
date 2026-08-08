@@ -27,6 +27,7 @@ export function GallerySection({ limit }: { limit?: number }) {
     typeof localStorage !== "undefined" &&
     localStorage.getItem("lunaya.cms.galleryManaged") === "1";
 
+  // When gallery is managed and empty, stay empty — never resurrect mock images.
   const source: GalleryImage[] =
     remote.length > 0
       ? remote.map((item) => {

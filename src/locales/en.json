@@ -885,7 +885,11 @@
       "slotAdded": "New proof card added — scroll down to edit it, then Save."
     },
     "messages": {
-      "loading": "Loading inbox from Firebase…"
+      "loading": "Loading inbox from Firebase…",
+      "printAll": "Print all messages",
+      "printTitle": "Inbox messages",
+      "printEmpty": "No messages to print.",
+      "printedAt": "Printed at"
     },
     "seo": {
       "subtitle": "Full SEO control: titles, descriptions, keywords, robots, canonicals, OG images, service pages and header images.",

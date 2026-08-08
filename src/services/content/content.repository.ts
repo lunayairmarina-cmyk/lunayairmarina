@@ -11,14 +11,7 @@ import {
   query,
 } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
-import {
-  deepMergeCopy,
-  diffCopyAgainstLocale,
-  emptyCmsStore,
-  loadCmsStore,
-  repairWrongLanguageCopy,
-  saveCmsStore,
-} from "@/lib/cms-store";
+import { deepMergeCopy, diffCopyAgainstLocale, emptyCmsStore, isCollectionManaged, loadCmsStore, repairWrongLanguageCopy, saveCmsStore } from "@/lib/cms-store";
 import enLocale from "@/locales/en.json";
 import arLocale from "@/locales/ar.json";
 import type {
@@ -113,14 +106,25 @@ function mergeGallery(
   cms: GalleryContent[],
   remote: GalleryContent[],
 ): GalleryContent[] {
-  try {
-    if (typeof localStorage !== "undefined" && localStorage.getItem("lunaya.cms.galleryManaged") === "1") {
-      return cms;
-    }
-  } catch {
-    // ignore
-  }
+  if (isCollectionManaged("gallery")) return cms;
   return mergeById(cms, remote);
+}
+
+/** Firebase is source of truth until admin manages the collection; then CMS wins (incl. deletes). */
+function preferManagedCollection<T extends { id: string }>(
+  local: T[],
+  remote: T[],
+  name: "team" | "faq" | "testimonials" | "blog" | "services" | "fleet",
+): T[] {
+  if (isCollectionManaged(name)) return local;
+  if (remote.length === 0) return local;
+  if (local.length === 0) return remote;
+  const map = new Map<string, T>();
+  for (const item of remote) map.set(item.id, item);
+  for (const item of local) {
+    if (!map.has(item.id)) map.set(item.id, item);
+  }
+  return Array.from(map.values());
 }
 
 function emptyBundle(): SiteBundle {
@@ -152,7 +156,17 @@ async function hydrateLocalCmsFromCloud() {
       !local.copy &&
       local.services.length === 0 &&
       local.blog.length === 0 &&
-      local.gallery.length === 0;
+      local.gallery.length === 0 &&
+      local.team.length === 0 &&
+      local.faq.length === 0 &&
+      local.testimonials.length === 0 &&
+      !isCollectionManaged("services") &&
+      !isCollectionManaged("blog") &&
+      !isCollectionManaged("gallery") &&
+      !isCollectionManaged("team") &&
+      !isCollectionManaged("faq") &&
+      !isCollectionManaged("testimonials") &&
+      !isCollectionManaged("messages");
     if (!isEmpty) return;
 
     const snap = await getDoc(doc(getDb(), "cms", "v1"));
@@ -261,18 +275,6 @@ function sanitizeHomepageForBundle(
   return homepage;
 }
 
-/** Firebase is source of truth; keep local-only rows (offline / failed sync). */
-function preferRemoteCollection<T extends { id: string }>(local: T[], remote: T[]): T[] {
-  if (remote.length === 0) return local;
-  if (local.length === 0) return remote;
-  const map = new Map<string, T>();
-  for (const item of remote) map.set(item.id, item);
-  for (const item of local) {
-    if (!map.has(item.id)) map.set(item.id, item);
-  }
-  return Array.from(map.values());
-}
-
 function mergeCmsOverFirebase(remote: SiteBundle): SiteBundle {
   const cms = loadCmsStore();
   const enLocaleDict = enLocale as Record<string, unknown>;
@@ -332,14 +334,14 @@ function mergeCmsOverFirebase(remote: SiteBundle): SiteBundle {
     about: cms.about ?? remote.about,
     why: cms.why ?? remote.why,
     trust: cms.trust ?? remote.trust,
-    services: preferRemoteCollection(cms.services, remote.services),
-    fleet: preferRemoteCollection(cms.fleet, remote.fleet),
-    team: preferRemoteCollection(cms.team, remote.team),
-    testimonials: preferRemoteCollection(cms.testimonials, remote.testimonials),
+    services: preferManagedCollection(cms.services, remote.services, "services"),
+    fleet: preferManagedCollection(cms.fleet, remote.fleet, "fleet"),
+    team: preferManagedCollection(cms.team, remote.team, "team"),
+    testimonials: preferManagedCollection(cms.testimonials, remote.testimonials, "testimonials"),
     locations: remote.locations,
-    blog: preferRemoteCollection(cms.blog, remote.blog),
+    blog: preferManagedCollection(cms.blog, remote.blog, "blog"),
     gallery: mergeGallery(cms.gallery, remote.gallery),
-    faq: preferRemoteCollection(cms.faq, remote.faq),
+    faq: preferManagedCollection(cms.faq, remote.faq, "faq"),
     copy,
     fetchedAt: Date.now(),
   };

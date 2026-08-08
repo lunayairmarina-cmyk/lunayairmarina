@@ -18,6 +18,38 @@ export const CMS_STORAGE_KEY = "lunayairmarina.cms.v1";
 export const CMS_UPDATED_EVENT = "lunayairmarina-cms-updated";
 export const CMS_BROADCAST_CHANNEL = "lunayairmarina-cms-broadcast";
 
+export type ManagedCollection =
+  | "gallery"
+  | "team"
+  | "faq"
+  | "testimonials"
+  | "blog"
+  | "services"
+  | "fleet"
+  | "messages";
+
+function managedStorageKey(name: ManagedCollection) {
+  return name === "gallery" ? "lunaya.cms.galleryManaged" : `lunaya.cms.${name}Managed`;
+}
+
+export function markCollectionManaged(name: ManagedCollection) {
+  if (typeof localStorage === "undefined") return;
+  try {
+    localStorage.setItem(managedStorageKey(name), "1");
+  } catch {
+    // ignore
+  }
+}
+
+export function isCollectionManaged(name: ManagedCollection): boolean {
+  if (typeof localStorage === "undefined") return false;
+  try {
+    return localStorage.getItem(managedStorageKey(name)) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export type SeoPageId = "home" | "about" | "services" | "contact" | "blog" | "application";
 
 export type PageHeaderId = "about" | "services" | "contact" | "blog" | "application";

@@ -1,15 +1,13 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { DataTable, RowAction, type Column } from "@/components/admin/DataTable";
 import { Modal, ModalField } from "@/components/admin/Modal";
 import { useLanguage } from "@/lib/i18n";
-import { faqRecords } from "@/data/mock";
-import { loadCmsStore } from "@/lib/cms-store";
-import { describeSaveResult, saveFaq } from "@/services/adminCmsService";
+import { adminDisplayLocalized, asLocalized, pairLocalized } from "@/lib/localized";
+import { describeSaveResult, loadFaq, saveFaq } from "@/services/adminCmsService";
 import type { FaqContent } from "@/types/content";
-import { asLocalized, pairLocalized } from "@/lib/localized";
 
 export const Route = createLazyFileRoute("/admin/faq")({
   component: AdminFaqPage,
@@ -29,30 +27,37 @@ const emptyDraft = (): Draft => ({
   answerAr: "",
 });
 
+function normalizeFaq(rows: FaqContent[]): FaqContent[] {
+  return rows.map((row) => ({
+    ...row,
+    question: asLocalized(row.question),
+    answer: asLocalized(row.answer),
+  }));
+}
+
 function AdminFaqPage() {
   const { t, language } = useLanguage();
-  const initial = useMemo<FaqContent[]>(() => {
-    const cms = loadCmsStore();
-    if (cms.faq.length) {
-      return cms.faq.map((row) => ({
-        ...row,
-        question: asLocalized(row.question),
-        answer: asLocalized(row.answer),
-      }));
-    }
-    return faqRecords.map((row, index) => ({
-      id: row.id,
-      question: { en: row.question, ar: row.question },
-      answer: { en: row.answer, ar: row.answer },
-      order: index + 1,
-    }));
-  }, []);
-
-  const [rows, setRows] = useState(initial);
+  const [rows, setRows] = useState<FaqContent[]>([]);
+  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [status, setStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      setLoading(true);
+      const faq = await loadFaq();
+      if (!cancelled) {
+        setRows(normalizeFaq(faq));
+        setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const persist = async (next: FaqContent[]) => {
     setRows(next);
@@ -86,25 +91,36 @@ function AdminFaqPage() {
     setDraft(emptyDraft());
   };
 
-  const columns: Column<FaqContent>[] = [
-    {
-      key: "question",
-      header: t("admin.table.question"),
-      render: (row) => <span className="text-navy">{row.question[language]}</span>,
-    },
-    {
-      key: "answer",
-      header: t("admin.table.answer"),
-      render: (row) => (
-        <span className="line-clamp-2 max-w-lg text-muted-foreground">{row.answer[language]}</span>
-      ),
-    },
-  ];
+  const columns: Column<FaqContent>[] = useMemo(
+    () => [
+      {
+        key: "question",
+        header: t("admin.table.question"),
+        render: (row) => (
+          <span className="text-navy" dir="auto">
+            {adminDisplayLocalized(row.question, language)}
+          </span>
+        ),
+      },
+      {
+        key: "answer",
+        header: t("admin.table.answer"),
+        render: (row) => (
+          <span className="line-clamp-2 max-w-lg text-muted-foreground" dir="auto">
+            {adminDisplayLocalized(row.answer, language)}
+          </span>
+        ),
+      },
+    ],
+    [language, t],
+  );
 
   return (
     <AdminLayout title={t("admin.nav.faq")}>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {status ? <span className="text-xs text-navy/55">{status}</span> : <span />}
+        <span className="text-xs text-navy/55">
+          {status ?? (loading ? t("common.loading") : null)}
+        </span>
         <button
           type="button"
           onClick={() => {

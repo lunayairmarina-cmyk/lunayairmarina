@@ -6,7 +6,9 @@ import {
   CMS_UPDATED_EVENT,
   deepMergeCopy,
   diffCopyAgainstLocale,
+  isCollectionManaged,
   loadCmsStore,
+  markCollectionManaged,
   patchCmsStore,
   repairWrongLanguageCopy,
   type CmsMessage,
@@ -38,8 +40,6 @@ import { cacheMediaDataUrl, mediaRefId, toMediaRef } from "@/lib/media-refs";
 
 export type SaveResult = { ok: true; sync: FirebaseSyncStatus } | { ok: false; error: string };
 
-const GALLERY_MANAGED_KEY = "lunaya.cms.galleryManaged";
-
 const STABLE_PAGE_HEADERS: Record<PageHeaderId, string> = {
   about: "/images/headers/header-about.webp",
   services: "/images/headers/header-services.webp",
@@ -69,19 +69,11 @@ function normalizePageHeaderUrl(pageId: PageHeaderId, imageUrl: string): string 
 }
 
 export function markGalleryManaged() {
-  try {
-    localStorage.setItem(GALLERY_MANAGED_KEY, "1");
-  } catch {
-    // ignore
-  }
+  markCollectionManaged("gallery");
 }
 
 export function isGalleryManaged(): boolean {
-  try {
-    return localStorage.getItem(GALLERY_MANAGED_KEY) === "1";
-  } catch {
-    return false;
-  }
+  return isCollectionManaged("gallery");
 }
 
 export function describeSaveResult(
@@ -242,6 +234,7 @@ export async function loadTeam(): Promise<TeamMember[]> {
 }
 
 export async function saveTeam(team: TeamMember[]): Promise<SaveResult> {
+  markCollectionManaged("team");
   const keepIds = new Set(team.map((member) => member.id).filter(Boolean));
   const sync = await tryFirebaseWrite(async () => {
     const db = getDb();
@@ -264,6 +257,7 @@ export async function saveTeam(team: TeamMember[]): Promise<SaveResult> {
 }
 
 export async function saveServices(services: ServiceContent[]): Promise<SaveResult> {
+  markCollectionManaged("services");
   const keepIds = new Set(services.map((service) => service.id || service.slug).filter(Boolean));
   const sync = await tryFirebaseWrite(async () => {
     const db = getDb();
@@ -360,12 +354,113 @@ export async function fetchGalleryFromFirebase(): Promise<GalleryContent[]> {
   return gallery;
 }
 
+export async function loadTestimonials(): Promise<TestimonialContent[]> {
+  const enItems =
+    (
+      enLocale as {
+        testimonials?: { items?: Array<{ name: string; position: string; review: string }> };
+      }
+    ).testimonials?.items ?? [];
+  const arItems =
+    (
+      arLocale as {
+        testimonials?: { items?: Array<{ name: string; position: string; review: string }> };
+      }
+    ).testimonials?.items ?? [];
+
+  const fromLocales = (): TestimonialContent[] =>
+    enItems.map((item, index) => ({
+      id: `t${index + 1}`,
+      clientName: { en: item.name, ar: arItems[index]?.name ?? "" },
+      role: { en: item.position, ar: arItems[index]?.position ?? "" },
+      text: { en: item.review, ar: arItems[index]?.review ?? "" },
+      order: index + 1,
+    }));
+
+  const asLocalizedPair = (
+    value: { en?: string; ar?: string } | string | undefined,
+  ): { en: string; ar: string } => {
+    if (!value) return { en: "", ar: "" };
+    if (typeof value === "string") return { en: value, ar: "" };
+    return { en: value.en ?? "", ar: value.ar ?? "" };
+  };
+
+  const repairPair = (
+    value: { en?: string; ar?: string } | string | undefined,
+    enFallback: string,
+    arFallback: string,
+  ) => {
+    if (typeof value === "string") {
+      return { en: value || enFallback, ar: arFallback || value };
+    }
+    const en = value?.en?.trim() || enFallback;
+    let ar = value?.ar?.trim() || "";
+    // Contaminated: Arabic side is empty or identical English copy.
+    if (!ar || (ar === en && arFallback && arFallback !== en)) ar = arFallback;
+    return { en, ar };
+  };
+
+  try {
+    const snap = await getDocs(collection(getDb(), "testimonials"));
+    let remote = snap.docs
+      .map((d) => ({ id: d.id, ...(d.data() as Omit<TestimonialContent, "id">) }))
+      .sort(
+        (a, b) =>
+          (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER),
+      );
+
+    if (remote.length) {
+      remote = remote.map((row, index) => {
+        const locale = fromLocales().find((item) => item.id === row.id) ?? fromLocales()[index];
+        const locName = asLocalizedPair(locale?.clientName);
+        const locRole = asLocalizedPair(locale?.role);
+        const locText = asLocalizedPair(locale?.text);
+        return {
+          ...row,
+          clientName: repairPair(row.clientName, locName.en, locName.ar),
+          role: repairPair(row.role, locRole.en, locRole.ar),
+          text: repairPair(row.text, locText.en, locText.ar),
+        };
+      });
+      patchCmsStore({ testimonials: remote, firebaseSync: "synced" });
+      return remote;
+    }
+  } catch {
+    // fall through
+  }
+
+  const local = loadCmsStore().testimonials;
+  if (local.length) {
+    return local.map((row, index) => {
+      const locale = fromLocales()[index];
+      const locName = asLocalizedPair(locale?.clientName);
+      const locRole = asLocalizedPair(locale?.role);
+      const locText = asLocalizedPair(locale?.text);
+      return {
+        ...row,
+        clientName: repairPair(row.clientName, locName.en, locName.ar),
+        role: repairPair(row.role, locRole.en, locRole.ar),
+        text: repairPair(row.text, locText.en, locText.ar),
+      };
+    });
+  }
+
+  return fromLocales();
+}
+
 export async function saveTestimonials(testimonials: TestimonialContent[]): Promise<SaveResult> {
+  markCollectionManaged("testimonials");
+  const keepIds = new Set(testimonials.map((item) => item.id).filter(Boolean));
   const sync = await tryFirebaseWrite(async () => {
-    const batch = writeBatch(getDb());
+    const db = getDb();
+    const existing = await getDocs(collection(db, "testimonials"));
+    const batch = writeBatch(db);
+    for (const snap of existing.docs) {
+      if (!keepIds.has(snap.id)) batch.delete(snap.ref);
+    }
     testimonials.forEach((item) => {
       const { id, ...data } = item;
-      batch.set(doc(getDb(), "testimonials", id), data, { merge: true });
+      batch.set(doc(db, "testimonials", id), data, { merge: true });
     });
     await batch.commit();
   });
@@ -374,12 +469,58 @@ export async function saveTestimonials(testimonials: TestimonialContent[]): Prom
   return { ok: true, sync };
 }
 
+export async function loadFaq(): Promise<FaqContent[]> {
+  try {
+    const snap = await getDocs(collection(getDb(), "faq"));
+    const remote = snap.docs
+      .map((d) => ({ id: d.id, ...(d.data() as Omit<FaqContent, "id">) }))
+      .sort(
+        (a, b) =>
+          (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER),
+      );
+    if (remote.length) {
+      patchCmsStore({ faq: remote, firebaseSync: "synced" });
+      return remote;
+    }
+  } catch {
+    // fall through
+  }
+  const local = loadCmsStore().faq;
+  // Drop English-only mock contamination (ar identical to en / missing Arabic script).
+  const usableLocal = local.filter((row) => {
+    const q = typeof row.question === "string" ? row.question : row.question?.ar ?? "";
+    const a = typeof row.answer === "string" ? row.answer : row.answer?.ar ?? "";
+    return /[\u0600-\u06FF]/.test(q) || /[\u0600-\u06FF]/.test(a);
+  });
+  if (usableLocal.length) return usableLocal;
+
+  const enItems =
+    (enLocale as { faq?: { items?: Array<{ question: string; answer: string }> } }).faq?.items ??
+    [];
+  const arItems =
+    (arLocale as { faq?: { items?: Array<{ question: string; answer: string }> } }).faq?.items ??
+    [];
+  return enItems.map((item, index) => ({
+    id: `f${index + 1}`,
+    question: { en: item.question, ar: arItems[index]?.question ?? "" },
+    answer: { en: item.answer, ar: arItems[index]?.answer ?? "" },
+    order: index + 1,
+  }));
+}
+
 export async function saveFaq(faq: FaqContent[]): Promise<SaveResult> {
+  markCollectionManaged("faq");
+  const keepIds = new Set(faq.map((item) => item.id).filter(Boolean));
   const sync = await tryFirebaseWrite(async () => {
-    const batch = writeBatch(getDb());
+    const db = getDb();
+    const existing = await getDocs(collection(db, "faq"));
+    const batch = writeBatch(db);
+    for (const snap of existing.docs) {
+      if (!keepIds.has(snap.id)) batch.delete(snap.ref);
+    }
     faq.forEach((item) => {
       const { id, ...data } = item;
-      batch.set(doc(getDb(), "faq", id), data, { merge: true });
+      batch.set(doc(db, "faq", id), data, { merge: true });
     });
     await batch.commit();
   });
@@ -389,10 +530,20 @@ export async function saveFaq(faq: FaqContent[]): Promise<SaveResult> {
 }
 
 export async function saveBlogPosts(blog: BlogContent[]): Promise<SaveResult> {
+  markCollectionManaged("blog");
+  const keepIds = new Set(
+    blog.map((post) => post.slug || post.id).filter(Boolean) as string[],
+  );
   const sync = await tryFirebaseWrite(async () => {
-    const batch = writeBatch(getDb());
+    const db = getDb();
+    const existing = await getDocs(collection(db, "blog"));
+    const batch = writeBatch(db);
+    for (const snap of existing.docs) {
+      if (!keepIds.has(snap.id)) batch.delete(snap.ref);
+    }
     blog.forEach((post) => {
-      batch.set(doc(getDb(), "blog", post.slug || post.id), post, { merge: true });
+      const docId = post.slug || post.id;
+      batch.set(doc(db, "blog", docId), post, { merge: true });
     });
     await batch.commit();
   });
@@ -469,10 +620,17 @@ export async function saveAllSeo(seo: Partial<Record<SeoPageId, SeoPageMeta>>): 
 }
 
 export async function saveMessages(messages: CmsMessage[]): Promise<SaveResult> {
+  markCollectionManaged("messages");
+  const keepIds = new Set(messages.map((msg) => msg.id).filter(Boolean));
   const sync = await tryFirebaseWrite(async () => {
-    const batch = writeBatch(getDb());
+    const db = getDb();
+    const existing = await getDocs(collection(db, "messages"));
+    const batch = writeBatch(db);
+    for (const snap of existing.docs) {
+      if (!keepIds.has(snap.id)) batch.delete(snap.ref);
+    }
     messages.forEach((msg) => {
-      batch.set(doc(getDb(), "messages", msg.id), msg, { merge: true });
+      batch.set(doc(db, "messages", msg.id), msg, { merge: true });
     });
     await batch.commit();
   });
@@ -521,7 +679,8 @@ export async function fetchMessagesFromFirebase(): Promise<CmsMessage[]> {
     .map((item) => item.data() as CmsMessage)
     .filter((item) => item?.id && item?.email)
     .sort((a, b) => String(b.date).localeCompare(String(a.date)));
-  if (messages.length) {
+  // Respect admin deletions: empty managed inbox stays empty.
+  if (messages.length || isCollectionManaged("messages")) {
     patchCmsStore({ messages, firebaseSync: "synced" });
   }
   return messages;

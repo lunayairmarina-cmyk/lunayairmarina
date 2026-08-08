@@ -26,3 +26,18 @@ export function pairLocalized(en: string, ar: string): LocalizedString {
     ar: ar.trim(),
   };
 }
+
+/**
+ * Admin table display: prefer the active UI language, then the other side.
+ * Does not mutate stored values.
+ */
+export function adminDisplayLocalized(
+  value: LocalizedString | string | undefined | null,
+  language: "en" | "ar",
+): string {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  const preferred = value[language]?.trim();
+  if (preferred) return preferred;
+  return (language === "ar" ? value.en : value.ar)?.trim() || "";
+}
