@@ -124,16 +124,27 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-white/10 py-5 text-center text-[0.7rem] text-white/35">
+        <div className="border-t border-white/10 py-5 text-center text-[0.7rem] text-white/45">
           <p>
             <Link
               to="/admin/login"
-              className="text-inherit no-underline hover:text-white/35"
+              className="text-inherit no-underline hover:text-white/45"
               aria-label="Admin"
             >
               ©
             </Link>{" "}
             {new Date().getFullYear()} {t("brand.name")}. {t("footer.rights")}
+          </p>
+          <p className="mt-2 text-sm text-white/70">
+            {t("footer.credit")}{" "}
+            <a
+              href="https://www.top1markting.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-[#e8c56a] underline-offset-2 transition-colors hover:text-[#f0d78a] hover:underline"
+            >
+              {t("footer.creditAgency")}
+            </a>
           </p>
         </div>
       </div>

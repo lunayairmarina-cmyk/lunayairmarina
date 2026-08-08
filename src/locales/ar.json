@@ -783,7 +783,9 @@
     "links": "روابط سريعة",
     "contact": "تواصل",
     "rights": "جميع الحقوق محفوظة.",
-    "admin": "دخول المشرف"
+    "admin": "دخول المشرف",
+    "credit": "الموقع من تنفيذ",
+    "creditAgency": "Top1Markting"
   },
   "admin": {
     "portal": "بوابة المشرف",

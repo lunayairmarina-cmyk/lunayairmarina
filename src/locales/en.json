@@ -783,7 +783,9 @@
     "links": "Quick Links",
     "contact": "Contact",
     "rights": "All rights reserved.",
-    "admin": "Admin Access"
+    "admin": "Admin Access",
+    "credit": "Website by",
+    "creditAgency": "Top1Markting"
   },
   "admin": {
     "portal": "Admin Portal",
