@@ -206,12 +206,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500;600&family=Noto+Kufi+Arabic:wght@400;500;700&family=Great+Vibes&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico?v=8", sizes: "any" },
-      { rel: "icon", href: "/favicon-48.png?v=8", type: "image/png", sizes: "48x48" },
-      { rel: "icon", href: "/favicon.png?v=8", type: "image/png", sizes: "64x64" },
-      { rel: "icon", href: "/favicon-32.png?v=8", type: "image/png", sizes: "32x32" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=8", sizes: "180x180" },
-      { rel: "manifest", href: "/site.webmanifest?v=8" },
+      { rel: "icon", href: "/favicon.ico?v=9", sizes: "any" },
+      { rel: "icon", href: "/favicon-48.png?v=9", type: "image/png", sizes: "48x48" },
+      { rel: "icon", href: "/favicon.png?v=9", type: "image/png", sizes: "64x64" },
+      { rel: "icon", href: "/favicon-32.png?v=9", type: "image/png", sizes: "32x32" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=9", sizes: "180x180" },
+      { rel: "manifest", href: "/site.webmanifest?v=9" },
     ],
     scripts: [
       {
