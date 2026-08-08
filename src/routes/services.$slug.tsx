@@ -4,7 +4,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { Reveal } from "@/components/shared/Reveal";
 import { useLanguage } from "@/lib/i18n";
 import { getServiceBySlug, type ServiceDefinition } from "@/data/services";
-import { localizeValue, useOptionalSiteContent } from "@/providers/SiteContentProvider";
+import { localizeOrFallback, useOptionalSiteContent } from "@/providers/SiteContentProvider";
 import { buildServiceSeoHead } from "@/services/seoService";
 import { useResolvedMediaSrc } from "@/hooks/useResolvedMediaSrc";
 import { ResolvedImage } from "@/components/shared/ResolvedImage";
@@ -60,11 +60,18 @@ function buildCopyFromCms(
   remote: ServiceContent,
   language: "en" | "ar",
   t: (key: string) => string,
+  localeFallback?: { title?: string; description?: string; features?: string[] },
 ): ServiceDetailCopy {
-  const title = localizeValue(remote.title, language);
-  const description = localizeValue(remote.description, language);
+  const title = localizeOrFallback(remote.title, language, localeFallback?.title ?? "");
+  const description = localizeOrFallback(
+    remote.description,
+    language,
+    localeFallback?.description ?? "",
+  );
   const features = remote.features
-    .map((feature) => localizeValue(feature, language))
+    .map((feature, index) =>
+      localizeOrFallback(feature, language, localeFallback?.features?.[index] ?? ""),
+    )
     .filter(Boolean);
   const benefits = features.length > 0 ? features : [description].filter(Boolean);
 
@@ -129,11 +136,16 @@ function ServiceDetailPage() {
             : []);
 
   const localeCopy = tv<ServiceDetailCopy | undefined>(`services.details.${slug}`);
+  const localeListItem = (
+    tv<Array<{ title: string; description: string; features: string[]; slug?: string }>>(
+      "services.items",
+    ) ?? []
+  ).find((item) => item.slug === slug);
   const copy =
     localeCopy?.meta && Array.isArray(localeCopy.benefits) && Array.isArray(localeCopy.values)
       ? localeCopy
       : remote
-        ? buildCopyFromCms(remote, language, t)
+        ? buildCopyFromCms(remote, language, t, localeListItem)
         : undefined;
 
   if ((!remote && !staticDef) || (remote && !published && !staticDef) || !copy) {

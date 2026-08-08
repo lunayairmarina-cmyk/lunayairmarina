@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -7,8 +7,7 @@ import { Modal, ModalField } from "@/components/admin/Modal";
 import { MediaUploader } from "@/components/admin/MediaUploader";
 import { useLanguage } from "@/lib/i18n";
 import { asLocalized, pairLocalized } from "@/lib/localized";
-import { loadCmsStore } from "@/lib/cms-store";
-import { describeSaveResult, saveTeam } from "@/services/adminCmsService";
+import { describeSaveResult, loadTeam, saveTeam } from "@/services/adminCmsService";
 import { ResolvedImage } from "@/components/shared/ResolvedImage";
 import type { TeamMember } from "@/types/content";
 
@@ -36,22 +35,38 @@ const emptyDraft = (): Draft => ({
   image: "",
 });
 
+function normalizeTeam(rows: TeamMember[]): TeamMember[] {
+  return rows.map((row) => ({
+    ...row,
+    name: asLocalized(row.name),
+    position: asLocalized(row.position),
+    bio: asLocalized(row.bio),
+  }));
+}
+
 function AdminTeamPage() {
   const { t, language } = useLanguage();
-  const initial = useMemo<TeamMember[]>(() => {
-    return loadCmsStore().team.map((row) => ({
-      ...row,
-      name: asLocalized(row.name),
-      position: asLocalized(row.position),
-      bio: asLocalized(row.bio),
-    }));
-  }, []);
-
-  const [rows, setRows] = useState(initial);
+  const [rows, setRows] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [status, setStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      setLoading(true);
+      const team = await loadTeam();
+      if (!cancelled) {
+        setRows(normalizeTeam(team));
+        setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const persist = async (next: TeamMember[]) => {
     setRows(next);
@@ -141,7 +156,9 @@ function AdminTeamPage() {
   return (
     <AdminLayout title={t("admin.nav.team")}>
       <div className="mb-6 flex items-center justify-between gap-3">
-        {status ? <span className="text-xs text-navy/55">{status}</span> : <span />}
+        <span className="text-xs text-navy/55">
+          {status ?? (loading ? t("common.loading") : null)}
+        </span>
         <button
           type="button"
           onClick={() => {

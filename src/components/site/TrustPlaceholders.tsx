@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useLanguage } from "@/lib/i18n";
 import { Reveal } from "@/components/shared/Reveal";
-import { useOptionalSiteContent, localizeValue } from "@/providers/SiteContentProvider";
+import { useOptionalSiteContent, localizeOrFallback } from "@/providers/SiteContentProvider";
 
 /**
  * Lightweight trust placeholders for future content:
@@ -10,16 +10,21 @@ import { useOptionalSiteContent, localizeValue } from "@/providers/SiteContentPr
 export function TrustPlaceholders() {
   const { t, tv, language } = useLanguage();
   const trust = useOptionalSiteContent()?.bundle?.trust;
+  const localeSlots = tv<{ title: string; body: string }[]>("trust.slots") ?? [];
   const slots = trust
-    ? trust.slots.map((slot) => ({
-        title: localizeValue(slot.title, language),
-        body: localizeValue(slot.body, language),
+    ? trust.slots.map((slot, index) => ({
+        title: localizeOrFallback(slot.title, language, localeSlots[index]?.title ?? ""),
+        body: localizeOrFallback(slot.body, language, localeSlots[index]?.body ?? ""),
       }))
-    : (tv<{ title: string; body: string }[]>("trust.slots") ?? []);
-  const eyebrow = trust ? localizeValue(trust.eyebrow, language) : t("trust.eyebrow");
-  const title = trust ? localizeValue(trust.title, language) : t("trust.title");
-  const lead = trust ? localizeValue(trust.lead, language) : t("trust.lead");
-  const cta = trust ? localizeValue(trust.cta, language) : t("trust.cta");
+    : localeSlots;
+  const eyebrow = trust
+    ? localizeOrFallback(trust.eyebrow, language, t("trust.eyebrow"))
+    : t("trust.eyebrow");
+  const title = trust
+    ? localizeOrFallback(trust.title, language, t("trust.title"))
+    : t("trust.title");
+  const lead = trust ? localizeOrFallback(trust.lead, language, t("trust.lead")) : t("trust.lead");
+  const cta = trust ? localizeOrFallback(trust.cta, language, t("trust.cta")) : t("trust.cta");
 
   return (
     <section className="border-y border-border bg-background py-16 lg:py-20">

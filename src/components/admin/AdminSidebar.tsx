@@ -65,7 +65,7 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex h-full min-h-0 flex-col bg-[#f4f0e8] text-navy">
       <div className="flex shrink-0 flex-col items-center border-b border-navy/8 px-4 pb-4 pt-14 sm:px-5 sm:pt-6 lg:pt-6">
-        <Logo tone="dark" align="center" className="h-14 w-36 sm:h-16 sm:w-40" />
+        <Logo tone="dark" align="center" className="h-16 w-40 sm:h-20 sm:w-48" />
       </div>
 
       <nav className="admin-hide-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3 sm:py-4">

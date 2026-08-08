@@ -3,7 +3,7 @@ import { Award, Clock, Globe2, Sparkles } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { staggerContainer, staggerItem } from "@/components/shared/Reveal";
-import { useOptionalSiteContent, localizeValue } from "@/providers/SiteContentProvider";
+import { useOptionalSiteContent, localizeOrFallback } from "@/providers/SiteContentProvider";
 import { cn } from "@/lib/utils";
 
 interface WhyItem {
@@ -16,14 +16,21 @@ const icons = [Award, Globe2, Clock, Sparkles];
 export function WhyChooseUs({ variant = "default" }: { variant?: "default" | "home" }) {
   const { t, tv, language } = useLanguage();
   const why = useOptionalSiteContent()?.bundle?.why;
+  const localeItems = tv<WhyItem[]>("why.items") ?? [];
   const items: WhyItem[] = why
-    ? why.items.map((item) => ({
-        title: localizeValue(item.title, language),
-        description: localizeValue(item.description, language),
+    ? why.items.map((item, index) => ({
+        title: localizeOrFallback(item.title, language, localeItems[index]?.title ?? ""),
+        description: localizeOrFallback(
+          item.description,
+          language,
+          localeItems[index]?.description ?? "",
+        ),
       }))
-    : (tv<WhyItem[]>("why.items") ?? []);
-  const eyebrow = why ? localizeValue(why.eyebrow, language) : t("why.eyebrow");
-  const title = why ? localizeValue(why.title, language) : t("why.title");
+    : localeItems;
+  const eyebrow = why
+    ? localizeOrFallback(why.eyebrow, language, t("why.eyebrow"))
+    : t("why.eyebrow");
+  const title = why ? localizeOrFallback(why.title, language, t("why.title")) : t("why.title");
 
   return (
     <section

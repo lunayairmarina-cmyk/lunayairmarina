@@ -11,7 +11,14 @@ import {
   query,
 } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
-import { deepMergeCopy, emptyCmsStore, loadCmsStore, repairWrongLanguageCopy, saveCmsStore } from "@/lib/cms-store";
+import {
+  deepMergeCopy,
+  diffCopyAgainstLocale,
+  emptyCmsStore,
+  loadCmsStore,
+  repairWrongLanguageCopy,
+  saveCmsStore,
+} from "@/lib/cms-store";
 import enLocale from "@/locales/en.json";
 import arLocale from "@/locales/ar.json";
 import type {
@@ -288,13 +295,21 @@ function mergeCmsOverFirebase(remote: SiteBundle): SiteBundle {
       : null;
 
   // Persist repaired Arabic/English copy so the UI stops flipping languages.
+  // Store diffs only — never dump the full locale tree into CMS localStorage.
   if (copy && cms.copy) {
     const arWasContaminated =
       JSON.stringify(cms.copy.ar ?? {}) !== JSON.stringify(copy.ar);
     const enWasContaminated =
       JSON.stringify(cms.copy.en ?? {}) !== JSON.stringify(copy.en);
     if (arWasContaminated || enWasContaminated) {
-      saveCmsStore({ ...cms, copy, homepage: sanitizeHomepageForBundle(cms.homepage) });
+      saveCmsStore({
+        ...cms,
+        copy: {
+          en: diffCopyAgainstLocale(copy.en ?? {}, enLocaleDict),
+          ar: diffCopyAgainstLocale(copy.ar ?? {}, arLocaleDict),
+        },
+        homepage: sanitizeHomepageForBundle(cms.homepage),
+      });
       copy = {
         en: repairWrongLanguageCopy(copy.en, enLocaleDict, arLocaleDict),
         ar: repairWrongLanguageCopy(copy.ar, arLocaleDict, enLocaleDict),

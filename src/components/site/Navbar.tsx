@@ -69,15 +69,15 @@ export function Navbar() {
   return (
     <>
       <header
-        className="fixed inset-x-0 top-0 z-50 h-[calc(4rem+env(safe-area-inset-top))] overflow-visible border-b border-navy/10 bg-white pt-[env(safe-area-inset-top)] shadow-card"
+        className="fixed inset-x-0 top-0 z-50 h-[calc(5rem+env(safe-area-inset-top))] overflow-visible border-b border-navy/10 bg-white pt-[env(safe-area-inset-top)] shadow-card"
       >
         <div className="container-luxe grid h-full grid-cols-[1fr_auto] items-center gap-3 lg:grid-cols-[1fr_auto_1fr]">
           <Link
             to="/"
-            className="relative z-10 min-w-0 max-w-[58%] justify-self-start sm:max-w-none"
+            className="relative z-10 min-w-0 max-w-[70%] justify-self-start sm:max-w-none"
             aria-label={t("brand.name")}
           >
-            <Logo tone="dark" className="h-9 w-24 sm:h-12 sm:w-36" />
+            <Logo tone="dark" className="h-14 w-36 sm:h-[4.25rem] sm:w-44" />
           </Link>
 
           <nav className="hidden items-center gap-9 lg:flex">
@@ -138,7 +138,7 @@ export function Navbar() {
 
             <div className="relative z-10 flex h-16 shrink-0 items-center justify-between border-b border-white/10 px-4 pt-[env(safe-area-inset-top)] sm:px-6">
               <Link to="/" onClick={() => setOpen(false)} aria-label={t("brand.name")}>
-                <Logo tone="light" className="h-9 w-24 sm:h-10 sm:w-28" />
+                <Logo tone="light" className="h-14 w-36 sm:h-16 sm:w-40" />
               </Link>
               <button
                 type="button"

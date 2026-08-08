@@ -285,7 +285,7 @@ export function ApplicationSections() {
   return (
     <>
       {/* HERO */}
-      <section className="relative flex min-h-[calc(100svh-4rem)] w-full items-center py-10 sm:py-14 lg:py-12">
+      <section className="relative flex min-h-[calc(100svh-5rem)] w-full items-center py-10 sm:py-14 lg:py-12">
         <div className="absolute inset-0 overflow-hidden">
           <img
             src={aboutMarina}

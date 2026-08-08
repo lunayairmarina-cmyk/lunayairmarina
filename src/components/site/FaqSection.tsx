@@ -4,7 +4,7 @@ import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/SectionHeading";
-import { useOptionalSiteContent, localizeValue } from "@/providers/SiteContentProvider";
+import { useOptionalSiteContent, localizeOrFallback } from "@/providers/SiteContentProvider";
 
 interface FaqItem {
   question: string;
@@ -14,13 +14,18 @@ interface FaqItem {
 export function FaqSection({ variant = "default" }: { variant?: "default" | "home" }) {
   const { t, tv, language } = useLanguage();
   const remote = useOptionalSiteContent()?.bundle?.faq ?? [];
+  const localeItems = tv<FaqItem[]>("faq.items") ?? [];
   const items: FaqItem[] =
     remote.length > 0
-      ? remote.map((item) => ({
-          question: localizeValue(item.question, language),
-          answer: localizeValue(item.answer, language),
+      ? remote.map((item, index) => ({
+          question: localizeOrFallback(
+            item.question,
+            language,
+            localeItems[index]?.question ?? "",
+          ),
+          answer: localizeOrFallback(item.answer, language, localeItems[index]?.answer ?? ""),
         }))
-      : (tv<FaqItem[]>("faq.items") ?? []);
+      : localeItems;
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (

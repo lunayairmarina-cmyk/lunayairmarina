@@ -182,8 +182,9 @@ export async function saveCopyBundle(copy: {
   };
 
   const sync = await tryFirebaseWrite(async () => {
-    await setDoc(doc(getDb(), "copy", "en"), toPersist.en, { merge: true });
-    await setDoc(doc(getDb(), "copy", "ar"), toPersist.ar, { merge: true });
+    // Replace (not merge) so repaired/removed keys actually leave Firestore.
+    await setDoc(doc(getDb(), "copy", "en"), toPersist.en);
+    await setDoc(doc(getDb(), "copy", "ar"), toPersist.ar);
   });
   patchCmsStore({ copy: toPersist, firebaseSync: sync });
   notifySiteReload();
@@ -223,12 +224,37 @@ export async function saveTrust(trust: TrustContent): Promise<SaveResult> {
   return { ok: true, sync };
 }
 
+/** Load team from Firestore and keep the local CMS store in sync. */
+export async function loadTeam(): Promise<TeamMember[]> {
+  try {
+    const snap = await getDocs(collection(getDb(), "team"));
+    const team = snap.docs
+      .map((d) => ({ id: d.id, ...(d.data() as Omit<TeamMember, "id">) }))
+      .sort(
+        (a, b) =>
+          (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER),
+      );
+    patchCmsStore({ team });
+    return team;
+  } catch {
+    return loadCmsStore().team;
+  }
+}
+
 export async function saveTeam(team: TeamMember[]): Promise<SaveResult> {
+  const keepIds = new Set(team.map((member) => member.id).filter(Boolean));
   const sync = await tryFirebaseWrite(async () => {
-    const batch = writeBatch(getDb());
+    const db = getDb();
+    const existing = await getDocs(collection(db, "team"));
+    const batch = writeBatch(db);
+
+    for (const snap of existing.docs) {
+      if (!keepIds.has(snap.id)) batch.delete(snap.ref);
+    }
+
     team.forEach((member) => {
       const { id, ...data } = member;
-      batch.set(doc(getDb(), "team", id), data, { merge: true });
+      batch.set(doc(db, "team", id), data, { merge: true });
     });
     await batch.commit();
   });

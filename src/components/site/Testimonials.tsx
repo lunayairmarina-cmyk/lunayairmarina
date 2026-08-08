@@ -6,7 +6,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { useLanguage } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/SectionHeading";
-import { useOptionalSiteContent, localizeValue } from "@/providers/SiteContentProvider";
+import { useOptionalSiteContent, localizeOrFallback } from "@/providers/SiteContentProvider";
 
 interface TestimonialItem {
   name: string;
@@ -26,19 +26,22 @@ export function Testimonials() {
   const { t, tv, dir, language } = useLanguage();
   const site = useOptionalSiteContent();
   const remote = site?.bundle?.testimonials ?? [];
+  const localeItems = tv<TestimonialItem[]>("testimonials.items") ?? [];
   const items: TestimonialItem[] =
     remote.length > 0
-      ? remote.map((item) => ({
-          name: localizeValue(
+      ? remote.map((item, index) => {
+          const locale = localeItems[index];
+          const nameValue =
             typeof item.clientName === "string"
               ? { en: item.clientName, ar: item.clientName }
-              : item.clientName,
-            language,
-          ),
-          position: localizeValue(item.role, language),
-          review: localizeValue(item.text, language),
-        }))
-      : (tv<TestimonialItem[]>("testimonials.items") ?? []);
+              : item.clientName;
+          return {
+            name: localizeOrFallback(nameValue, language, locale?.name ?? ""),
+            position: localizeOrFallback(item.role, language, locale?.position ?? ""),
+            review: localizeOrFallback(item.text, language, locale?.review ?? ""),
+          };
+        })
+      : localeItems;
   const [mounted, setMounted] = useState(false);
   const maxSlidesPerView = 3;
   const canLoop = items.length > maxSlidesPerView;

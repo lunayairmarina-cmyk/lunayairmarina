@@ -30,7 +30,10 @@ export function localizeValue(
 ): string {
   if (!value) return "";
   if (typeof value === "string") return value;
-  return value[language] || value.en || value.ar || "";
+  const preferred = value[language];
+  if (typeof preferred === "string" && preferred.trim()) return preferred;
+  // Do not cross-fill EN↔AR — empty side should fall back via localizeOrFallback / t().
+  return "";
 }
 
 /** True when a CMS string looks like an i18n key (e.g. hero.title) instead of real copy. */
@@ -41,13 +44,27 @@ export function looksLikeI18nKey(value: string | undefined | null): boolean {
   return /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/i.test(trimmed);
 }
 
+/** Detect English accidentally stored in an Arabic field (or vice versa). */
+export function looksLikeWrongLanguage(value: string, language: Lang): boolean {
+  const trimmed = value.trim();
+  if (!trimmed) return true;
+  if (looksLikeI18nKey(trimmed)) return true;
+  if (language === "ar") {
+    // Arabic UI expects Arabic script for marketing copy.
+    return !/[\u0600-\u06FF]/.test(trimmed) && /[A-Za-z]{3,}/.test(trimmed);
+  }
+  // English UI should not be pure Arabic script.
+  return /[\u0600-\u06FF]/.test(trimmed) && !/[A-Za-z]{3,}/.test(trimmed);
+}
+
 export function localizeOrFallback(
   value: LocalizedString | string | undefined,
   language: Lang,
   fallback: string,
 ): string {
   const localized = localizeValue(value, language);
-  return looksLikeI18nKey(localized) ? fallback : localized;
+  if (!localized || looksLikeWrongLanguage(localized, language)) return fallback;
+  return localized;
 }
 
 export function SiteContentProvider({ children }: { children: ReactNode }) {

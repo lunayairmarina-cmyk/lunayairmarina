@@ -73,7 +73,7 @@ export function Footer() {
             aria-label={t("brand.name")}
             className="inline-flex items-center justify-center"
           >
-            <Logo tone="light" align="center" className="mx-auto h-20 w-40 sm:h-24 sm:w-48" />
+            <Logo tone="light" align="center" className="mx-auto h-24 w-44 sm:h-28 sm:w-52" />
           </Link>
 
           <span className="mt-5 block h-px w-14 bg-gold/70" aria-hidden />

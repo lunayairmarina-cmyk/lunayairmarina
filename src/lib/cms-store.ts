@@ -202,6 +202,15 @@ export function repairWrongLanguageCopy(
       ) {
         return correct;
       }
+      // Latin-only CMS string while correct locale is Arabic → use locale.
+      if (
+        typeof correct === "string" &&
+        /[\u0600-\u06FF]/.test(correct) &&
+        !/[\u0600-\u06FF]/.test(node) &&
+        /[A-Za-z]{3,}/.test(node)
+      ) {
+        return correct;
+      }
       return node;
     }
     if (Array.isArray(node)) {

@@ -87,16 +87,16 @@ function AdminTestimonialsPage() {
   const save = async () => {
     if (!draft.nameEn.trim() && !draft.nameAr.trim()) return;
     const clientName = {
-      en: draft.nameEn.trim() || draft.nameAr.trim(),
-      ar: draft.nameAr.trim() || draft.nameEn.trim(),
+      en: draft.nameEn.trim(),
+      ar: draft.nameAr.trim(),
     };
     const role = {
-      en: draft.positionEn.trim() || draft.positionAr.trim(),
-      ar: draft.positionAr.trim() || draft.positionEn.trim(),
+      en: draft.positionEn.trim(),
+      ar: draft.positionAr.trim(),
     };
     const text = {
-      en: draft.reviewEn.trim() || draft.reviewAr.trim(),
-      ar: draft.reviewAr.trim() || draft.reviewEn.trim(),
+      en: draft.reviewEn.trim(),
+      ar: draft.reviewAr.trim(),
     };
 
     const next = editingId

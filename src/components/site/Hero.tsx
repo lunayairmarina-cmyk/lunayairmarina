@@ -136,7 +136,7 @@ export function Hero() {
   return (
     <section
       ref={sectionRef}
-      className="relative flex min-h-[calc(100svh-4rem-env(safe-area-inset-top))] w-full items-center justify-center overflow-hidden max-sm:items-end max-sm:pb-16"
+      className="relative flex min-h-[calc(100svh-5rem-env(safe-area-inset-top))] w-full items-center justify-center overflow-hidden max-sm:items-end max-sm:pb-16"
     >
       <div className="absolute inset-0 bg-navy">
         {/* LCP poster — always visible immediately */}

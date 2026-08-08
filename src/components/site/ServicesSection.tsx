@@ -5,7 +5,7 @@ import { useLanguage } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { staggerContainer, staggerItem } from "@/components/shared/Reveal";
 import { getServiceBySlug } from "@/data/services";
-import { useOptionalSiteContent, localizeValue } from "@/providers/SiteContentProvider";
+import { useOptionalSiteContent, localizeOrFallback } from "@/providers/SiteContentProvider";
 import { ResolvedImage } from "@/components/shared/ResolvedImage";
 import type { ServiceContent } from "@/types/content";
 
@@ -32,23 +32,34 @@ export function ServicesSection({
 }) {
   const { t, tv, language } = useLanguage();
   const remote = useOptionalSiteContent()?.bundle?.services ?? [];
+  const localeItems =
+    tv<Array<{ title: string; description: string; features: string[]; slug?: string }>>(
+      "services.items",
+    ) ?? [];
   const items: ServiceItem[] =
     remote.length > 0
       ? remote
           .filter(isPublishedService)
           .slice()
           .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-          .map((item) => ({
-            id: item.id,
-            title: localizeValue(item.title, language),
-            description: localizeValue(item.description, language),
-            features: item.features.map((f) => localizeValue(f, language)),
-            slug: item.slug,
-            image: item.image,
-          }))
-      : (tv<Array<{ title: string; description: string; features: string[]; slug?: string }>>(
-          "services.items",
-        ) ?? []).map((item, index) => ({
+          .map((item, index) => {
+            const locale = localeItems.find((row) => row.slug === item.slug) ?? localeItems[index];
+            return {
+              id: item.id,
+              title: localizeOrFallback(item.title, language, locale?.title ?? ""),
+              description: localizeOrFallback(
+                item.description,
+                language,
+                locale?.description ?? "",
+              ),
+              features: item.features.map((f, featureIndex) =>
+                localizeOrFallback(f, language, locale?.features?.[featureIndex] ?? ""),
+              ),
+              slug: item.slug,
+              image: item.image,
+            };
+          })
+      : localeItems.map((item, index) => ({
           id: item.slug ?? `locale-${index}`,
           title: item.title,
           description: item.description,
