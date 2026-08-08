@@ -5,7 +5,7 @@ export const Route = createFileRoute("/admin/services")({
     meta: [
       { title: "Services — lunayairmarina Admin" },
       { name: "description", content: "Manage the services shown on the website." },
-      { name: "robots", content: "noindex" },
+      { name: "robots", content: "noindex, nofollow, noarchive" },
     ],
   }),
 });

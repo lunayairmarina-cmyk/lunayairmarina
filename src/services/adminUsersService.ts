@@ -18,8 +18,13 @@ import {
 import { getDb, getFirebaseAuth, getSecondaryAuth, getSecondaryDb } from "@/lib/firebase";
 import {
   ADMIN_PERMISSIONS,
+  assignableRoles,
+  canDelegateAccounts,
+  canManageUser,
   DEFAULT_ADMIN_USERS,
-  permissionsForRole,
+  grantablePermissions,
+  migratedPermissionsFor,
+  normalizeRole,
   saveAdminUsers,
   type AdminPermission,
   type AdminRoleId,
@@ -27,6 +32,9 @@ import {
 } from "@/lib/admin-roles";
 
 const ADMINS_COLLECTION = "admins";
+
+/** Raised when the signed-in actor tries to reach above or across their own level. */
+const FORBIDDEN = "FORBIDDEN_HIERARCHY";
 
 function authCode(error: unknown): string {
   if (error && typeof error === "object" && "code" in error) {
@@ -62,19 +70,18 @@ export type AdminUserInput = {
 
 function normalizeUser(id: string, data: Record<string, unknown>): AdminUser | null {
   if (typeof data.email !== "string" || typeof data.name !== "string") return null;
-  const role = (data.role as AdminRoleId) || "custom";
+  const role = normalizeRole(data.role);
   const rawPermissions = Array.isArray(data.permissions)
     ? (data.permissions as AdminPermission[])
     : [];
+  const stored = rawPermissions.filter((permission) => ADMIN_PERMISSIONS.includes(permission));
+  // Stored permissions win so per-user tuning survives; retired presets only seed empty sets.
   const permissions =
     role === "super_admin"
       ? [...ADMIN_PERMISSIONS]
-      : Array.from(
-          new Set([
-            ...rawPermissions,
-            ...(role === "custom" ? [] : permissionsForRole(role)),
-          ]),
-        ).filter((permission) => ADMIN_PERMISSIONS.includes(permission));
+      : stored.length
+        ? stored
+        : migratedPermissionsFor(data.role);
 
   return {
     id,
@@ -92,10 +99,35 @@ function buildProfile(uid: string, input: AdminUserInput, email: string): AdminU
     name: input.name.trim(),
     email,
     role: input.role,
-    permissions:
-      input.role === "custom" ? input.permissions : permissionsForRole(input.role),
+    permissions: input.role === "super_admin" ? [...ADMIN_PERMISSIONS] : [...input.permissions],
     active: input.active,
   };
+}
+
+/** Resolve the signed-in actor's stored profile and confirm they may delegate at all. */
+async function requireDelegatingActor(): Promise<AdminUser> {
+  const auth = getFirebaseAuth();
+  // Wait for IndexedDB restore — currentUser can be null for a beat even while logged in.
+  await auth.authStateReady();
+  const current = auth.currentUser;
+  if (!current) throw new Error("AUTH_REQUIRED");
+  const actor = await getAdminProfile(current.uid);
+  if (!actor || !canDelegateAccounts(actor)) throw new Error(FORBIDDEN);
+  return actor;
+}
+
+/** An actor may never hand out a role at or above their level, nor a permission they lack. */
+function assertCanAssign(
+  actor: AdminUser,
+  role: AdminRoleId,
+  permissions: AdminPermission[],
+  currentRole?: AdminRoleId,
+) {
+  if (role !== currentRole && !assignableRoles(actor).includes(role)) throw new Error(FORBIDDEN);
+  const allowed = grantablePermissions(actor, role);
+  if (permissions.some((permission) => !allowed.includes(permission))) {
+    throw new Error(FORBIDDEN);
+  }
 }
 
 async function writeAdminProfile(profile: AdminUser) {
@@ -133,7 +165,7 @@ export async function getAdminProfile(uid: string): Promise<AdminUser | null> {
 }
 
 /**
- * Super Admin invites a user:
+ * Invite a user one level below the signed-in actor:
  * 1) Create (or reclaim) Firebase Auth account with email+password
  * 2) Save role/permissions profile in Firestore admins/{uid}
  */
@@ -147,10 +179,12 @@ export async function createAdminUser(input: AdminUserInput): Promise<AdminUser>
     throw new Error("Password must be at least 6 characters.");
   }
 
-  const primary = getFirebaseAuth().currentUser;
-  if (!primary) {
-    throw new Error("SUPER_ADMIN_REQUIRED");
-  }
+  const actor = await requireDelegatingActor();
+  assertCanAssign(actor, input.role, input.permissions);
+
+  const primary = getFirebaseAuth();
+  const primaryUid = primary.currentUser?.uid;
+  if (!primaryUid) throw new Error("AUTH_REQUIRED");
 
   const secondary = getSecondaryAuth();
   let uid = "";
@@ -175,6 +209,11 @@ export async function createAdminUser(input: AdminUserInput): Promise<AdminUser>
       } catch {
         throw new Error("EMAIL_EXISTS_WRONG_PASSWORD");
       }
+    }
+
+    // Creating on Secondary must never replace the primary admin session.
+    if (primary.currentUser?.uid !== primaryUid) {
+      throw new Error("AUTH_REQUIRED");
     }
 
     const profile = buildProfile(uid, input, email);
@@ -234,15 +273,16 @@ export async function updateAdminUser(
   id: string,
   input: Omit<AdminUserInput, "password"> & { password?: string },
 ): Promise<AdminUser> {
-  const profile: AdminUser = {
+  const actor = await requireDelegatingActor();
+  const target = await getAdminProfile(id);
+  if (!target || !canManageUser(actor, target)) throw new Error(FORBIDDEN);
+  assertCanAssign(actor, input.role, input.permissions, target.role);
+
+  const profile = buildProfile(
     id,
-    name: input.name.trim(),
-    email: input.email.trim().toLowerCase(),
-    role: input.role,
-    permissions:
-      input.role === "custom" ? input.permissions : permissionsForRole(input.role),
-    active: input.active,
-  };
+    { ...input, password: undefined },
+    input.email.trim().toLowerCase(),
+  );
 
   await updateDoc(doc(getDb(), ADMINS_COLLECTION, id), {
     name: profile.name,
@@ -263,6 +303,9 @@ export async function updateAdminUser(
 }
 
 export async function deleteAdminUserProfile(id: string) {
+  const actor = await requireDelegatingActor();
+  const target = await getAdminProfile(id);
+  if (!target || !canManageUser(actor, target)) throw new Error(FORBIDDEN);
   await deleteDoc(doc(getDb(), ADMINS_COLLECTION, id));
 }
 

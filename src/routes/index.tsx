@@ -12,12 +12,20 @@ import { FaqSection } from "@/components/site/FaqSection";
 import { FleetSection } from "@/components/site/FleetSection";
 import { TeamSection } from "@/components/site/TeamSection";
 import { buildSeoHead } from "@/services/seoService";
+import {
+  buildVideoObjectSchema,
+  buildVideoOgMeta,
+  SITE_VIDEOS,
+} from "@/lib/videos";
+import { SITE_ORIGIN } from "@/lib/site";
 
 export const Route = createFileRoute("/")({
   head: () => {
     const seo = buildSeoHead("home", "/");
+    const heroVideo = SITE_VIDEOS[0]!;
     return {
       ...seo,
+      meta: [...(seo.meta ?? []), ...buildVideoOgMeta(heroVideo, SITE_ORIGIN)],
       links: [
         ...(seo.links ?? []),
         {
@@ -26,6 +34,19 @@ export const Route = createFileRoute("/")({
           href: "/images/hero/hero-main.webp",
           type: "image/webp",
           fetchPriority: "high",
+        },
+        // Helps crawlers discover the hero MP4 even before the delayed <video> mounts.
+        {
+          rel: "alternate",
+          type: "video/mp4",
+          href: heroVideo.contentPath,
+          title: `${heroVideo.title.en}`,
+        },
+      ],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(buildVideoObjectSchema(heroVideo, SITE_ORIGIN)),
         },
       ],
     };

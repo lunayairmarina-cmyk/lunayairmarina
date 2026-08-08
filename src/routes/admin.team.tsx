@@ -4,7 +4,7 @@ export const Route = createFileRoute("/admin/team")({
   head: () => ({
     meta: [
       { title: "Team — lunayairmarina Admin" },
-      { name: "robots", content: "noindex" },
+      { name: "robots", content: "noindex, nofollow, noarchive" },
     ],
   }),
 });

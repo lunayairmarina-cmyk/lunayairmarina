@@ -168,6 +168,19 @@ export function Hero() {
             src={heroVideo}
           />
         ) : null}
+        {/* Crawlable fallback: hero video loads after JS, so expose a static copy for Google. */}
+        <noscript>
+          <video
+            className="absolute inset-0 size-full object-cover object-center"
+            muted
+            playsInline
+            controls
+            poster={heroImage}
+            src={heroVideo}
+          >
+            <a href={heroVideo}>Lunayair Marina yacht management video</a>
+          </video>
+        </noscript>
         <div className="absolute inset-0 bg-navy/25" />
         <div className="absolute inset-0 bg-gradient-to-t from-navy/70 via-navy/20 to-transparent sm:from-navy/55 sm:via-transparent" />
       </div>
@@ -185,9 +198,10 @@ export function Hero() {
         <motion.h1
           initial={false}
           animate={{ y: 0 }}
-          className="font-display type-display-xl mt-4 text-balance text-white uppercase sm:mt-6"
+          dir="ltr"
+          className="type-wordmark mt-4 text-balance text-white sm:mt-6"
         >
-          {t("brand.name")}
+          {t("brand.wordmark")}
         </motion.h1>
 
         <p className="type-body mt-4 max-w-2xl text-white/90 sm:mt-7">{title}</p>

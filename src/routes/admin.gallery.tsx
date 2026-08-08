@@ -5,7 +5,7 @@ export const Route = createFileRoute("/admin/gallery")({
     meta: [
       { title: "Gallery — lunayairmarina Admin" },
       { name: "description", content: "Manage gallery images." },
-      { name: "robots", content: "noindex" },
+      { name: "robots", content: "noindex, nofollow, noarchive" },
     ],
   }),
 });

@@ -10,6 +10,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import {
+  canDelegateAccounts,
   isSuperAdmin,
   loadAdminUsers,
   SESSION_STORAGE_KEY,
@@ -98,12 +99,8 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     const auth = getFirebaseAuth();
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
-        const local = readSessionUser();
-        if (local) {
-          // Keep sidebar/session stable while Firebase auth is briefly null during route changes.
-          applyUser(local);
-          return;
-        }
+        // Do not keep a ghost localStorage session — it makes the UI look signed in
+        // while Auth writes fail with a confusing "must be Super Admin" error.
         applyUser(null);
         return;
       }
@@ -218,9 +215,9 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const can = useCallback(
     (permission: AdminPermission) => {
       if (!user?.active) return false;
-      if (permission === "users" || permission === "settings") {
-        return isSuperAdmin(user);
-      }
+      if (isSuperAdmin(user)) return true;
+      // Account management also requires Admin level, not just the permission flag.
+      if (permission === "users") return canDelegateAccounts(user);
       return user.permissions.includes(permission);
     },
     [user],

@@ -5,7 +5,7 @@ export const Route = createFileRoute("/admin/faq")({
     meta: [
       { title: "FAQ — lunayairmarina Admin" },
       { name: "description", content: "Manage frequently asked questions." },
-      { name: "robots", content: "noindex" },
+      { name: "robots", content: "noindex, nofollow, noarchive" },
     ],
   }),
 });

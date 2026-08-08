@@ -6,6 +6,7 @@ import { useLanguage } from "@/lib/i18n";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
 import { Logo } from "@/components/shared/Logo";
+import { sendAdminPasswordReset } from "@/services/adminUsersService";
 import adminBg from "@/assets/admin/admin-login-bg.jpg";
 
 export const Route = createLazyFileRoute("/admin/login")({
@@ -19,12 +20,15 @@ function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [resetBusy, setResetBusy] = useState(false);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setBusy(true);
     setError(null);
+    setNotice(null);
     const result = await login(email, password);
     setBusy(false);
     if (result.ok) {
@@ -33,6 +37,26 @@ function AdminLoginPage() {
     }
     const key = result.error || authError || "admin.loginFailed";
     setError(key.startsWith("admin.") ? t(key) : key);
+  };
+
+  const handleForgotPassword = async () => {
+    const normalized = email.trim().toLowerCase();
+    setError(null);
+    setNotice(null);
+    if (!normalized) {
+      setError(t("admin.resetEmailRequired"));
+      return;
+    }
+    setResetBusy(true);
+    try {
+      await sendAdminPasswordReset(normalized);
+      setNotice(t("admin.resetSent"));
+    } catch {
+      // Same message either way so we do not reveal whether the email exists.
+      setNotice(t("admin.resetSent"));
+    } finally {
+      setResetBusy(false);
+    }
   };
 
   return (
@@ -79,9 +103,19 @@ function AdminLoginPage() {
           </label>
 
           <label className="flex flex-col gap-2">
-            <span className="text-[0.6rem] tracking-[0.22em] text-navy-foreground/50 uppercase">
-              {t("admin.password")}
-            </span>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[0.6rem] tracking-[0.22em] text-navy-foreground/50 uppercase">
+                {t("admin.password")}
+              </span>
+              <button
+                type="button"
+                disabled={busy || resetBusy}
+                onClick={() => void handleForgotPassword()}
+                className="text-[0.65rem] tracking-[0.12em] text-gold/80 transition-colors hover:text-gold disabled:opacity-50"
+              >
+                {resetBusy ? t("common.loading") : t("admin.forgot")}
+              </button>
+            </div>
             <input
               type="password"
               value={password}
@@ -97,9 +131,15 @@ function AdminLoginPage() {
             </p>
           ) : null}
 
+          {notice ? (
+            <p className="rounded-md border border-gold/30 bg-gold/10 px-3 py-2 text-xs text-gold">
+              {notice}
+            </p>
+          ) : null}
+
           <motion.button
             type="submit"
-            disabled={busy}
+            disabled={busy || resetBusy}
             whileTap={{ scale: 0.98 }}
             className="mt-2 border border-gold bg-gold px-8 py-4 text-[0.7rem] tracking-[0.22em] text-navy uppercase transition-all duration-500 hover:bg-transparent hover:text-gold disabled:opacity-60"
           >

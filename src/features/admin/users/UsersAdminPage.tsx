@@ -6,14 +6,18 @@ import { Modal, ModalField } from "@/components/admin/Modal";
 import { useLanguage } from "@/lib/i18n";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
-  ADMIN_PERMISSIONS,
+  assignableRoles,
   canChangeUserRole,
+  canDelegateAccounts,
   canDeleteUser,
   canManageUser,
-  isSuperAdmin,
+  grantablePermissions,
   loadAdminUsers,
   permissionsForRole,
+  sanitizePermissions,
   saveAdminUsers,
+  selectableRoles,
+  visibleUsers,
   type AdminPermission,
   type AdminRoleId,
   type AdminUser,
@@ -26,14 +30,6 @@ import {
   updateAdminUser,
 } from "@/services/adminUsersService";
 import { cn } from "@/lib/utils";
-
-const ROLE_OPTIONS: AdminRoleId[] = [
-  "super_admin",
-  "editor",
-  "gallery_manager",
-  "support",
-  "custom",
-];
 
 type Draft = {
   name: string;
@@ -48,8 +44,8 @@ const emptyDraft: Draft = {
   name: "",
   email: "",
   password: "",
-  role: "editor",
-  permissions: permissionsForRole("editor"),
+  role: "custom",
+  permissions: [],
   active: true,
 };
 
@@ -76,7 +72,7 @@ export function UsersAdminPage() {
       });
   }, []);
 
-  if (!can("users") || !isSuperAdmin(currentUser)) {
+  if (!can("users") || !canDelegateAccounts(currentUser)) {
     return (
       <AdminLayout title={t("admin.nav.users")}>
         <div className="rounded-2xl border border-navy/8 bg-white p-10 text-center shadow-sm">
@@ -87,18 +83,26 @@ export function UsersAdminPage() {
     );
   }
 
+  const editingTarget = editingId ? (rows.find((row) => row.id === editingId) ?? null) : null;
+  const roleOptions = selectableRoles(currentUser, editingTarget?.role);
+  const allowedPermissions = grantablePermissions(currentUser, draft.role);
+  const listedRows = visibleUsers(currentUser, rows);
+
+  // New accounts start as staff with nothing ticked; the creator picks each permission.
+  const initialDraft = (): Draft => ({ ...emptyDraft, role: "custom", permissions: [] });
+
   const persistLocal = (next: AdminUser[]) => {
     setRows(next);
     saveAdminUsers(next);
     window.dispatchEvent(new Event("lunayairmarina-admin-users"));
   };
 
+  /** Picking a role sets the level and seeds its preset; checkboxes then fine-tune it. */
   const setRole = (role: AdminRoleId) => {
-    setDraft((current) => ({
-      ...current,
-      role,
-      permissions: role === "custom" ? current.permissions : permissionsForRole(role),
-    }));
+    setDraft((current) => {
+      const seed = role === "custom" ? current.permissions : permissionsForRole(role);
+      return { ...current, role, permissions: sanitizePermissions(currentUser, role, seed) };
+    });
   };
 
   const togglePermission = (permission: AdminPermission) => {
@@ -109,7 +113,10 @@ export function UsersAdminPage() {
       const permissions = exists
         ? current.permissions.filter((item) => !linked.includes(item))
         : Array.from(new Set([...current.permissions, ...linked]));
-      return { ...current, role: "custom", permissions };
+      return {
+        ...current,
+        permissions: sanitizePermissions(currentUser, current.role, permissions),
+      };
     });
   };
 
@@ -127,6 +134,10 @@ export function UsersAdminPage() {
           ? t("admin.users.cannotEditSelfRole")
           : t("admin.users.protectLastSuper"),
       );
+      return;
+    }
+    if (draft.role !== target?.role && !assignableRoles(currentUser).includes(draft.role)) {
+      setNotice(t("admin.users.roleNotAllowed"));
       return;
     }
     if (
@@ -151,8 +162,7 @@ export function UsersAdminPage() {
           name: draft.name.trim(),
           email: draft.email.trim().toLowerCase(),
           role: draft.role,
-          permissions:
-            draft.role === "custom" ? draft.permissions : permissionsForRole(draft.role),
+          permissions: sanitizePermissions(currentUser, draft.role, draft.permissions),
           active: draft.active,
           password: draft.password.trim() || undefined,
         });
@@ -166,19 +176,18 @@ export function UsersAdminPage() {
           email: draft.email.trim().toLowerCase(),
           password: draft.password.trim(),
           role: draft.role,
-          permissions:
-            draft.role === "custom" ? draft.permissions : permissionsForRole(draft.role),
+          permissions: sanitizePermissions(currentUser, draft.role, draft.permissions),
           active: draft.active,
         });
         const withoutDup = rows.filter(
           (row) => row.id !== created.id && row.email !== created.email,
         );
         persistLocal([...withoutDup, created]);
-        setNotice(t("admin.users.savedFirebase"));
+        setNotice(t("admin.users.saved"));
       }
       setOpen(false);
       setEditingId(null);
-      setDraft(emptyDraft);
+      setDraft(initialDraft());
     } catch (error) {
       const raw = error instanceof Error ? error.message : "";
       const code =
@@ -186,9 +195,11 @@ export function UsersAdminPage() {
           ? String((error as { code?: string }).code ?? "")
           : "";
       if (raw === "EMAIL_EXISTS_WRONG_PASSWORD") {
-        setNotice(t("admin.users.emailExistsWrongPassword"));
-      } else if (raw === "SUPER_ADMIN_REQUIRED") {
-        setNotice(t("admin.users.superAdminRequired"));
+        setNotice(t("admin.users.emailInUse"));
+      } else if (raw === "AUTH_REQUIRED" || raw === "SUPER_ADMIN_REQUIRED") {
+        setNotice(t("admin.users.authRequired"));
+      } else if (raw === "FORBIDDEN_HIERARCHY") {
+        setNotice(t("admin.users.hierarchyDenied"));
       } else if (code.includes("email-already-in-use")) {
         setNotice(t("admin.users.emailInUse"));
       } else if (code.includes("permission-denied") || raw.includes("permission")) {
@@ -243,12 +254,12 @@ export function UsersAdminPage() {
   return (
     <AdminLayout title={t("admin.nav.users")}>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="max-w-xl text-sm text-muted-foreground">{t("admin.users.subtitleFirebase")}</p>
+        <p className="max-w-xl text-sm text-muted-foreground">{t("admin.users.subtitle")}</p>
         <button
           type="button"
           onClick={() => {
             setEditingId(null);
-            setDraft(emptyDraft);
+            setDraft(initialDraft());
             setNotice(null);
             setOpen(true);
           }}
@@ -267,59 +278,59 @@ export function UsersAdminPage() {
 
       <DataTable
         columns={columns}
-        rows={rows}
+        rows={listedRows}
         getRowId={(row) => row.id}
-        actions={(row) => (
-          <>
-            <RowAction
-              icon={Pencil}
-              label={t("admin.actions.edit")}
-              onClick={() => {
-                if (!canManageUser(currentUser, row)) return;
-                setEditingId(row.id);
-                setDraft({
-                  name: row.name,
-                  email: row.email,
-                  password: "",
-                  role: row.role,
-                  permissions: [...row.permissions],
-                  active: row.active,
-                });
-                setNotice(null);
-                setOpen(true);
-              }}
-            />
-            <RowAction
-              icon={KeyRound}
-              label={t("admin.users.resetPassword")}
-              onClick={() => {
-                void sendAdminPasswordReset(row.email)
-                  .then(() => setNotice(t("admin.users.resetSent")))
-                  .catch(() => setNotice(t("admin.users.saveFailed")));
-              }}
-            />
-            <RowAction
-              icon={Trash2}
-              tone="danger"
-              confirm={false}
-              label={t("admin.actions.delete")}
-              onClick={() => {
-                if (!canDeleteUser(currentUser, row, rows)) {
-                  setNotice(
-                    row.id === currentUser?.id
-                      ? t("admin.users.cannotEditSelfRole")
-                      : t("admin.users.protectLastSuper"),
-                  );
-                  return;
-                }
-                if (!window.confirm(t("admin.actions.confirmDelete"))) return;
-                void deleteAdminUserProfile(row.id)
-                  .then(() => persistLocal(rows.filter((item) => item.id !== row.id)))
-                  .catch(() => setNotice(t("admin.users.saveFailed")));
-              }}
-            />
-          </>
-        )}
+        actions={(row) => {
+          if (!canManageUser(currentUser, row)) {
+            return <span className="text-xs text-muted-foreground">—</span>;
+          }
+          return (
+            <>
+              <RowAction
+                icon={Pencil}
+                label={t("admin.actions.edit")}
+                onClick={() => {
+                  setEditingId(row.id);
+                  setDraft({
+                    name: row.name,
+                    email: row.email,
+                    password: "",
+                    role: row.role,
+                    permissions: [...row.permissions],
+                    active: row.active,
+                  });
+                  setNotice(null);
+                  setOpen(true);
+                }}
+              />
+              <RowAction
+                icon={KeyRound}
+                label={t("admin.users.resetPassword")}
+                onClick={() => {
+                  void sendAdminPasswordReset(row.email)
+                    .then(() => setNotice(t("admin.users.resetSent")))
+                    .catch(() => setNotice(t("admin.users.saveFailed")));
+                }}
+              />
+              <RowAction
+                icon={Trash2}
+                tone="danger"
+                confirm={false}
+                label={t("admin.actions.delete")}
+                onClick={() => {
+                  if (!canDeleteUser(currentUser, row, rows)) {
+                    setNotice(t("admin.users.protectLastSuper"));
+                    return;
+                  }
+                  if (!window.confirm(t("admin.actions.confirmDelete"))) return;
+                  void deleteAdminUserProfile(row.id)
+                    .then(() => persistLocal(rows.filter((item) => item.id !== row.id)))
+                    .catch(() => setNotice(t("admin.users.saveFailed")));
+                }}
+              />
+            </>
+          );
+        }}
       />
 
       <Modal
@@ -341,18 +352,11 @@ export function UsersAdminPage() {
           onChange={(value) => setDraft({ ...draft, email: value })}
         />
         <ModalField
-          label={
-            editingId ? t("admin.users.newPasswordOptional") : t("admin.password")
-          }
+          label={editingId ? t("admin.users.newPasswordOptional") : t("admin.password")}
           type="password"
           value={draft.password}
           onChange={(value) => setDraft({ ...draft, password: value })}
         />
-        {!editingId ? (
-          <p className="text-xs text-muted-foreground">{t("admin.users.passwordHint")}</p>
-        ) : (
-          <p className="text-xs text-muted-foreground">{t("admin.users.editPasswordHint")}</p>
-        )}
 
         <label className="flex flex-col gap-2">
           <span className="text-[0.6rem] tracking-[0.22em] text-muted-foreground uppercase">
@@ -363,7 +367,7 @@ export function UsersAdminPage() {
             onChange={(event) => setRole(event.target.value as AdminRoleId)}
             className="rounded-md border border-navy/10 bg-[#faf8f4] px-4 py-3 text-sm outline-none transition-colors focus:border-navy/30"
           >
-            {ROLE_OPTIONS.map((role) => (
+            {roleOptions.map((role) => (
               <option key={role} value={role}>
                 {t(`admin.users.roles.${role}`)}
               </option>
@@ -377,29 +381,31 @@ export function UsersAdminPage() {
           </p>
           <p className="mt-1 text-xs text-muted-foreground">{t("admin.users.permissionsHint")}</p>
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
-            {ADMIN_PERMISSIONS.filter((permission) => permission !== "pages").map((permission) => {
-              const checked =
-                permission === "content"
-                  ? draft.permissions.includes("content") || draft.permissions.includes("pages")
-                  : draft.permissions.includes(permission);
-              return (
-                <label
-                  key={permission}
-                  className={cn(
-                    "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-3 text-sm transition-colors",
-                    checked ? "border-gold/50 bg-gold/8 text-navy" : "border-border text-navy/70",
-                  )}
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => togglePermission(permission)}
-                    className="accent-[oklch(0.755_0.075_82)]"
-                  />
-                  {t(`admin.users.permissionLabels.${permission}`)}
-                </label>
-              );
-            })}
+            {allowedPermissions
+              .filter((permission) => permission !== "pages")
+              .map((permission) => {
+                const checked =
+                  permission === "content"
+                    ? draft.permissions.includes("content") || draft.permissions.includes("pages")
+                    : draft.permissions.includes(permission);
+                return (
+                  <label
+                    key={permission}
+                    className={cn(
+                      "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-3 text-sm transition-colors",
+                      checked ? "border-gold/50 bg-gold/8 text-navy" : "border-border text-navy/70",
+                    )}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => togglePermission(permission)}
+                      className="accent-[oklch(0.755_0.075_82)]"
+                    />
+                    {t(`admin.users.permissionLabels.${permission}`)}
+                  </label>
+                );
+              })}
           </div>
         </div>
 

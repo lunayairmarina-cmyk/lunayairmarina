@@ -49,7 +49,8 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const normalized = await normalizeCatastrophicSsrResponse(response);
+      return withPrivatePathHeaders(request, normalized);
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {
@@ -59,3 +60,17 @@ export default {
     }
   },
 };
+
+/** Keep admin + API surfaces out of Google index/archive even if meta tags are missed. */
+function withPrivatePathHeaders(request: Request, response: Response): Response {
+  const path = new URL(request.url).pathname;
+  if (!path.startsWith("/admin") && !path.startsWith("/api")) return response;
+
+  const headers = new Headers(response.headers);
+  headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}

@@ -5,7 +5,7 @@ export const Route = createFileRoute("/admin/testimonials")({
     meta: [
       { title: "Testimonials — lunayairmarina Admin" },
       { name: "description", content: "Manage client testimonials." },
-      { name: "robots", content: "noindex" },
+      { name: "robots", content: "noindex, nofollow, noarchive" },
     ],
   }),
 });

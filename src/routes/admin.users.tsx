@@ -5,7 +5,7 @@ export const Route = createFileRoute("/admin/users")({
     meta: [
       { title: "Users & Roles — lunayairmarina Admin" },
       { name: "description", content: "Manage admin users, roles and permissions." },
-      { name: "robots", content: "noindex" },
+      { name: "robots", content: "noindex, nofollow, noarchive" },
     ],
   }),
 });

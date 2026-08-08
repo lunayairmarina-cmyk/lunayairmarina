@@ -19,6 +19,37 @@ service cloud.firestore {
       return isActiveAdmin() && adminDoc().role == 'super_admin';
     }
 
+    // Account hierarchy: super_admin(3) > admin(2) > every staff role(1).
+    function levelForRole(role) {
+      return role == 'super_admin' ? 3 : (role == 'admin' ? 2 : 1);
+    }
+
+    function actorLevel() {
+      return levelForRole(adminDoc().role);
+    }
+
+    // Only Admin level and above, holding the `users` permission, may delegate accounts.
+    function canDelegate() {
+      return isActiveAdmin()
+        && actorLevel() >= 2
+        && ('users' in adminDoc().permissions);
+    }
+
+    // A written profile must sit strictly below the actor and carry no permission the actor lacks.
+    function delegatesTo(uid) {
+      return canDelegate()
+        && request.auth.uid != uid
+        && request.resource.data.permissions is list
+        && levelForRole(request.resource.data.role) < actorLevel()
+        && request.resource.data.permissions.hasOnly(adminDoc().permissions);
+    }
+
+    function ownsTarget(uid) {
+      return canDelegate()
+        && request.auth.uid != uid
+        && levelForRole(resource.data.role) < actorLevel();
+    }
+
     function isPublicContent(collection) {
       return collection in [
         'settings', 'homepage', 'about', 'copy', 'why', 'trust',
@@ -37,7 +68,9 @@ service cloud.firestore {
     // Admin profiles — not public
     match /admins/{uid} {
       allow read: if isActiveAdmin() || (signedIn() && request.auth.uid == uid);
-      allow create: if isSuperAdmin()
+      // super_admin is a single account minted once at bootstrap; nobody can hand it out later.
+      allow create: if (isSuperAdmin() && request.resource.data.role != 'super_admin')
+        || delegatesTo(uid)
         || (
           signedIn()
           && request.auth.uid == uid
@@ -45,7 +78,12 @@ service cloud.firestore {
           && request.resource.data.active == true
           && !exists(/databases/$(database)/documents/config/bootstrap)
         );
-      allow update, delete: if isSuperAdmin();
+      allow update: if (
+          isSuperAdmin()
+          && (request.resource.data.role != 'super_admin' || resource.data.role == 'super_admin')
+        )
+        || (delegatesTo(uid) && ownsTarget(uid));
+      allow delete: if isSuperAdmin() || ownsTarget(uid);
     }
 
     // Contact leads — public can create only; admins manage

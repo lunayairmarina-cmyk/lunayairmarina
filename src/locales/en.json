@@ -1,6 +1,7 @@
 {
   "brand": {
     "name": "lunayairmarina",
+    "wordmark": "Lunayair Marina",
     "tagline": "Yacht Management"
   },
   "nav": {
@@ -792,12 +793,14 @@
     "login": "Login",
     "remember": "Remember me",
     "forgot": "Forgot password?",
+    "resetEmailRequired": "Enter your email first, then request a reset link.",
+    "resetSent": "If this email has an account, a reset link was sent. Check your inbox.",
     "demoHint": "Demo: admin@lunayairmarina.com or editor@lunayairmarina.com — any password works.",
     "firebaseHint": "Uses Firebase Auth. First login with a new email creates the Super Admin if none exist. Enable Email/Password in Firebase Console.",
     "loginFailed": "Login failed. Check email, password and Firebase Auth settings.",
     "authCredentialsRequired": "Email and password are required.",
     "authProviderDisabled": "Email/Password is disabled in Firebase. Open Console → Authentication → Sign-in method → Enable Email/Password for project lunayairmarina-2d694.",
-    "authInvalidCredentials": "Invalid email or password. Forgot it? From Users, click the key icon to email a reset link, or delete and recreate the user with a known password.",
+    "authInvalidCredentials": "Invalid email or password. Use Forgot password? to get a reset link.",
     "authUserNotFound": "User not found. Create it from Users, or first login bootstraps Super Admin.",
     "authEmailInUse": "Email already registered. Use the correct password.",
     "authWeakPassword": "Password is too weak (min 6 characters).",
@@ -1116,16 +1119,14 @@
       "role": "Role",
       "permissions": "Permissions",
       "permissionsCount": "sections",
-      "permissionsHint": "Select what this user can view and edit. Changing boxes switches the role to Custom.",
+      "permissionsHint": "Select what this user can view and edit. You can only grant permissions you hold yourself.",
       "activeAccount": "Active account",
       "inactive": "Inactive",
       "noAccess": "You do not have permission to manage users and roles.",
       "roles": {
         "super_admin": "Super Admin",
-        "editor": "Editor",
-        "gallery_manager": "Gallery Manager",
-        "support": "Support",
-        "custom": "Custom"
+        "admin": "Admin",
+        "custom": "Staff"
       },
       "permissionLabels": {
         "dashboard": "Dashboard",
@@ -1153,12 +1154,16 @@
       "editPasswordHint": "Leave empty to keep the current password. If filled, a password-reset email is sent.",
       "resetPassword": "Reset password email",
       "resetSent": "Password reset email sent.",
+      "saved": "User saved successfully.",
       "savedFirebase": "Saved to Firebase Auth + Firestore. They can sign in now with the same email and password.",
-      "saveFailed": "Could not save user to Firebase. Check Auth Email/Password is enabled and rules are deployed.",
+      "saveFailed": "Could not save the user. Try again.",
       "emailExistsWrongPassword": "This email already exists in Firebase Auth with a different password. Use the key icon to send a reset, or re-add with the correct password to attach roles.",
-      "superAdminRequired": "You must be signed in as Super Admin to create users.",
-      "emailInUse": "This email is already used in Firebase Auth.",
-      "permissionDenied": "Firestore rules blocked the write. Confirm you are Super Admin and rules are published."
+      "superAdminRequired": "You must be signed in to create users.",
+      "authRequired": "Your session expired. Sign out and sign in again, then retry.",
+      "emailInUse": "This email is already registered. Delete it from Authentication first, or use a different email.",
+      "roleNotAllowed": "You can only assign roles below your own level.",
+      "hierarchyDenied": "You can only manage accounts below your own level, and only grant permissions you hold yourself.",
+      "permissionDenied": "You do not have permission to make this change."
     }
   },
   "common": {

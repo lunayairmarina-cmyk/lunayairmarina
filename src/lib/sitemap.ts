@@ -44,10 +44,20 @@ export const PUBLIC_BLOG_SLUGS = [
 ] as const;
 
 const ADMIN_PREFIX = "/admin";
+const API_PREFIX = "/api";
 
 export function isAdminPath(path: string): boolean {
   const normalized = path.startsWith("/") ? path : `/${path}`;
   return normalized === ADMIN_PREFIX || normalized.startsWith(`${ADMIN_PREFIX}/`);
+}
+
+export function isPrivatePath(path: string): boolean {
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return (
+    isAdminPath(normalized) ||
+    normalized === API_PREFIX ||
+    normalized.startsWith(`${API_PREFIX}/`)
+  );
 }
 
 export function normalizePublicPath(path: string): string {
@@ -79,7 +89,7 @@ export function listPublicSitemapEntries(
 
   for (const entry of merged) {
     const path = normalizePublicPath(entry.path);
-    if (isAdminPath(path) || seen.has(path)) continue;
+    if (isPrivatePath(path) || seen.has(path)) continue;
     seen.add(path);
     entries.push({
       ...entry,

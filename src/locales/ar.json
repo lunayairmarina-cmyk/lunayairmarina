@@ -1,6 +1,7 @@
 {
   "brand": {
     "name": "lunayairmarina",
+    "wordmark": "Lunayair Marina",
     "tagline": "إدارة اليخوت"
   },
   "nav": {
@@ -792,12 +793,14 @@
     "login": "تسجيل الدخول",
     "remember": "تذكرني",
     "forgot": "نسيت كلمة المرور؟",
+    "resetEmailRequired": "اكتب الإيميل الأول، بعدين اطلب رابط إعادة التعيين.",
+    "resetSent": "لو الإيميل ده عنده حساب، هتصله رسالة إعادة تعيين. راجع صندوق الوارد.",
     "demoHint": "تجريبي: admin@lunayairmarina.com أو editor@lunayairmarina.com — أي كلمة مرور تعمل.",
     "firebaseHint": "يستخدم Firebase Auth. أول تسجيل بإيميل جديد ينشئ Super Admin إن لم يوجد. فعّل Email/Password من Firebase Console.",
     "loginFailed": "فشل تسجيل الدخول. راجع الإيميل وكلمة المرور وإعدادات Firebase Auth.",
     "authCredentialsRequired": "الإيميل وكلمة المرور مطلوبان.",
     "authProviderDisabled": "Email/Password مش مفعّل في Firebase. افتح Console → Authentication → Sign-in method → فعّل Email/Password في مشروع lunayairmarina-2d694.",
-    "authInvalidCredentials": "الإيميل أو كلمة المرور غير صحيحة. لو نسيت كلمة المرور: من Users اضغط أيقونة المفتاح لإرسال رابط إعادة التعيين، أو احذف المستخدم وأنشئه من جديد بكلمة مرور معروفة.",
+    "authInvalidCredentials": "الإيميل أو كلمة المرور غير صحيحة. استخدم «نسيت كلمة المرور؟» عشان يوصلك لينك إعادة التعيين.",
     "authUserNotFound": "المستخدم غير موجود. أنشئه من Users أو سجّل أول مرة لإنشاء Super Admin.",
     "authEmailInUse": "الإيميل مسجّل بالفعل. استخدم كلمة المرور الصحيحة.",
     "authWeakPassword": "كلمة المرور ضعيفة (٦ أحرف على الأقل).",
@@ -1116,16 +1119,14 @@
       "role": "الدور",
       "permissions": "الصلاحيات",
       "permissionsCount": "أقسام",
-      "permissionsHint": "اختر ما يمكن لهذا المستخدم رؤيته وتعديله. تغيير الصلاحيات يحوّل الدور إلى مخصص.",
+      "permissionsHint": "اختر ما يمكن لهذا المستخدم رؤيته وتعديله. لا يمكنك منح صلاحية لا تمتلكها أنت.",
       "activeAccount": "حساب نشط",
       "inactive": "غير نشط",
       "noAccess": "ليس لديك صلاحية لإدارة المستخدمين والأدوار.",
       "roles": {
         "super_admin": "مدير عام",
-        "editor": "محرر",
-        "gallery_manager": "مدير المعرض",
-        "support": "دعم",
-        "custom": "مخصص"
+        "admin": "مدير",
+        "custom": "موظف"
       },
       "permissionLabels": {
         "dashboard": "لوحة التحكم",
@@ -1153,12 +1154,16 @@
       "editPasswordHint": "اتركها فارغة للإبقاء على كلمة المرور. إن ملأتها يُرسل إيميل إعادة تعيين.",
       "resetPassword": "إرسال إعادة تعيين كلمة المرور",
       "resetSent": "تم إرسال إيميل إعادة تعيين كلمة المرور.",
+      "saved": "تم حفظ المستخدم بنجاح.",
       "savedFirebase": "تم الحفظ في Firebase Auth + Firestore. يقدر يسجّل الدخول الآن بنفس الإيميل وكلمة المرور.",
-      "saveFailed": "تعذر حفظ المستخدم في Firebase. تأكد من تفعيل Email/Password ونشر القواعد.",
+      "saveFailed": "تعذر حفظ المستخدم. حاول مرة أخرى.",
       "emailExistsWrongPassword": "الإيميل موجود في Firebase Auth لكن كلمة المرور غير مطابقة. اضغط أيقونة المفتاح لإرسال Reset، أو أعد الإضافة بنفس كلمة المرور الصحيحة لربط الصلاحيات.",
-      "superAdminRequired": "لازم تكون مسجّل كـ Super Admin لإضافة مستخدمين.",
-      "emailInUse": "هذا الإيميل مستخدم بالفعل في Firebase Auth.",
-      "permissionDenied": "صلاحيات Firestore ترفض الكتابة. تأكد إن حسابك Super Admin والقواعد منشورة."
+      "superAdminRequired": "لازم تكون مسجّل دخول عشان تضيف مستخدمين.",
+      "authRequired": "انتهت جلستك. سجّل خروج وادخل تاني، بعدين جرّب الإضافة.",
+      "emailInUse": "الإيميل ده مسجّل بالفعل. امسحه من Authentication الأول، أو استخدم إيميل تاني.",
+      "roleNotAllowed": "تقدر تمنح أدوار أقل من مستواك فقط.",
+      "hierarchyDenied": "تقدر تدير الحسابات الأقل من مستواك فقط، وتمنح الصلاحيات اللي عندك أنت فقط.",
+      "permissionDenied": "مش عندك صلاحية تعمل التعديل ده."
     }
   },
   "common": {

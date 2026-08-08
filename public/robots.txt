@@ -1,18 +1,42 @@
+# Keep /admin and /api out of search indexes and archives.
+# Public videos under /videos/ are crawlable so Google can index/archive them.
+User-agent: *
+Allow: /
+Allow: /videos/
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api
+Disallow: /api/
+
 User-agent: Googlebot
 Allow: /
+Allow: /videos/
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api
+Disallow: /api/
+
+User-agent: Googlebot-Image
+Allow: /videos/
+Allow: /images/
+Disallow: /admin
+Disallow: /api
+
+User-agent: Googlebot-Video
+Allow: /
+Allow: /videos/
+Disallow: /admin
+Disallow: /api
 
 User-agent: Bingbot
 Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
-User-agent: *
-Allow: /
+Allow: /videos/
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
+# Prefer the index (pages + videos). Individual sitemaps remain available.
+Sitemap: https://www.lunayairmarina.com/sitemap-index.xml
 Sitemap: https://www.lunayairmarina.com/sitemap.xml
+Sitemap: https://www.lunayairmarina.com/sitemap-video.xml

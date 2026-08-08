@@ -5,7 +5,7 @@ export const Route = createFileRoute("/admin/blog")({
     meta: [
       { title: "Blog — lunayairmarina Admin" },
       { name: "description", content: "Create and edit SEO-optimized blog posts." },
-      { name: "robots", content: "noindex" },
+      { name: "robots", content: "noindex, nofollow, noarchive" },
     ],
   }),
 });

@@ -5,7 +5,7 @@ export const Route = createFileRoute("/admin/messages")({
     meta: [
       { title: "Messages — lunayairmarina Admin" },
       { name: "description", content: "Inbox of website contact requests." },
-      { name: "robots", content: "noindex" },
+      { name: "robots", content: "noindex, nofollow, noarchive" },
     ],
   }),
 });

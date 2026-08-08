@@ -1,10 +1,15 @@
-import gallery1 from "@/assets/gallery/gallery-01-marina.jpg";
-import gallery2 from "@/assets/gallery/gallery-02-deck.jpg";
-import yacht1 from "@/assets/fleet/fleet-01.jpg";
-import aboutMarina from "@/assets/about/yacht_side_transom_landscape.png";
 import type { Language } from "@/lib/i18n";
 import { loadCmsStore } from "@/lib/cms-store";
 import { absoluteUrl as siteAbsoluteUrl } from "@/lib/site";
+
+/**
+ * Blog images are persisted into the CMS, so they must use stable `public/` URLs.
+ * Bundled `src/assets` imports carry a build hash that changes on every deploy and 404s.
+ */
+const gallery1 = "/images/gallery/gallery-01-marina.jpg";
+const gallery2 = "/images/gallery/gallery-02-deck.jpg";
+const yacht1 = "/images/fleet/fleet-01.jpg";
+const aboutMarina = "/images/about/yacht_side_transom_landscape.png";
 
 export type Localized = { en: string; ar: string };
 

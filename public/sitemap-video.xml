@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+  <url>
+    <loc>https://www.lunayairmarina.com/</loc>
+    <video:video>
+      <video:thumbnail_loc>https://www.lunayairmarina.com/images/hero/hero-main.webp</video:thumbnail_loc>
+      <video:title>لوناير مارينا — فيلم إدارة اليخوت | Lunayair Marina — Yacht Management Hero Film</video:title>
+      <video:description>فيلم تعريفي يعرض إدارة اليخوت وتشغيل المارينا والإبحار الفاخر مع لوناير مارينا في البحر الأحمر. Hero film showcasing Lunayair Marina yacht management, marina operations and Red Sea luxury yachting.</video:description>
+      <video:content_loc>https://www.lunayairmarina.com/videos/lunayair.mp4</video:content_loc>
+      <video:player_loc allow_embed="yes">https://www.lunayairmarina.com/</video:player_loc>
+      <video:duration>53</video:duration>
+      <video:publication_date>2025-01-01</video:publication_date>
+      <video:family_friendly>yes</video:family_friendly>
+      <video:live>no</video:live>
+      <video:requires_subscription>no</video:requires_subscription>
+    </video:video>
+  </url>
+</urlset>
+

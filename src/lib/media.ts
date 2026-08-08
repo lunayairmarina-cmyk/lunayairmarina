@@ -79,8 +79,21 @@ const ASSET_BY_FILENAME: Record<string, string> = {
 };
 
 /**
+ * Vite emits `/assets/<name>-<hash>.<ext>` and the hash changes every build, so any
+ * such URL persisted into the CMS 404s after the next deploy. Drop the hash so the
+ * filename can be matched back to a bundled asset.
+ */
+function withoutBuildHash(fileName: string): string {
+  return fileName.replace(/-[A-Za-z0-9_-]{8}(\.[a-z0-9]+)$/i, "$1");
+}
+
+function bundledAssetFor(fileName: string): string | undefined {
+  return ASSET_BY_FILENAME[fileName] ?? ASSET_BY_FILENAME[withoutBuildHash(fileName)];
+}
+
+/**
  * Normalize CMS/Firestore media URLs.
- * Fixes legacy `/src/assets/...` paths that break in the browser.
+ * Fixes legacy `/src/assets/...` paths and stale hashed build URLs that break in the browser.
  * Never returns a raw `media:` ref (invalid as img src) — uses memory cache or fallback.
  */
 export function resolvePublicMediaSrc(src: string | undefined | null, fallback = gallery01): string {
@@ -104,7 +117,10 @@ export function resolvePublicMediaSrc(src: string | undefined | null, fallback =
     return value;
   }
 
-  if (value.startsWith("/assets/")) return value;
+  if (value.startsWith("/assets/")) {
+    const assetName = value.split("/").pop()?.split("?")[0]?.toLowerCase() ?? "";
+    return bundledAssetFor(assetName) ?? value;
+  }
 
   if (value.startsWith("/images/") || value.startsWith("/videos/")) {
     if (/about-marina|yacht_lunaiyar|yacht_side_transom/i.test(value)) return aboutMarina;
@@ -120,12 +136,11 @@ export function resolvePublicMediaSrc(src: string | undefined | null, fallback =
   }
 
   const fileName = value.split(/[/\\]/).pop()?.split("?")[0]?.toLowerCase() ?? "";
-  if (fileName && ASSET_BY_FILENAME[fileName]) {
-    return ASSET_BY_FILENAME[fileName];
-  }
+  const bundled = fileName ? bundledAssetFor(fileName) : undefined;
+  if (bundled) return bundled;
 
   if (value.includes("/src/assets/") || value.startsWith("src/assets/")) {
-    return ASSET_BY_FILENAME[fileName] ?? fallback;
+    return fallback;
   }
 
   return value;

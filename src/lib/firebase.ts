@@ -1,4 +1,4 @@
-import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
+import { initializeApp, getApp, type FirebaseApp } from "firebase/app";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 import { getAuth, type Auth } from "firebase/auth";
@@ -88,7 +88,13 @@ export function getFirebaseConfig(): FirebaseWebConfig {
 
 export function getFirebaseApp(): FirebaseApp {
   if (!app) {
-    app = getApps().length ? getApps()[0]! : initializeApp(getFirebaseConfig());
+    // Always bind to the default app — never grab getApps()[0], which can be the
+    // Secondary invite app and would make create-user signOut wipe the admin session.
+    try {
+      app = getApp();
+    } catch {
+      app = initializeApp(getFirebaseConfig());
+    }
   }
   return app;
 }
