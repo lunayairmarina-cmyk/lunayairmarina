@@ -141,14 +141,15 @@ export function buildVideoSitemapXml(videos = SITE_VIDEOS, origin = SITE_ORIGIN)
         ? `\n      <video:publication_date>${video.uploadDate}</video:publication_date>`
         : "";
 
+      // Google requires content_loc/player_loc to differ from <loc>.
+      // Self-hosted MP4 → content_loc only (homepage is not an embed player URL).
       return `  <url>
     <loc>${escapeXml(pageUrl)}</loc>
     <video:video>
       <video:thumbnail_loc>${escapeXml(thumbUrl)}</video:thumbnail_loc>
       <video:title>${title}</video:title>
       <video:description>${description}</video:description>
-      <video:content_loc>${escapeXml(contentUrl)}</video:content_loc>
-      <video:player_loc allow_embed="yes">${escapeXml(pageUrl)}</video:player_loc>${durationTag}${uploadTag}
+      <video:content_loc>${escapeXml(contentUrl)}</video:content_loc>${durationTag}${uploadTag}
       <video:family_friendly>yes</video:family_friendly>
       <video:live>no</video:live>
       <video:requires_subscription>no</video:requires_subscription>
