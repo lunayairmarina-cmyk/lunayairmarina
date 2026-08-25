@@ -118,17 +118,42 @@ export function DataTable<T>({ columns, rows, getRowId, actions }: DataTableProp
   );
 }
 
-export function StatusBadge({ label, tone }: { label: string; tone: "active" | "draft" }) {
+export function StatusBadge({
+  label,
+  tone,
+}: {
+  label: string;
+  tone: "active" | "draft" | "scheduled" | "expired" | "paused";
+}) {
+  const toneClass =
+    tone === "active"
+      ? "bg-emerald-500/12 text-emerald-800"
+      : tone === "scheduled"
+        ? "bg-amber-400/15 text-amber-900"
+        : tone === "expired"
+          ? "bg-red-500/10 text-red-700"
+          : tone === "paused"
+            ? "bg-navy/8 text-navy/55"
+            : "bg-navy/6 text-navy/55";
+  const dotClass =
+    tone === "active"
+      ? "bg-emerald-600"
+      : tone === "scheduled"
+        ? "bg-amber-500"
+        : tone === "expired"
+          ? "bg-red-500"
+          : tone === "paused"
+            ? "bg-navy/40"
+            : "bg-navy/35";
+
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[0.65rem] tracking-[0.14em] uppercase",
-        tone === "active" ? "bg-gold/15 text-navy/80" : "bg-navy/6 text-navy/55",
+        toneClass,
       )}
     >
-      <span
-        className={cn("size-1.5 rounded-full", tone === "active" ? "bg-gold" : "bg-navy/35")}
-      />
+      <span className={cn("size-1.5 rounded-full", dotClass)} />
       {label}
     </span>
   );

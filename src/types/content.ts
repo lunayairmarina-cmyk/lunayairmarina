@@ -128,6 +128,40 @@ export interface FaqContent {
   order?: number;
 }
 
+/** Manual lifecycle flag stored in Firestore. Scheduled/expired are derived from dates. */
+export type AdvertisementStatus = "draft" | "active" | "paused";
+
+/**
+ * Advertising packages (placements):
+ * - standard: /advertising card only
+ * - featured: /advertising + homepage ticker
+ * - vip: large /advertising showcase + homepage ticker + side notice
+ */
+export type AdvertisementPackage = "standard" | "featured" | "vip";
+
+export interface AdvertisementContent {
+  id: string;
+  companyName: LocalizedString;
+  description: LocalizedString;
+  category?: LocalizedString;
+  ctaLabel: LocalizedString;
+  logo: string;
+  image: string;
+  websiteUrl: string;
+  /** ISO date `YYYY-MM-DD` (inclusive). */
+  startDate: string;
+  /** ISO date `YYYY-MM-DD` (inclusive). */
+  endDate: string;
+  status: AdvertisementStatus;
+  /** Placement package. Prefer this over legacy `featured`. */
+  package?: AdvertisementPackage;
+  /** @deprecated Prefer `package`. Kept for older documents. */
+  featured?: boolean;
+  displayOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface WhyContent {
   eyebrow: LocalizedString;
   title: LocalizedString;
@@ -152,6 +186,7 @@ export interface SiteBundle {
   fleet: FleetItem[];
   team: TeamMember[];
   testimonials: TestimonialContent[];
+  advertisements: AdvertisementContent[];
   locations: LocationContent[];
   blog: BlogContent[];
   gallery: GalleryContent[];

@@ -12,6 +12,7 @@ export type {
   SiteSettings,
   TeamMember,
   TestimonialContent,
+  AdvertisementContent,
   TrustContent,
   WhyContent,
   LocalizedString,

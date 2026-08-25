@@ -10,6 +10,7 @@
     "services": "Our Services",
     "blog": "Blog",
     "application": "App",
+    "advertising": "Advertising",
     "gallery": "Gallery",
     "contact": "Join Our Team",
     "cta": "Join Our Team",
@@ -787,6 +788,34 @@
     "credit": "Website by",
     "creditAgency": "Top1Markting"
   },
+  "advertising": {
+    "eyebrow": "Advertising",
+    "title": "Advertising",
+    "subtitle": "A curated space for temporary company advertisements featured alongside lunayairmarina.",
+    "visitWebsite": "Visit Website",
+    "featured": "Featured",
+    "vipNotice": "VIP offer",
+    "stripLabel": "Advertising",
+    "stripCta": "View",
+    "package": {
+      "standard": "Standard",
+      "featured": "Featured",
+      "vip": "VIP"
+    },
+    "sections": {
+      "vip": "VIP Partners",
+      "featured": "Featured",
+      "standard": "More Advertising"
+    },
+    "vipPerks": {
+      "showcase": "Premium showcase",
+      "ticker": "Homepage ticker",
+      "notice": "Side notice"
+    },
+    "emptyEyebrow": "Advertising",
+    "emptyTitle": "No active advertisements right now",
+    "emptyBody": "Temporary company advertisements will appear here during their scheduled campaign window."
+  },
   "admin": {
     "portal": "Admin Portal",
     "portalSubtitle": "Manage Website Content",
@@ -825,18 +854,53 @@
       "blog": "Blog",
       "gallery": "Gallery",
       "testimonials": "Testimonials",
-      "faq": "FAQ",
-      "messages": "Messages",
-      "seo": "SEO",
-      "users": "Users & Roles",
-      "settings": "Settings",
-      "logout": "Logout",
-      "groups": {
-        "content": "Content",
-        "system": "System"
-      }
+    "faq": "FAQ",
+    "advertisements": "Advertising",
+    "messages": "Messages",
+    "seo": "SEO",
+    "users": "Users & Roles",
+    "settings": "Settings",
+    "logout": "Logout",
+    "groups": {
+      "content": "Content",
+      "system": "System"
+    }
+  },
+  "advertisements": {
+    "company": "Company",
+    "category": "Category",
+    "websiteUrl": "Website URL",
+    "ctaLabel": "CTA label",
+    "logo": "Company logo",
+    "image": "Advertisement image",
+    "start": "Start",
+    "end": "End",
+    "featured": "Featured",
+    "package": "Package",
+    "packages": {
+      "standard": "Standard",
+      "featured": "Featured",
+      "vip": "VIP"
     },
-    "cms": {
+    "packageHints": {
+      "standard": "Appears on the Advertising page only.",
+      "featured": "Advertising page + homepage ticker.",
+      "vip": "Large Advertising showcase + homepage ticker + side notice every 30 minutes."
+    },
+    "order": "Order",
+    "preview": "Preview",
+    "pause": "Pause",
+    "resume": "Resume",
+    "invalidDates": "End date must be on or after the start date.",
+    "status": {
+      "draft": "Draft",
+      "scheduled": "Scheduled",
+      "active": "Active",
+      "expired": "Expired",
+      "paused": "Paused"
+    }
+  },
+  "cms": {
       "savedLocal": "Saved locally. Live on this browser.",
       "savedSynced": "Saved and synced to Firebase.",
       "uploadFailed": "Upload failed. Check you are signed in as admin and try again.",
@@ -925,7 +989,8 @@
         "services": "Services",
         "contact": "Contact",
         "blog": "Blog",
-        "application": "Application"
+        "application": "Application",
+        "advertising": "Advertising"
       }
     },
     "services": {
@@ -1146,6 +1211,7 @@
         "gallery": "Gallery",
         "testimonials": "Testimonials",
         "faq": "FAQ",
+        "advertisements": "Advertising",
         "messages": "Messages",
         "seo": "SEO",
         "settings": "Settings",
@@ -1175,6 +1241,9 @@
   "common": {
     "language": "Language",
     "readMore": "Read more",
-    "loading": "Loading"
+    "loading": "Loading",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close"
   }
 }

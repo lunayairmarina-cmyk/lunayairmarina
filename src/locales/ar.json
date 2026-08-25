@@ -10,6 +10,7 @@
     "services": "خدماتنا",
     "blog": "المدونة",
     "application": "التطبيق",
+    "advertising": "الإعلانات",
     "gallery": "المعرض",
     "contact": "انضم إلى فريق العمل",
     "cta": "انضم إلى فريق العمل",
@@ -787,6 +788,34 @@
     "credit": "الموقع من تنفيذ",
     "creditAgency": "Top1Markting"
   },
+  "advertising": {
+    "eyebrow": "الإعلانات",
+    "title": "الإعلانات",
+    "subtitle": "مساحة مخصصة لإعلانات الشركات المؤقتة ضمن lunayairmarina.",
+    "visitWebsite": "زيارة الموقع",
+    "featured": "مميز",
+    "vipNotice": "عرض VIP",
+    "stripLabel": "إعلان",
+    "stripCta": "عرض",
+    "package": {
+      "standard": "عادي",
+      "featured": "مميز",
+      "vip": "VIP"
+    },
+    "sections": {
+      "vip": "شركاء VIP",
+      "featured": "مميز",
+      "standard": "المزيد من الإعلانات"
+    },
+    "vipPerks": {
+      "showcase": "عرض مميز",
+      "ticker": "شريط الرئيسية",
+      "notice": "رسالة جانبية"
+    },
+    "emptyEyebrow": "الإعلانات",
+    "emptyTitle": "لا توجد إعلانات نشطة حاليًا",
+    "emptyBody": "ستظهر هنا إعلانات الشركات المؤقتة خلال فترة الحملة المحددة."
+  },
   "admin": {
     "portal": "بوابة المشرف",
     "portalSubtitle": "إدارة محتوى الموقع",
@@ -826,6 +855,7 @@
       "gallery": "المعرض",
       "testimonials": "آراء العملاء",
       "faq": "الأسئلة الشائعة",
+      "advertisements": "الإعلانات",
       "messages": "الرسائل",
       "seo": "تحسين محركات البحث",
       "users": "المستخدمون والصلاحيات",
@@ -834,6 +864,40 @@
       "groups": {
         "content": "المحتوى",
         "system": "النظام"
+      }
+    },
+    "advertisements": {
+      "company": "الشركة",
+      "category": "التصنيف",
+      "websiteUrl": "رابط الموقع",
+      "ctaLabel": "نص زر الإجراء",
+      "logo": "شعار الشركة",
+      "image": "صورة الإعلان",
+      "start": "البداية",
+      "end": "النهاية",
+    "featured": "مميز",
+    "package": "الباقة",
+    "packages": {
+      "standard": "عادي",
+      "featured": "مميز",
+      "vip": "VIP"
+    },
+    "packageHints": {
+      "standard": "يظهر في صفحة الإعلانات فقط.",
+      "featured": "صفحة الإعلانات + شريط الصفحة الرئيسية.",
+      "vip": "عرض كبير في صفحة الإعلانات + شريط الرئيسية + رسالة جانبية كل ٣٠ دقيقة."
+    },
+    "order": "الترتيب",
+      "preview": "معاينة",
+      "pause": "إيقاف مؤقت",
+      "resume": "استئناف",
+      "invalidDates": "تاريخ النهاية يجب أن يكون في يوم البداية أو بعده.",
+      "status": {
+        "draft": "مسودة",
+        "scheduled": "مجدول",
+        "active": "نشط",
+        "expired": "منتهي",
+        "paused": "متوقف"
       }
     },
     "cms": {
@@ -925,7 +989,8 @@
         "services": "الخدمات",
         "contact": "التواصل",
         "blog": "المدونة",
-        "application": "التطبيق"
+        "application": "التطبيق",
+        "advertising": "الإعلانات"
       }
     },
     "services": {
@@ -1146,6 +1211,7 @@
         "gallery": "المعرض",
         "testimonials": "آراء العملاء",
         "faq": "الأسئلة الشائعة",
+        "advertisements": "الإعلانات",
         "messages": "الرسائل",
         "seo": "تحسين محركات البحث",
         "settings": "الإعدادات",
@@ -1175,6 +1241,9 @@
   "common": {
     "language": "اللغة",
     "readMore": "اقرأ المزيد",
-    "loading": "جاري التحميل"
+    "loading": "جاري التحميل",
+    "yes": "نعم",
+    "no": "لا",
+    "close": "إغلاق"
   }
 }

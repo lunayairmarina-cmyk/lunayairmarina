@@ -1,5 +1,6 @@
 import type {
   AboutContent,
+  AdvertisementContent,
   BlogContent,
   FaqContent,
   FleetItem,
@@ -26,7 +27,8 @@ export type ManagedCollection =
   | "blog"
   | "services"
   | "fleet"
-  | "messages";
+  | "messages"
+  | "advertisements";
 
 function managedStorageKey(name: ManagedCollection) {
   return name === "gallery" ? "lunaya.cms.galleryManaged" : `lunaya.cms.${name}Managed`;
@@ -50,9 +52,16 @@ export function isCollectionManaged(name: ManagedCollection): boolean {
   }
 }
 
-export type SeoPageId = "home" | "about" | "services" | "contact" | "blog" | "application";
+export type SeoPageId =
+  | "home"
+  | "about"
+  | "services"
+  | "contact"
+  | "blog"
+  | "application"
+  | "advertising";
 
-export type PageHeaderId = "about" | "services" | "contact" | "blog" | "application";
+export type PageHeaderId = "about" | "services" | "contact" | "blog" | "application" | "advertising";
 
 export interface SeoPageMeta {
   title: LocalizedString;
@@ -96,6 +105,7 @@ export interface CmsStore {
   blog: BlogContent[];
   team: TeamMember[];
   fleet: FleetItem[];
+  advertisements: AdvertisementContent[];
   seo: Partial<Record<SeoPageId, SeoPageMeta>>;
   /** Per-service SEO keyed by slug, e.g. yacht-management-360 */
   serviceSeo: Partial<Record<string, SeoPageMeta>>;
@@ -122,6 +132,7 @@ export function emptyCmsStore(): CmsStore {
     blog: [],
     team: [],
     fleet: [],
+    advertisements: [],
     seo: {},
     serviceSeo: {},
     pageHeaders: {},
@@ -147,6 +158,9 @@ export function loadCmsStore(): CmsStore {
       blog: parsed.blog ?? [],
       team: parsed.team ?? [],
       fleet: parsed.fleet ?? [],
+      advertisements: (parsed.advertisements ?? []).filter(
+        (ad) => !String(ad.id).startsWith("sample-ad-"),
+      ),
       seo: parsed.seo ?? {},
       serviceSeo: parsed.serviceSeo ?? {},
       pageHeaders: parsed.pageHeaders ?? {},

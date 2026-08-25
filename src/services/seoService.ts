@@ -124,6 +124,24 @@ const DEFAULT_SEO: Record<SeoPageId, SeoPageMeta> = {
     robots: "index,follow",
     ogImage: DEFAULT_OG_IMAGE_PATH,
   },
+  advertising: {
+    title: {
+      en: "Advertising | lunayairmarina",
+      ar: "الإعلانات | lunayairmarina",
+    },
+    description: {
+      en: "Temporary company advertising featured with lunayairmarina — premium brands aligned with yacht management excellence.",
+      ar: "مساحة إعلانات الشركات المؤقتة مع lunayairmarina — علامات فاخرة متوافقة مع تميز إدارة اليخوت.",
+    },
+    keywords: {
+      en: "lunayairmarina advertising, yacht advertising, marina advertising",
+      ar: "إعلانات lunayairmarina, إعلانات اليخوت, إعلانات المارينا",
+    },
+    focusKeyword: { en: "advertising", ar: "الإعلانات" },
+    canonicalPath: "/advertising",
+    robots: "index,follow",
+    ogImage: DEFAULT_OG_IMAGE_PATH,
+  },
 };
 
 const DEFAULT_SERVICE_SEO: Record<ServiceSlug, SeoPageMeta> = {

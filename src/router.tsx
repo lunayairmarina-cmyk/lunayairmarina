@@ -8,8 +8,8 @@ export const getRouter = () => {
   const router = createRouter({
     routeTree,
     context: { queryClient },
-    scrollRestoration: true,
-    scrollRestorationBehavior: "instant",
+    // Always open pages at the top; do not restore prior scroll offsets.
+    scrollRestoration: false,
     defaultPreloadStaleTime: 0,
   });
 

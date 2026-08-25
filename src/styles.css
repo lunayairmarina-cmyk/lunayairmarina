@@ -465,14 +465,158 @@
   }
 }
 
-/* Strip any third-party "Edit with Lovable" / branding injects */
-a[href*="lovable.dev"],
-a[href*="lovable.app"],
-iframe[src*="lovable"],
-[data-lovable],
-#lovable-badge,
-.lovable-badge {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
+/* Featured advertisement — soft gold pulse + light sweep */
+@keyframes ad-featured-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--gold) 45%, transparent),
+      0 8px 28px color-mix(in oklab, var(--gold) 12%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--gold) 75%, transparent),
+      0 10px 36px color-mix(in oklab, var(--gold) 28%, transparent),
+      0 0 48px color-mix(in oklab, var(--gold) 16%, transparent);
+  }
+}
+
+@keyframes ad-featured-shine {
+  0% {
+    transform: translateX(-120%) skewX(-12deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.55;
+  }
+  55% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateX(220%) skewX(-12deg);
+    opacity: 0;
+  }
+}
+
+@keyframes ad-featured-badge {
+  0%,
+  100% {
+    transform: translateY(0);
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--gold) 0%, transparent);
+  }
+  50% {
+    transform: translateY(-1px);
+    box-shadow: 0 0 18px color-mix(in oklab, var(--gold) 45%, transparent);
+  }
+}
+
+.ad-featured {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent) !important;
+  animation: ad-featured-glow 3.2s ease-in-out infinite;
+}
+
+.ad-featured::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    color-mix(in oklab, var(--gold) 35%, white 20%) 48%,
+    transparent 62%
+  );
+  width: 42%;
+  animation: ad-featured-shine 4.8s ease-in-out infinite;
+}
+
+.ad-featured-badge {
+  animation: ad-featured-badge 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ad-featured,
+  .ad-featured::before,
+  .ad-featured-badge {
+    animation: none !important;
+  }
+}
+
+/*
+ * Directional hero/header media: flip the image/video layer only when
+ * document direction does not match the photo's composed text side.
+ * Never put these classes on containers that also hold text/UI.
+ */
+html[dir="ltr"] .media-mirror-for-ltr {
+  transform: scaleX(-1);
+}
+
+html[dir="rtl"] .media-mirror-for-rtl {
+  transform: scaleX(-1);
+}
+
+/* Homepage advertising news ticker */
+@keyframes ad-ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ad-ticker {
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.ad-ticker-track {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: 0;
+  animation: ad-ticker-scroll 22s linear infinite;
+  will-change: transform;
+}
+
+[dir="rtl"] .ad-ticker-track {
+  animation-direction: reverse;
+}
+
+.ad-ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  padding-inline-end: 1.25rem;
+  white-space: nowrap;
+}
+
+.ad-ticker-dot {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--gold) 70%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ad-ticker-track {
+    animation: none !important;
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .ad-ticker-item:not(:first-child) {
+    display: none;
+  }
+
+  .ad-ticker-item {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

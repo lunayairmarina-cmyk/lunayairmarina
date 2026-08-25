@@ -23,6 +23,7 @@ import arLocale from "@/locales/ar.json";
 import { clearContentCache } from "@/services/content";
 import type {
   AboutContent,
+  AdvertisementContent,
   BlogContent,
   FaqContent,
   GalleryContent,
@@ -34,6 +35,7 @@ import type {
   TrustContent,
   WhyContent,
 } from "@/types/content";
+import { normalizeAdvertisementPackage, normalizeAdvertisementStatus } from "@/lib/advertisements";
 import { companyInfo } from "@/data/mock";
 import { healGallerySrc, isFragileGallerySrc } from "@/lib/gallery-src";
 import { cacheMediaDataUrl, mediaRefId, toMediaRef } from "@/lib/media-refs";
@@ -46,6 +48,7 @@ const STABLE_PAGE_HEADERS: Record<PageHeaderId, string> = {
   contact: "/images/headers/header-contact.webp",
   blog: "/images/headers/header-blog.webp",
   application: "/images/headers/header-about.webp",
+  advertising: "/images/headers/header-advertising.webp",
 };
 
 function normalizePageHeaderUrl(pageId: PageHeaderId, imageUrl: string): string {
@@ -252,6 +255,82 @@ export async function saveTeam(team: TeamMember[]): Promise<SaveResult> {
     await batch.commit();
   });
   patchCmsStore({ team, firebaseSync: sync });
+  notifySiteReload();
+  return { ok: true, sync };
+}
+
+function normalizeAdvertisement(row: AdvertisementContent): AdvertisementContent {
+  const pkg = normalizeAdvertisementPackage(row.package, Boolean(row.featured));
+  return {
+    ...row,
+    status: normalizeAdvertisementStatus(row.status),
+    package: pkg,
+    featured: pkg === "featured" || pkg === "vip",
+    displayOrder: row.displayOrder ?? 0,
+    logo: row.logo ?? "",
+    image: row.image ?? "",
+    websiteUrl: row.websiteUrl ?? "",
+    startDate: row.startDate ?? "",
+    endDate: row.endDate ?? "",
+  };
+}
+
+/** Load advertisements from Firestore and keep the local CMS store in sync. */
+export async function loadAdvertisements(): Promise<AdvertisementContent[]> {
+  try {
+    const snap = await getDocs(collection(getDb(), "advertisements"));
+    const advertisements = snap.docs
+      .map((d) =>
+        normalizeAdvertisement({
+          id: d.id,
+          ...(d.data() as Omit<AdvertisementContent, "id">),
+        }),
+      )
+      .filter((ad) => !String(ad.id).startsWith("sample-ad-"))
+      .sort(
+        (a, b) =>
+          (a.displayOrder ?? Number.MAX_SAFE_INTEGER) -
+          (b.displayOrder ?? Number.MAX_SAFE_INTEGER),
+      );
+    if (advertisements.length === 0 && !isCollectionManaged("advertisements")) {
+      return (loadCmsStore().advertisements ?? []).map(normalizeAdvertisement);
+    }
+    patchCmsStore({ advertisements });
+    return advertisements;
+  } catch {
+    return (loadCmsStore().advertisements ?? []).map(normalizeAdvertisement);
+  }
+}
+
+export async function saveAdvertisements(
+  advertisements: AdvertisementContent[],
+): Promise<SaveResult> {
+  markCollectionManaged("advertisements");
+  const normalized = advertisements.map((item, index) =>
+    normalizeAdvertisement({
+      ...item,
+      displayOrder: item.displayOrder ?? index + 1,
+      updatedAt: new Date().toISOString(),
+      createdAt: item.createdAt || new Date().toISOString(),
+    }),
+  );
+  const keepIds = new Set(normalized.map((item) => item.id).filter(Boolean));
+  const sync = await tryFirebaseWrite(async () => {
+    const db = getDb();
+    const existing = await getDocs(collection(db, "advertisements"));
+    const batch = writeBatch(db);
+
+    for (const snap of existing.docs) {
+      if (!keepIds.has(snap.id)) batch.delete(snap.ref);
+    }
+
+    normalized.forEach((item) => {
+      const { id, ...data } = item;
+      batch.set(doc(db, "advertisements", id), data, { merge: true });
+    });
+    await batch.commit();
+  });
+  patchCmsStore({ advertisements: normalized, firebaseSync: sync });
   notifySiteReload();
   return { ok: true, sync };
 }

@@ -20,6 +20,7 @@ import headerAbout from "@/assets/headers/header-about.webp";
 import headerBlog from "@/assets/headers/header-blog.webp";
 import headerContact from "@/assets/headers/header-contact.webp";
 import headerServices from "@/assets/headers/header-services.webp";
+import headerAdvertising from "@/assets/headers/header-advertising.webp";
 import logo from "@/assets/brand/logo.png";
 import serviceYachtMgmt from "@/assets/services/service-yacht-management.jpg";
 import serviceAgency from "@/assets/services/service-yacht-agency.jpg";
@@ -70,10 +71,12 @@ const ASSET_BY_FILENAME: Record<string, string> = {
   "header-blog.jpg": headerBlog,
   "header-contact.jpg": headerContact,
   "header-services.jpg": headerServices,
+  "header-advertising.jpg": headerAdvertising,
   "header-about.webp": headerAbout,
   "header-blog.webp": headerBlog,
   "header-contact.webp": headerContact,
   "header-services.webp": headerServices,
+  "header-advertising.webp": headerAdvertising,
   "admin-bg.jpg": adminLoginBg,
   "admin-login-bg.jpg": adminLoginBg,
 };

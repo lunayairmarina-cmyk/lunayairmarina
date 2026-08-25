@@ -16,6 +16,7 @@ import {
   Newspaper,
   ShieldCheck,
   UserRound,
+  Megaphone,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,7 @@ const navItems: {
   { to: "/admin/gallery", key: "admin.nav.gallery", icon: ImageIcon, permission: "gallery" },
   { to: "/admin/testimonials", key: "admin.nav.testimonials", icon: Quote, permission: "testimonials" },
   { to: "/admin/faq", key: "admin.nav.faq", icon: HelpCircle, permission: "faq" },
+  { to: "/admin/advertisements", key: "admin.nav.advertisements", icon: Megaphone, permission: "advertisements" },
   { to: "/admin/messages", key: "admin.nav.messages", icon: MessageSquare, permission: "messages" },
   { to: "/admin/seo", key: "admin.nav.seo", icon: Search, permission: "seo" },
   { to: "/admin/users", key: "admin.nav.users", icon: Users, permission: "users" },

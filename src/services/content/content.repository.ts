@@ -16,6 +16,7 @@ import enLocale from "@/locales/en.json";
 import arLocale from "@/locales/ar.json";
 import type {
   AboutContent,
+  AdvertisementContent,
   BlogContent,
   FaqContent,
   FleetItem,
@@ -114,7 +115,7 @@ function mergeGallery(
 function preferManagedCollection<T extends { id: string }>(
   local: T[],
   remote: T[],
-  name: "team" | "faq" | "testimonials" | "blog" | "services" | "fleet",
+  name: "team" | "faq" | "testimonials" | "blog" | "services" | "fleet" | "advertisements",
 ): T[] {
   if (isCollectionManaged(name)) return local;
   if (remote.length === 0) return local;
@@ -138,6 +139,7 @@ function emptyBundle(): SiteBundle {
     fleet: [],
     team: [],
     testimonials: [],
+    advertisements: [],
     locations: [],
     blog: [],
     gallery: [],
@@ -160,12 +162,14 @@ async function hydrateLocalCmsFromCloud() {
       local.team.length === 0 &&
       local.faq.length === 0 &&
       local.testimonials.length === 0 &&
+      local.advertisements.length === 0 &&
       !isCollectionManaged("services") &&
       !isCollectionManaged("blog") &&
       !isCollectionManaged("gallery") &&
       !isCollectionManaged("team") &&
       !isCollectionManaged("faq") &&
       !isCollectionManaged("testimonials") &&
+      !isCollectionManaged("advertisements") &&
       !isCollectionManaged("messages");
     if (!isEmpty) return;
 
@@ -196,6 +200,7 @@ async function fetchBundleFromFirebase(): Promise<SiteBundle> {
       fleet,
       team,
       testimonials,
+      advertisements,
       locations,
       blog,
       gallery,
@@ -212,6 +217,7 @@ async function fetchBundleFromFirebase(): Promise<SiteBundle> {
       getCollectionOrdered<FleetItem>("fleet"),
       getCollectionOrdered<TeamMember>("team"),
       getCollectionOrdered<TestimonialContent>("testimonials"),
+      getCollectionOrdered<AdvertisementContent>("advertisements", "displayOrder"),
       getCollectionOrdered<LocationContent>("locations"),
       getCollectionOrdered<BlogContent>("blog", "date"),
       getCollectionOrdered<GalleryContent>("gallery"),
@@ -238,6 +244,7 @@ async function fetchBundleFromFirebase(): Promise<SiteBundle> {
       fleet,
       team,
       testimonials,
+      advertisements,
       locations,
       blog: blog.sort((a, b) => String(b.date).localeCompare(String(a.date))),
       gallery,
@@ -338,6 +345,11 @@ function mergeCmsOverFirebase(remote: SiteBundle): SiteBundle {
     fleet: preferManagedCollection(cms.fleet, remote.fleet, "fleet"),
     team: preferManagedCollection(cms.team, remote.team, "team"),
     testimonials: preferManagedCollection(cms.testimonials, remote.testimonials, "testimonials"),
+    advertisements: preferManagedCollection(
+      cms.advertisements,
+      remote.advertisements,
+      "advertisements",
+    ),
     locations: remote.locations,
     blog: preferManagedCollection(cms.blog, remote.blog, "blog"),
     gallery: mergeGallery(cms.gallery, remote.gallery),

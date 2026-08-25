@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
 import { WhatsAppButton } from "./WhatsAppButton";
+import { VipAdNotice } from "./VipAdNotice";
 
 interface SiteLayoutProps {
   children: ReactNode;
@@ -18,6 +19,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
       <main className="min-w-0 flex-1 pt-[calc(5rem+env(safe-area-inset-top))]">{children}</main>
       <Footer />
       <WhatsAppButton />
+      <VipAdNotice />
     </div>
   );
 }

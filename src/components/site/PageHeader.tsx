@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { mediaDirectionClass, type MediaComposition } from "@/lib/media-direction";
 
 interface PageHeaderProps {
   eyebrow?: string;
@@ -10,6 +11,14 @@ interface PageHeaderProps {
   alignContent?: "start" | "end";
   /** CSS object-position for the background photo */
   imagePosition?: string;
+  /**
+   * Photo composition relative to text-start.
+   * Default "rtl" (Arabic-first): mirrors under English/LTR.
+   * Use "ltr" when the asset was composed for English (empty side on the left).
+   */
+  imageComposition?: MediaComposition;
+  /** Stronger side overlay for bright photos so white title stays readable. */
+  overlay?: "default" | "strong";
 }
 
 /**
@@ -49,8 +58,12 @@ export function PageHeader({
   compact = false,
   alignContent = "start",
   imagePosition,
+  imageComposition = "rtl",
+  overlay = "default",
 }: PageHeaderProps) {
   const webp = webpSiblingFor(image);
+  const mirrorClass = mediaDirectionClass(imageComposition);
+  const strongOverlay = overlay === "strong";
 
   return (
     <section
@@ -72,6 +85,7 @@ export function PageHeader({
             decoding="async"
             className={cn(
               "size-full object-cover",
+              mirrorClass,
               imagePosition ? undefined : "object-[center_40%] sm:object-center",
             )}
             style={imagePosition ? { objectPosition: imagePosition } : undefined}
@@ -82,7 +96,9 @@ export function PageHeader({
             "absolute inset-0",
             alignContent === "end"
               ? "bg-gradient-to-t from-[#050d18]/75 via-[#050d18]/30 to-transparent sm:bg-gradient-to-l sm:from-transparent sm:via-[#050d18]/35 sm:to-[#050d18]/65"
-              : "bg-gradient-to-t from-[#050d18]/70 via-[#050d18]/25 to-transparent sm:from-[#050d18]/55 sm:via-transparent",
+              : strongOverlay
+                ? "bg-gradient-to-t from-[#050d18]/85 via-[#050d18]/45 to-[#050d18]/25 sm:bg-gradient-to-r sm:from-[#050d18]/78 sm:via-[#050d18]/35 sm:to-transparent rtl:sm:bg-gradient-to-l rtl:sm:from-transparent rtl:sm:via-[#050d18]/35 rtl:sm:to-[#050d18]/78"
+                : "bg-gradient-to-t from-[#050d18]/70 via-[#050d18]/25 to-transparent sm:from-[#050d18]/55 sm:via-transparent",
           )}
         />
       </div>
@@ -100,7 +116,7 @@ export function PageHeader({
           </h1>
           <span className="gold-rule mt-4 origin-start sm:mt-6" />
           {subtitle ? (
-            <p className="type-body mt-4 max-w-md text-white/80 sm:mt-6 sm:max-w-xl">{subtitle}</p>
+            <p className="type-body mt-4 max-w-md text-white/85 sm:mt-6 sm:max-w-xl">{subtitle}</p>
           ) : null}
         </div>
       </div>

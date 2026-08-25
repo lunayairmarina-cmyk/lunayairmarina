@@ -44,11 +44,11 @@ function buildPrintHtml(
 ) {
   const printedAt = new Date().toLocaleString();
 
-  const field = (label: string, value?: string) => {
+  const field = (label: string, value?: string, valueDir: "auto" | "ltr" = "auto") => {
     if (!value?.trim()) return "";
     return `<div class="field">
       <span class="field-label">${escapeHtml(label)}</span>
-      <span class="field-value" dir="auto">${escapeHtml(value)}</span>
+      <span class="field-value" dir="${valueDir}" style="unicode-bidi:isolate">${escapeHtml(value)}</span>
     </div>`;
   };
 
@@ -67,23 +67,23 @@ function buildPrintHtml(
                     <h2 dir="auto">${escapeHtml(row.name || "—")}</h2>
                   </div>
                   <div class="badges">
-                    <span class="badge date">${escapeHtml(row.date || "—")}</span>
+                    <span class="badge date" dir="ltr" style="unicode-bidi:isolate">${escapeHtml(row.date || "—")}</span>
                     <span class="badge ${isNew ? "badge-new" : "badge-read"}">${escapeHtml(
                       isNew ? labels.statusNew : labels.statusRead,
                     )}</span>
                   </div>
                 </header>
                 <div class="fields">
-                  ${field(labels.email, row.email)}
-                  ${field(labels.phone, row.phone)}
+                  ${field(labels.email, row.email, "ltr")}
+                  ${field(labels.phone, row.phone, "ltr")}
                   ${field(labels.yachtType, row.yachtType)}
-                  ${field(labels.yachtLength, row.yachtLength)}
+                  ${field(labels.yachtLength, row.yachtLength, "ltr")}
                   ${field(labels.yachtLocation, row.yachtLocation)}
                   ${field(labels.serviceNeeded, row.serviceNeeded)}
                 </div>
                 <div class="message-box">
                   <span class="message-label">${escapeHtml(labels.message)}</span>
-                  <p class="message-body" dir="auto">${escapeHtml(row.message || "—").replaceAll("\n", "<br/>")}</p>
+                  <p class="message-body" dir="auto" style="unicode-bidi:plaintext">${escapeHtml(row.message || "—").replaceAll("\n", "<br/>")}</p>
                 </div>
               </article>
             `;
@@ -373,18 +373,51 @@ function AdminMessagesPage() {
     {
       key: "name",
       header: t("admin.table.name"),
-      render: (row) => <span className="text-navy">{row.name}</span>,
+      render: (row) => (
+        <span dir="auto" className="[unicode-bidi:plaintext] text-navy">
+          {row.name}
+        </span>
+      ),
     },
-    { key: "email", header: t("admin.table.email"), render: (row) => row.email },
-    { key: "phone", header: t("admin.table.phone"), render: (row) => row.phone },
+    {
+      key: "email",
+      header: t("admin.table.email"),
+      render: (row) => (
+        <span dir="ltr" className="inline-block max-w-[14rem] truncate [unicode-bidi:isolate]">
+          {row.email || "—"}
+        </span>
+      ),
+    },
+    {
+      key: "phone",
+      header: t("admin.table.phone"),
+      render: (row) => (
+        <span dir="ltr" className="inline-block whitespace-nowrap tabular-nums [unicode-bidi:isolate]">
+          {row.phone?.trim() || "—"}
+        </span>
+      ),
+    },
     {
       key: "message",
       header: t("admin.table.message"),
       render: (row) => (
-        <span className="line-clamp-2 max-w-sm text-muted-foreground">{row.message}</span>
+        <span
+          dir="auto"
+          className="line-clamp-2 max-w-sm text-start text-muted-foreground [unicode-bidi:plaintext]"
+        >
+          {row.message}
+        </span>
       ),
     },
-    { key: "date", header: t("admin.table.date"), render: (row) => row.date },
+    {
+      key: "date",
+      header: t("admin.table.date"),
+      render: (row) => (
+        <span dir="ltr" className="inline-block whitespace-nowrap tabular-nums [unicode-bidi:isolate]">
+          {row.date || "—"}
+        </span>
+      ),
+    },
     {
       key: "status",
       header: t("admin.table.status"),

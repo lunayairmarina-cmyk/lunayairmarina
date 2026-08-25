@@ -25,6 +25,7 @@ import {
 } from "@/data/application";
 import aboutMarina from "@/assets/about/yacht_side_transom_landscape.png";
 import { cn } from "@/lib/utils";
+import { mediaDirectionClass } from "@/lib/media-direction";
 
 const overviewIcons = {
   Ship,
@@ -293,7 +294,7 @@ export function ApplicationSections() {
             aria-hidden
             fetchPriority="high"
             decoding="async"
-            className="size-full object-cover"
+            className={cn("size-full object-cover", mediaDirectionClass("rtl"))}
           />
           <div className="absolute inset-0 bg-[#03111f]/35" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#03111f]/88 via-[#03111f]/40 to-transparent rtl:bg-gradient-to-l" />

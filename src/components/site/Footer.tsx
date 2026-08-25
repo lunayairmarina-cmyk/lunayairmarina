@@ -10,6 +10,7 @@ const quickLinks = [
   { to: "/about", key: "nav.about" },
   { to: "/blog", key: "nav.blog" },
   { to: "/application", key: "nav.application" },
+  { to: "/advertising", key: "nav.advertising" },
   { to: "/contact", key: "nav.cta" },
 ] as const;
 

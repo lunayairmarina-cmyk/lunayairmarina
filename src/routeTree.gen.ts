@@ -11,10 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdvertisingRouteImport } from './routes/advertising'
 import { Route as ApplicationRouteImport } from './routes/application'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as AdminAdvertisementsRouteImport } from './routes/admin.advertisements'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
@@ -46,6 +48,11 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdvertisingRoute = AdvertisingRouteImport.update({
+  id: '/advertising',
+  path: '/advertising',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApplicationRoute = ApplicationRouteImport.update({
   id: '/application',
   path: '/application',
@@ -66,6 +73,13 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAdvertisementsRoute = AdminAdvertisementsRouteImport.update({
+  id: '/admin/advertisements',
+  path: '/admin/advertisements',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() =>
+  import('./routes/admin.advertisements.lazy').then((d) => d.Route),
+)
 const AdminBlogRoute = AdminBlogRouteImport.update({
   id: '/admin/blog',
   path: '/admin/blog',
@@ -180,10 +194,12 @@ const ServicesSlugRoute = ServicesSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/advertising': typeof AdvertisingRoute
   '/application': typeof ApplicationRoute
   '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
   '/services': typeof ServicesRouteWithChildren
+  '/admin/advertisements': typeof AdminAdvertisementsRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -208,8 +224,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/advertising': typeof AdvertisingRoute
   '/application': typeof ApplicationRoute
   '/contact': typeof ContactRoute
+  '/admin/advertisements': typeof AdminAdvertisementsRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -235,10 +253,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/advertising': typeof AdvertisingRoute
   '/application': typeof ApplicationRoute
   '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
   '/services': typeof ServicesRouteWithChildren
+  '/admin/advertisements': typeof AdminAdvertisementsRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -265,10 +285,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/advertising'
     | '/application'
     | '/blog'
     | '/contact'
     | '/services'
+    | '/admin/advertisements'
     | '/admin/blog'
     | '/admin/content'
     | '/admin/dashboard'
@@ -293,8 +315,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/advertising'
     | '/application'
     | '/contact'
+    | '/admin/advertisements'
     | '/admin/blog'
     | '/admin/content'
     | '/admin/dashboard'
@@ -319,10 +343,12 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/advertising'
     | '/application'
     | '/blog'
     | '/contact'
     | '/services'
+    | '/admin/advertisements'
     | '/admin/blog'
     | '/admin/content'
     | '/admin/dashboard'
@@ -348,10 +374,12 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdvertisingRoute: typeof AdvertisingRoute
   ApplicationRoute: typeof ApplicationRoute
   BlogRoute: typeof BlogRouteWithChildren
   ContactRoute: typeof ContactRoute
   ServicesRoute: typeof ServicesRouteWithChildren
+  AdminAdvertisementsRoute: typeof AdminAdvertisementsRoute
   AdminBlogRoute: typeof AdminBlogRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
@@ -386,6 +414,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/advertising': {
+      id: '/advertising'
+      path: '/advertising'
+      fullPath: '/advertising'
+      preLoaderRoute: typeof AdvertisingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/application': {
       id: '/application'
       path: '/application'
@@ -412,6 +447,13 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/advertisements': {
+      id: '/admin/advertisements'
+      path: '/admin/advertisements'
+      fullPath: '/admin/advertisements'
+      preLoaderRoute: typeof AdminAdvertisementsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/blog': {
@@ -586,10 +628,12 @@ const ServicesRouteWithChildren = ServicesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdvertisingRoute: AdvertisingRoute,
   ApplicationRoute: ApplicationRoute,
   BlogRoute: BlogRouteWithChildren,
   ContactRoute: ContactRoute,
   ServicesRoute: ServicesRouteWithChildren,
+  AdminAdvertisementsRoute: AdminAdvertisementsRoute,
   AdminBlogRoute: AdminBlogRoute,
   AdminContentRoute: AdminContentRoute,
   AdminDashboardRoute: AdminDashboardRoute,

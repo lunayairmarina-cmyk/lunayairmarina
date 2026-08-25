@@ -27,6 +27,7 @@ export const PUBLIC_STATIC_PAGES: SitemapEntry[] = [
   { path: "/blog", priority: "0.75", changefreq: "weekly" },
   { path: "/contact", priority: "0.85", changefreq: "monthly" },
   { path: "/application", priority: "0.7", changefreq: "monthly" },
+  { path: "/advertising", priority: "0.65", changefreq: "weekly" },
 ];
 
 /** Keep in sync with SERVICE_SLUGS in src/data/services.ts */

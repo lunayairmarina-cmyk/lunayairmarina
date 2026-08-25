@@ -54,7 +54,7 @@ service cloud.firestore {
       return collection in [
         'settings', 'homepage', 'about', 'copy', 'why', 'trust',
         'team', 'fleet', 'services', 'gallery', 'testimonials',
-        'faq', 'blog', 'seo', 'pageHeaders', 'cms', 'media', 'locations'
+        'faq', 'blog', 'advertisements', 'seo', 'pageHeaders', 'cms', 'media', 'locations'
       ];
     }
 

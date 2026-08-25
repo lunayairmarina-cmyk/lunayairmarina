@@ -15,14 +15,14 @@ export function LanguageSwitcher({ tone = "dark" }: { tone?: "light" | "dark" })
       aria-label={isArabic ? "Switch to English" : "التبديل إلى العربية"}
       onClick={() => setLanguage(isArabic ? "en" : "ar")}
       className={cn(
-        "relative isolate flex h-8 w-[3.625rem] shrink-0 items-center overflow-hidden rounded-full border border-navy/80 bg-[#f3f3f3] p-[3px]",
+        "relative isolate flex h-8 w-16 shrink-0 items-center overflow-hidden rounded-full border border-navy/80 bg-[#f3f3f3] p-1",
         tone === "light" && "border-navy-foreground/40 bg-navy-foreground/10",
       )}
     >
       {/* Idle labels on the track */}
       <span
         className={cn(
-          "pointer-events-none absolute inset-y-0 left-[3px] z-0 flex w-[1.625rem] items-center justify-center text-[0.58rem] font-semibold tracking-[0.08em] text-navy/40 transition-opacity duration-200",
+          "pointer-events-none absolute inset-y-0 left-1 z-0 flex w-6 items-center justify-center text-[0.58rem] font-semibold tracking-[0.08em] text-navy/40 transition-opacity duration-200",
           !isArabic && "opacity-0",
         )}
       >
@@ -30,7 +30,7 @@ export function LanguageSwitcher({ tone = "dark" }: { tone?: "light" | "dark" })
       </span>
       <span
         className={cn(
-          "pointer-events-none absolute inset-y-0 right-[3px] z-0 flex w-[1.625rem] items-center justify-center font-arabic text-[0.85rem] font-semibold leading-none text-navy/40 transition-opacity duration-200",
+          "pointer-events-none absolute inset-y-0 right-1 z-0 flex w-6 items-center justify-center font-arabic text-[0.8rem] font-semibold leading-none text-navy/40 transition-opacity duration-200",
           isArabic && "opacity-0",
         )}
       >
@@ -41,15 +41,15 @@ export function LanguageSwitcher({ tone = "dark" }: { tone?: "light" | "dark" })
       <span
         aria-hidden
         className={cn(
-          "relative z-10 grid size-[1.625rem] place-items-center rounded-full bg-navy text-white shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform",
-          isArabic ? "translate-x-[1.625rem]" : "translate-x-0",
+          "relative z-10 grid size-6 place-items-center rounded-full bg-navy text-white shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform",
+          isArabic ? "translate-x-7" : "translate-x-0",
         )}
       >
         <span
           className={cn(
             "leading-none",
             isArabic
-              ? "font-arabic -translate-x-px text-[0.85rem] font-semibold"
+              ? "font-arabic text-[0.8rem] font-semibold"
               : "text-[0.58rem] font-semibold tracking-[0.08em]",
           )}
         >

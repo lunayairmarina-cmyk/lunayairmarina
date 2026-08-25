@@ -203,6 +203,8 @@ function ContactPage() {
         title={t("contact.title")}
         subtitle={t("contact.subtitle")}
         image={headerImage}
+        imagePosition="32% 42%"
+        overlay="strong"
       />
 
       <section id="contact-form" className="bg-sand py-16 lg:py-24">

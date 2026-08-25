@@ -19,8 +19,23 @@ import { MediaUploader } from "@/components/admin/MediaUploader";
 import { useLanguage } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-const PAGE_IDS: SeoPageId[] = ["home", "about", "services", "contact", "blog", "application"];
-const HEADER_IDS: PageHeaderId[] = ["about", "services", "contact", "blog", "application"];
+const PAGE_IDS: SeoPageId[] = [
+  "home",
+  "about",
+  "services",
+  "contact",
+  "blog",
+  "application",
+  "advertising",
+];
+const HEADER_IDS: PageHeaderId[] = [
+  "about",
+  "services",
+  "contact",
+  "blog",
+  "application",
+  "advertising",
+];
 
 type Tab = "pages" | "services" | "headers";
 

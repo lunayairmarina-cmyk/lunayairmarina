@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { Instagram, Linkedin, Menu, X, type LucideProps } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 import { Logo } from "@/components/shared/Logo";
 import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
@@ -13,6 +14,7 @@ const links = [
   { to: "/about", key: "nav.about" },
   { to: "/blog", key: "nav.blog" },
   { to: "/application", key: "nav.application" },
+  { to: "/advertising", key: "nav.advertising" },
   { to: "/contact", key: "nav.cta" },
 ] as const;
 
@@ -71,29 +73,43 @@ export function Navbar() {
       <header
         className="fixed inset-x-0 top-0 z-50 h-[calc(5rem+env(safe-area-inset-top))] overflow-visible border-b border-navy/10 bg-white pt-[env(safe-area-inset-top)] shadow-card"
       >
-        <div className="container-luxe grid h-full grid-cols-[1fr_auto] items-center gap-3 lg:grid-cols-[1fr_auto_1fr]">
+        <div className="container-luxe relative flex h-full items-center justify-between gap-3">
           <Link
             to="/"
-            className="relative z-10 min-w-0 max-w-[70%] justify-self-start sm:max-w-none"
+            className="relative z-10 min-w-0 shrink-0 max-w-[70%] sm:max-w-none"
             aria-label={t("brand.name")}
           >
             <Logo tone="dark" className="h-14 w-36 sm:h-[4.25rem] sm:w-44" />
           </Link>
 
-          <nav className="hidden items-center gap-9 lg:flex">
-            {links.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                activeOptions={{ exact: link.to === "/" }}
-                className="nav-link text-navy/75 transition-colors hover:text-navy"
-              >
-                {t(link.key)}
-              </Link>
-            ))}
+          {/* Geometrically centered for EN + AR so left/right stay symmetric. */}
+          <nav
+            aria-label="Primary"
+            className="pointer-events-none absolute inset-x-0 top-1/2 hidden -translate-y-1/2 justify-center lg:flex"
+          >
+            <div
+              className={cn(
+                "pointer-events-auto flex max-w-[min(100%,52rem)] flex-wrap items-center justify-center gap-x-4 gap-y-1 xl:gap-x-6",
+                isRTL && "tracking-normal",
+              )}
+            >
+              {links.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  activeOptions={{ exact: link.to === "/" }}
+                  className={cn(
+                    "nav-link shrink-0 text-navy/75 transition-colors hover:text-navy",
+                    isRTL && "tracking-[0.04em]",
+                  )}
+                >
+                  {t(link.key)}
+                </Link>
+              ))}
+            </div>
           </nav>
 
-          <div className="hidden items-center justify-end gap-3 lg:flex">
+          <div className="relative z-10 hidden shrink-0 items-center gap-3 lg:flex">
             <LanguageSwitcher tone="dark" />
             <Link
               to="/contact"
@@ -103,7 +119,7 @@ export function Navbar() {
             </Link>
           </div>
 
-          <div className="flex items-center justify-self-end gap-1.5 lg:hidden">
+          <div className="relative z-10 ms-auto flex items-center gap-1.5 lg:hidden">
             <LanguageSwitcher tone="dark" />
             <button
               type="button"

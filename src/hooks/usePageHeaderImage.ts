@@ -11,6 +11,7 @@ const STABLE_HEADERS: Record<PageHeaderId, string> = {
   contact: "/images/headers/header-contact.webp",
   blog: "/images/headers/header-blog.webp",
   application: "/images/headers/header-about.webp",
+  advertising: "/images/headers/header-advertising.webp",
 };
 
 function pickHeaderCandidate(pageId: PageHeaderId, fallback: string): string {

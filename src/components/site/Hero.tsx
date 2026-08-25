@@ -1,10 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/lib/i18n";
 import { useOptionalSiteContent, localizeOrFallback } from "@/providers/SiteContentProvider";
 import { useResolvedMediaSrc } from "@/hooks/useResolvedMediaSrc";
+import { HomeAdvertisingStrip } from "@/components/site/HomeAdvertisingStrip";
 
 const HERO_MP4_FALLBACK = "/videos/lunayair.mp4";
 /** Stable public URL — matches homepage `<link rel="preload">` for LCP. */
@@ -34,9 +34,6 @@ export function Hero() {
   const secondary = homepage
     ? localizeOrFallback(homepage.secondaryCTA, language, t("hero.secondary"))
     : t("hero.secondary");
-  const scroll = homepage
-    ? localizeOrFallback(homepage.scrollLabel, language, t("hero.scroll"))
-    : t("hero.scroll");
 
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -136,7 +133,7 @@ export function Hero() {
   return (
     <section
       ref={sectionRef}
-      className="relative flex min-h-[calc(100svh-5rem-env(safe-area-inset-top))] w-full items-center justify-center overflow-hidden max-sm:items-end max-sm:pb-16"
+      className="relative flex min-h-[calc(100svh-5rem-env(safe-area-inset-top))] w-full items-center justify-center overflow-hidden max-sm:items-end max-sm:pb-20"
     >
       <div className="absolute inset-0 bg-navy">
         {/* LCP poster — always visible immediately */}
@@ -223,16 +220,7 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="absolute inset-x-0 bottom-4 z-10 hidden flex-col items-center gap-2 sm:bottom-7 sm:flex">
-        <span className="text-[0.6rem] tracking-[0.3em] text-white/55 uppercase">{scroll}</span>
-        <motion.span
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-          className="text-gold"
-        >
-          <ChevronDown className="size-5" strokeWidth={1.5} />
-        </motion.span>
-      </div>
+      <HomeAdvertisingStrip className="absolute inset-x-0 bottom-0 z-20" />
     </section>
   );
 }
