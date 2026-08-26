@@ -135,7 +135,7 @@ export function Hero() {
   return (
     <section
       ref={sectionRef}
-      className="relative flex min-h-[calc(100svh-5rem-env(safe-area-inset-top))] w-full items-center justify-center overflow-hidden max-sm:items-end max-sm:pb-20"
+      className="relative flex min-h-[calc(100svh-5rem-env(safe-area-inset-top))] w-full items-center justify-center overflow-hidden max-sm:items-end max-sm:pb-[4.75rem]"
     >
       <div className="absolute inset-0 bg-navy">
         {/* LCP poster — always visible immediately */}
@@ -185,7 +185,7 @@ export function Hero() {
       </div>
 
       {/* Visible immediately — Motion only does a soft lift after paint (no opacity:0 gate). */}
-      <div className="container-luxe relative z-10 flex w-full flex-col items-center px-1 py-8 text-center sm:py-10">
+      <div className="container-luxe relative z-10 flex w-full flex-col items-center px-1 py-5 text-center sm:py-10">
         <motion.span initial={false} animate={{ y: 0 }} className="eyebrow">
           {eyebrow}
         </motion.span>
@@ -194,24 +194,24 @@ export function Hero() {
           initial={false}
           animate={{ y: 0 }}
           dir="ltr"
-          className="type-wordmark mt-4 text-balance text-white sm:mt-6"
+          className="type-wordmark mt-3 text-balance text-white sm:mt-6"
         >
           {t("brand.wordmark")}
         </motion.h1>
 
-        <p className="type-body mt-4 max-w-2xl text-white/90 sm:mt-7">{title}</p>
-        <p className="type-body-sm mt-2 max-w-xl text-white/70 sm:mt-3">{subtitle}</p>
+        <p className="type-body mt-3 max-w-2xl text-pretty text-white/90 sm:mt-7">{title}</p>
+        <p className="type-body-sm mt-1.5 max-w-xl text-pretty text-white/70 sm:mt-3">{subtitle}</p>
 
-        <div className="mt-8 flex w-full max-w-sm flex-col gap-3 sm:mt-12 sm:max-w-none sm:flex-row sm:justify-center">
+        <div className="mt-6 flex w-full max-w-sm flex-col gap-2.5 sm:mt-12 sm:max-w-none sm:flex-row sm:justify-center sm:gap-3">
           <Link
             to="/contact"
-            className="type-cta border border-gold bg-gold px-6 py-3.5 text-center text-navy transition-all duration-500 hover:bg-transparent hover:text-gold sm:px-8 sm:py-4"
+            className="type-cta border border-gold bg-gold px-5 py-3 text-center text-navy transition-all duration-500 hover:bg-transparent hover:text-gold sm:px-8 sm:py-4"
           >
             {primary}
           </Link>
           <Link
             to="/services"
-            className="type-cta border border-white/50 px-6 py-3.5 text-center text-white transition-all duration-500 hover:border-white hover:bg-white/10 sm:px-8 sm:py-4"
+            className="type-cta border border-white/50 px-5 py-3 text-center text-white transition-all duration-500 hover:border-white hover:bg-white/10 sm:px-8 sm:py-4"
           >
             {secondary}
           </Link>

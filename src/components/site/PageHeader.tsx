@@ -67,7 +67,7 @@ export function PageHeader({
         "relative flex w-full items-end overflow-hidden",
         compact
           ? "min-h-[34vh] pb-10 sm:min-h-[36vh] sm:pb-14"
-          : "min-h-[38vh] pb-10 sm:min-h-[44vh] sm:pb-16 lg:min-h-[50vh] lg:pb-20",
+          : "min-h-[36vh] pb-12 sm:min-h-[44vh] sm:pb-16 lg:min-h-[50vh] lg:pb-20",
       )}
     >
       <div className="absolute inset-0 bg-navy">

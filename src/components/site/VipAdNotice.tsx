@@ -141,13 +141,17 @@ export function VipAdNotice() {
           exit={{ opacity: 0, y: 14, scale: 0.98 }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           className={cn(
-            "fixed end-4 z-40 w-[min(100%-2rem,22rem)] overflow-hidden rounded-2xl",
-            "bottom-[calc(5.75rem+env(safe-area-inset-bottom))] sm:end-6 sm:bottom-[calc(6.25rem+env(safe-area-inset-bottom))]",
+            "fixed z-40 overflow-hidden overflow-y-auto rounded-2xl",
+            // Leave physical gap beside the chat FAB (RTL → right, LTR → left)
+            isRTL
+              ? "left-3 right-[4.75rem] bottom-[calc(5.75rem+env(safe-area-inset-bottom))]"
+              : "right-3 left-[4.75rem] bottom-[calc(5.75rem+env(safe-area-inset-bottom))]",
+            "w-auto max-w-none sm:inset-x-auto sm:right-6 sm:left-auto sm:bottom-[calc(6.25rem+env(safe-area-inset-bottom))] sm:w-[min(100%-3rem,22rem)]",
             "border border-gold/25 bg-[#fbfaf7]",
             "shadow-[0_22px_60px_rgba(11,31,51,0.28)]",
+            "max-h-[min(68dvh,32rem)]",
           )}
         >
-          {/* Soft gold accent edge */}
           <div
             aria-hidden
             className="absolute inset-x-0 top-0 z-[3] h-[2px] bg-gradient-to-r from-transparent via-gold to-transparent"
@@ -163,76 +167,76 @@ export function VipAdNotice() {
               <ResolvedImage
                 src={ad.image}
                 alt=""
-                className="relative z-[1] aspect-[16/9] w-full object-cover object-center opacity-95"
+                className="relative z-[1] aspect-[2.2/1] w-full object-contain object-center p-3 opacity-95 sm:aspect-[16/9] sm:object-cover sm:p-0"
                 loading="lazy"
               />
             ) : (
-              <div className="relative z-[1] aspect-[16/9] w-full" />
+              <div className="relative z-[1] aspect-[2.2/1] w-full sm:aspect-[16/9]" />
             )}
 
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-[#fbfaf7] via-navy/25 to-navy/40"
+              className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-[#fbfaf7] via-navy/20 to-navy/35"
             />
 
-            <div className="absolute inset-x-0 top-0 z-[4] flex items-start justify-between p-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-navy/75 px-2.5 py-1 text-[0.58rem] tracking-[0.14em] text-gold uppercase shadow-sm backdrop-blur-md">
-                <Crown className="size-3 text-gold" strokeWidth={1.75} aria-hidden />
-                {t("advertising.vipNotice")}
+            <div className="absolute inset-x-0 top-0 z-[4] flex items-start justify-between gap-2 p-2.5 sm:p-3">
+              <span className="inline-flex max-w-[70%] items-center gap-1.5 rounded-full border border-gold/40 bg-navy/80 px-2.5 py-1 text-[0.55rem] tracking-[0.12em] text-gold uppercase shadow-sm backdrop-blur-md sm:text-[0.58rem] sm:tracking-[0.14em]">
+                <Crown className="size-3 shrink-0 text-gold" strokeWidth={1.75} aria-hidden />
+                <span className="truncate">{t("advertising.vipNotice")}</span>
               </span>
               <button
                 type="button"
                 onClick={dismiss}
                 aria-label={t("common.close")}
-                className="grid size-8 place-items-center rounded-full border border-white/15 bg-navy/55 text-white/90 shadow-sm backdrop-blur-md transition hover:border-gold/45 hover:bg-navy/75 hover:text-gold"
+                className="grid size-9 shrink-0 place-items-center rounded-full border border-white/20 bg-navy/60 text-white shadow-sm backdrop-blur-md transition hover:border-gold/45 hover:bg-navy/75 hover:text-gold sm:size-8"
               >
                 <X className="size-3.5" strokeWidth={1.7} />
               </button>
             </div>
           </div>
 
-          <div className="relative -mt-7 px-4 pb-4 pt-0 sm:px-5 sm:pb-5">
-            <div className="mb-3.5 flex items-end gap-3">
+          <div className="relative -mt-5 px-3.5 pb-3.5 pt-0 sm:-mt-7 sm:px-5 sm:pb-5">
+            <div className="mb-3 flex items-center gap-2.5 sm:mb-3.5 sm:items-end sm:gap-3">
               <div className="relative shrink-0">
                 {ad.logo ? (
                   <ResolvedImage
                     src={ad.logo}
                     alt=""
-                    className="size-14 rounded-2xl border border-white object-cover shadow-[0_10px_28px_rgba(11,31,51,0.22)] ring-1 ring-gold/35"
+                    className="size-12 rounded-xl border border-white object-contain bg-white p-1 shadow-[0_8px_22px_rgba(11,31,51,0.2)] ring-1 ring-gold/35 sm:size-14 sm:rounded-2xl sm:object-cover sm:p-0"
                     loading="lazy"
                   />
                 ) : (
-                  <span className="grid size-14 place-items-center rounded-2xl border border-white bg-navy font-display text-sm tracking-[0.08em] text-gold shadow-[0_10px_28px_rgba(11,31,51,0.22)] ring-1 ring-gold/35">
+                  <span className="grid size-12 place-items-center rounded-xl border border-white bg-navy font-display text-xs tracking-[0.08em] text-gold shadow-[0_8px_22px_rgba(11,31,51,0.2)] ring-1 ring-gold/35 sm:size-14 sm:rounded-2xl sm:text-sm">
                     {initials || "VIP"}
                   </span>
                 )}
               </div>
-              <div className="min-w-0 flex-1 pb-0.5">
+              <div className="min-w-0 flex-1">
                 {category ? (
-                  <p className="mb-1 text-[0.58rem] tracking-[0.16em] text-gold/90 uppercase">
+                  <p className="mb-0.5 truncate text-[0.55rem] tracking-[0.14em] text-gold/90 uppercase sm:mb-1 sm:text-[0.58rem] sm:tracking-[0.16em]">
                     {category}
                   </p>
                 ) : null}
-                <h2 className="truncate font-display text-[1.35rem] leading-tight text-navy">
+                <h2 className="line-clamp-2 font-display text-[1.15rem] leading-snug text-navy sm:line-clamp-1 sm:truncate sm:text-[1.35rem] sm:leading-tight">
                   {companyName}
                 </h2>
               </div>
             </div>
 
             {description ? (
-              <p className="line-clamp-3 text-[0.92rem] leading-relaxed text-navy/58">
+              <p className="line-clamp-2 text-[0.85rem] leading-relaxed text-navy/60 sm:line-clamp-3 sm:text-[0.92rem] sm:text-navy/58">
                 {description}
               </p>
             ) : null}
 
-            <div className="mt-4 flex flex-col gap-2">
+            <div className="mt-3.5 flex flex-col gap-1.5 sm:mt-4 sm:gap-2">
               {websiteUrl ? (
                 <a
                   href={websiteUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={dismiss}
-                  className="group inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gold bg-gold px-4 py-3 text-[0.68rem] tracking-[0.14em] text-navy uppercase transition hover:-translate-y-0.5 hover:border-navy hover:bg-navy hover:text-navy-foreground"
+                  className="group inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-gold bg-gold px-4 py-2.5 text-[0.65rem] tracking-[0.12em] text-navy uppercase transition hover:-translate-y-0.5 hover:border-navy hover:bg-navy hover:text-navy-foreground sm:min-h-0 sm:py-3 sm:text-[0.68rem] sm:tracking-[0.14em]"
                 >
                   {ctaLabel}
                   <Arrow
@@ -245,7 +249,7 @@ export function VipAdNotice() {
               <Link
                 to="/advertising"
                 onClick={dismiss}
-                className="inline-flex w-full items-center justify-center gap-1.5 py-1.5 text-[0.62rem] tracking-[0.14em] text-navy/50 uppercase transition hover:text-navy"
+                className="inline-flex w-full items-center justify-center gap-1.5 py-1.5 text-[0.6rem] tracking-[0.12em] text-navy/50 uppercase transition hover:text-navy sm:text-[0.62rem] sm:tracking-[0.14em]"
               >
                 {t("advertising.stripCta")}
                 <span aria-hidden className="text-gold/80">

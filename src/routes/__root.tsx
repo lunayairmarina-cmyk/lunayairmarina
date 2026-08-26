@@ -242,14 +242,14 @@ gtag('config', 'G-VLSMRG4M9M');`,
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" dir="ltr" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
       <body>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var l=localStorage.getItem('azura.language');if(l==='ar'||l==='en'){document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';document.cookie='azura.language='+l+';path=/;max-age=31536000;SameSite=Lax';}}catch(e){}})();`,
+            __html: `(function(){try{var l=localStorage.getItem('azura.language');if(l!=='ar'&&l!=='en'){var m=document.cookie.match(/(?:^|;\\s*)azura\\.language=(ar|en)(?:;|$)/);l=m?m[1]:'ar';}document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';document.cookie='azura.language='+l+';path=/;max-age=31536000;SameSite=Lax';localStorage.setItem('azura.language',l);}catch(e){document.documentElement.lang='ar';document.documentElement.dir='rtl';}})();`,
           }}
         />
         {children}

@@ -460,7 +460,7 @@ export function ChatbotWidget() {
         // Elevate above homepage ad ticker only; elsewhere keep a normal safe FAB offset.
         "fixed z-50 flex flex-col gap-2.5",
         isHome
-          ? "bottom-[calc(4.75rem+env(safe-area-inset-bottom))] sm:bottom-[calc(5.25rem+env(safe-area-inset-bottom))]"
+          ? "bottom-[calc(4.25rem+env(safe-area-inset-bottom))] sm:bottom-[calc(5.25rem+env(safe-area-inset-bottom))]"
           : "bottom-[max(1rem,env(safe-area-inset-bottom))] sm:bottom-[max(1.5rem,env(safe-area-inset-bottom))]",
         cornerPosition,
       )}
@@ -479,9 +479,11 @@ export function ChatbotWidget() {
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
             className={cn(
               "flex w-[min(100vw-2rem,24.5rem)] flex-col overflow-hidden rounded-[1.35rem] border border-navy/10 bg-[#f7f5f1] shadow-luxe sm:w-[min(100vw-2rem,26.5rem)]",
+              // Mobile: fill between safe top and FAB; desktop: fixed height card
+              "max-sm:fixed max-sm:inset-x-3 max-sm:top-[calc(5rem+env(safe-area-inset-top))] max-sm:h-auto max-sm:w-auto",
               isHome
-                ? "max-sm:fixed max-sm:inset-x-3 max-sm:bottom-[max(7.25rem,env(safe-area-inset-bottom))] max-sm:top-[max(5.5rem,env(safe-area-inset-top))] max-sm:w-auto h-[min(34rem,calc(100dvh-8rem))] sm:h-[min(36rem,calc(100dvh-9rem))]"
-                : "max-sm:fixed max-sm:inset-x-3 max-sm:bottom-[max(5.5rem,env(safe-area-inset-bottom))] max-sm:top-[max(4.75rem,env(safe-area-inset-top))] max-sm:w-auto h-[min(34rem,calc(100dvh-6.5rem))] sm:h-[min(36rem,calc(100dvh-7.5rem))]",
+                ? "max-sm:bottom-[calc(5.75rem+env(safe-area-inset-bottom))] sm:h-[min(36rem,calc(100dvh-9rem))]"
+                : "max-sm:bottom-[calc(4.5rem+env(safe-area-inset-bottom))] sm:h-[min(36rem,calc(100dvh-7.5rem))]",
             )}
           >
             <header className="relative shrink-0 overflow-hidden bg-navy px-4 pb-3.5 pt-3.5 text-navy-foreground">
@@ -668,7 +670,7 @@ export function ChatbotWidget() {
                   disabled={sending}
                   dir={isRTL ? "rtl" : "ltr"}
                   aria-label={t("chatbot.placeholder")}
-                  className="min-h-10 max-h-28 flex-1 resize-none border-0 bg-transparent px-2.5 py-2.5 text-sm shadow-none focus-visible:ring-0"
+                  className="min-h-10 max-h-28 flex-1 resize-none border-0 bg-transparent px-2.5 py-2.5 text-base shadow-none focus-visible:ring-0 sm:text-sm"
                 />
                 <Button
                   type="submit"

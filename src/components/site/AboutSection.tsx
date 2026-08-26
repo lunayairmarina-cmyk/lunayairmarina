@@ -41,7 +41,7 @@ export function AboutSection({ variant = "home" }: { variant?: "home" | "page" }
 
   if (variant === "home") {
     return (
-      <section className="border-b border-gold/10 bg-[#fbfaf7] py-24 lg:py-32">
+      <section className="border-b border-gold/10 bg-[#fbfaf7] py-16 sm:py-20 lg:py-32">
         <div className="container-luxe grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <Reveal direction="left">
             <div className="relative overflow-hidden">
@@ -77,7 +77,7 @@ export function AboutSection({ variant = "home" }: { variant?: "home" | "page" }
   }
 
   return (
-    <section className="bg-background py-24 lg:py-32">
+    <section className="bg-background py-16 sm:py-20 lg:py-32">
       <div className="container-luxe">
         <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
           <Reveal direction="left">

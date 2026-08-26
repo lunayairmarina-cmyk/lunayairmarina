@@ -71,16 +71,16 @@ export function Navbar() {
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-50 h-[calc(5rem+env(safe-area-inset-top))] overflow-visible border-b border-navy/10 bg-white pt-[env(safe-area-inset-top)] shadow-card">
-        <div className="container-luxe grid h-full grid-cols-[1fr_auto_1fr] items-center gap-3 lg:gap-4">
+        <div className="container-luxe flex h-full items-center justify-between gap-2 sm:gap-3 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-4">
           <Link
             to="/"
-            className="min-w-0 shrink-0 justify-self-start max-w-[70%] sm:max-w-none"
+            className="min-w-0 shrink-0 max-w-[58%] sm:max-w-none lg:justify-self-start"
             aria-label={t("brand.name")}
           >
-            <Logo tone="dark" className="h-14 w-36 sm:h-[4.25rem] sm:w-44" />
+            <Logo tone="dark" className="h-11 w-[6.75rem] max-w-full sm:h-12 sm:w-28 lg:h-[4.25rem] lg:w-44" />
           </Link>
 
-          {/* Symmetric center column — same balance for EN and AR. */}
+          {/* Symmetric center column — desktop only. */}
           <nav aria-label="Primary" className="hidden min-w-0 justify-self-center lg:block">
             <div
               className={cn(
@@ -104,7 +104,7 @@ export function Navbar() {
             </div>
           </nav>
 
-          <div className="flex shrink-0 items-center justify-self-end gap-3">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3 lg:justify-self-end">
             <LanguageSwitcher tone="dark" />
             <Link
               to="/contact"
@@ -116,7 +116,7 @@ export function Navbar() {
               type="button"
               onClick={() => setOpen(true)}
               aria-label="Open menu"
-              className="grid size-11 place-items-center rounded-lg text-navy transition-colors hover:bg-navy/5 lg:hidden"
+              className="grid size-10 place-items-center rounded-lg text-navy transition-colors hover:bg-navy/5 sm:size-11 lg:hidden"
             >
               <Menu className="size-6" strokeWidth={1.5} />
             </button>
@@ -143,9 +143,9 @@ export function Navbar() {
               className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/35 to-transparent"
             />
 
-            <div className="relative z-10 flex h-16 shrink-0 items-center justify-between border-b border-white/10 px-4 pt-[env(safe-area-inset-top)] sm:px-6">
+            <div className="relative z-10 flex h-[calc(4rem+env(safe-area-inset-top))] shrink-0 items-center justify-between border-b border-white/10 px-4 pt-[env(safe-area-inset-top)] sm:px-6">
               <Link to="/" onClick={() => setOpen(false)} aria-label={t("brand.name")}>
-                <Logo tone="light" className="h-14 w-36 sm:h-16 sm:w-40" />
+                <Logo tone="light" className="h-12 w-28 max-w-full sm:h-16 sm:w-40" />
               </Link>
               <button
                 type="button"

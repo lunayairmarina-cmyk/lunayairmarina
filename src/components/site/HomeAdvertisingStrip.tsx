@@ -44,21 +44,21 @@ export function HomeAdvertisingStrip({ className }: { className?: string }) {
 
   const sequence = buildSeamlessTickerItems(lines);
   // Slower pace so VIP/featured lines stay readable.
-  const durationSec = Math.max(110, lines.length * 58);
+  const durationSec = Math.max(140, lines.length * 72);
 
   return (
     <aside
       aria-label={t("advertising.stripLabel")}
       className={cn(
-        "border-t border-gold/30 bg-navy/80 text-navy-foreground backdrop-blur-md",
+        "border-t border-white/20 bg-gradient-to-r from-red-700 via-red-600 to-red-700 text-white shadow-[0_-4px_24px_rgba(185,28,28,0.35)]",
         className,
       )}
     >
-      <div className="container-luxe flex min-h-14 items-center gap-3 py-3.5 sm:min-h-16 sm:gap-5 sm:py-4">
-        <span className="relative z-[1] shrink-0 bg-transparent pe-1 text-[0.72rem] tracking-[0.2em] text-gold uppercase sm:text-[0.78rem]">
+      <div className="container-luxe flex min-h-12 items-center gap-2 py-2.5 sm:min-h-16 sm:gap-5 sm:py-4">
+        <span className="relative z-[1] hidden shrink-0 bg-transparent pe-1 text-[0.72rem] font-semibold tracking-[0.2em] text-white uppercase sm:inline sm:text-[0.78rem]">
           {t("advertising.stripLabel")}
         </span>
-        <span aria-hidden className="hidden h-4 w-px shrink-0 bg-gold/35 sm:block" />
+        <span aria-hidden className="hidden h-4 w-px shrink-0 bg-white/35 sm:block" />
 
         {/*
           Keep the marquee track in LTR so translateX(-50%) stays seamless.
@@ -70,7 +70,7 @@ export function HomeAdvertisingStrip({ className }: { className?: string }) {
               <span key={item.key} className="ad-ticker-item">
                 <span
                   dir={isRTL ? "rtl" : "ltr"}
-                  className="text-base text-white/90 sm:text-lg"
+                  className="text-[0.9rem] text-white sm:text-lg"
                 >
                   {item.text}
                 </span>
@@ -82,7 +82,7 @@ export function HomeAdvertisingStrip({ className }: { className?: string }) {
 
         <Link
           to="/advertising"
-          className="relative z-[1] shrink-0 ps-1 text-[0.72rem] tracking-[0.16em] text-gold uppercase transition hover:text-gold-soft sm:text-[0.78rem]"
+          className="relative z-[1] shrink-0 ps-1 text-[0.65rem] font-semibold tracking-[0.12em] text-gold uppercase transition hover:text-white sm:text-[0.78rem] sm:tracking-[0.16em]"
         >
           {t("advertising.stripCta")}
         </Link>

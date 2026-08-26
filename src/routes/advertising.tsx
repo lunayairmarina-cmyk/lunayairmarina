@@ -69,12 +69,12 @@ function VipAdvertisementCard({
       />
 
       {/* Media: contain so logos/photos don't get cropped into a giant mess */}
-      <div className="relative z-[1] aspect-[16/10] overflow-hidden bg-[linear-gradient(165deg,var(--navy),color-mix(in_oklab,var(--navy)_78%,var(--ocean)))]">
+      <div className="relative z-[1] aspect-[2/1] overflow-hidden bg-[linear-gradient(165deg,var(--navy),color-mix(in_oklab,var(--navy)_78%,var(--ocean)))] sm:aspect-[16/10]">
         {ad.image ? (
           <ResolvedImage
             src={ad.image}
             alt={companyName}
-            className="h-full w-full object-contain object-center p-5 sm:p-6"
+            className="h-full w-full object-contain object-center p-3 sm:p-6"
             loading="lazy"
           />
         ) : null}
@@ -124,7 +124,7 @@ function VipAdvertisementCard({
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackAdClick({ ...ad, websiteUrl })}
-            className="mt-4 inline-flex w-fit items-center gap-2 border border-gold bg-gold px-4 py-2.5 text-[0.62rem] tracking-[0.14em] text-navy uppercase transition hover:border-navy hover:bg-navy hover:text-navy-foreground"
+            className="mt-4 inline-flex w-full max-w-full items-center justify-center gap-2 border border-gold bg-gold px-4 py-2.5 text-[0.62rem] tracking-[0.14em] text-navy uppercase transition hover:border-navy hover:bg-navy hover:text-navy-foreground sm:w-fit"
           >
             {ctaLabel}
             <span aria-hidden>→</span>
@@ -228,7 +228,7 @@ function AdvertisementCard({
             rel="noopener noreferrer"
             onClick={() => trackAdClick({ ...ad, websiteUrl })}
             className={cn(
-              "mt-3.5 inline-flex w-fit border px-3.5 py-1.5 text-[0.58rem] tracking-[0.16em] uppercase transition",
+              "mt-3.5 inline-flex w-full max-w-full items-center justify-center border px-3.5 py-2 text-[0.58rem] tracking-[0.16em] uppercase transition sm:w-fit sm:py-1.5",
               isFeatured
                 ? "border-gold bg-gold text-navy hover:border-navy hover:bg-navy hover:text-navy-foreground"
                 : "mt-4 border-navy bg-navy px-4 py-2 text-[0.62rem] text-navy-foreground hover:border-gold hover:bg-gold hover:text-navy",

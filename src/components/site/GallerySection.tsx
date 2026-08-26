@@ -74,7 +74,7 @@ export function GallerySection({ limit }: { limit?: number }) {
 
   if (site?.status === "loading" && remote.length === 0 && galleryImages.length === 0) {
     return (
-      <section className="bg-[#f3efe7] py-24 lg:py-32">
+      <section className="bg-[#f3efe7] py-16 sm:py-20 lg:py-32">
         <div className="container-luxe">
           <ContentSkeleton rows={4} />
         </div>
@@ -85,7 +85,7 @@ export function GallerySection({ limit }: { limit?: number }) {
   const displaySrc = (image: GalleryImage) => resolved[image.id] || image.src;
 
   return (
-    <section className="bg-[#f3efe7] py-24 lg:py-32">
+    <section className="bg-[#f3efe7] py-16 sm:py-20 lg:py-32">
       <div className="container-luxe">
         <SectionHeading
           eyebrow={t("gallery.eyebrow")}
@@ -146,7 +146,7 @@ export function GallerySection({ limit }: { limit?: number }) {
               type="button"
               onClick={() => setActive(null)}
               aria-label={t("gallery.close")}
-              className="absolute top-4 inset-inline-end-4 grid size-11 place-items-center rounded-full border border-navy-foreground/20 text-navy-foreground transition-colors hover:border-gold hover:text-gold sm:top-6 sm:inset-inline-end-6"
+              className="absolute top-[max(1rem,env(safe-area-inset-top))] inset-inline-end-4 grid size-11 place-items-center rounded-full border border-navy-foreground/20 text-navy-foreground transition-colors hover:border-gold hover:text-gold sm:top-6 sm:inset-inline-end-6"
             >
               <X className="size-5" strokeWidth={1.5} />
             </button>

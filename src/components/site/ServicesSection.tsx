@@ -71,7 +71,7 @@ export function ServicesSection({
 
   if (!isPage) {
     return (
-      <section className="border-y border-gold/15 bg-gradient-to-br from-[#061321] via-navy to-ocean py-24 lg:py-32">
+      <section className="border-y border-gold/15 bg-gradient-to-br from-[#061321] via-navy to-ocean py-16 sm:py-20 lg:py-32">
         <div className="container-luxe">
           <SectionHeading
             eyebrow={t("services.eyebrow")}

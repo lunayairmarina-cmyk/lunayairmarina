@@ -18,6 +18,8 @@ export type Direction = "ltr" | "rtl";
 const bundledDictionaries: Record<Language, unknown> = { en, ar };
 const STORAGE_KEY = "azura.language";
 const COOKIE_KEY = "azura.language";
+/** Site default — Arabic-first for Lunayair Marina. */
+const DEFAULT_LANGUAGE: Language = "ar";
 
 interface LanguageContextValue {
   language: Language;
@@ -42,15 +44,30 @@ function resolve(dict: unknown, key: string): unknown {
   }, dict);
 }
 
-function readStoredLanguage(): Language {
-  if (typeof window === "undefined") return "en";
+function parseLanguage(value: string | null | undefined): Language | null {
+  if (value === "ar" || value === "en") return value;
+  return null;
+}
+
+function readCookieLanguage(): Language | null {
+  if (typeof document === "undefined") return null;
   try {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored === "ar" || stored === "en") return stored;
+    const match = document.cookie.match(/(?:^|;\s*)azura\.language=(ar|en)(?:;|$)/);
+    return parseLanguage(match?.[1]);
+  } catch {
+    return null;
+  }
+}
+
+function readStoredLanguage(): Language {
+  if (typeof window === "undefined") return DEFAULT_LANGUAGE;
+  try {
+    const stored = parseLanguage(window.localStorage.getItem(STORAGE_KEY));
+    if (stored) return stored;
   } catch {
     // ignore
   }
-  return "en";
+  return readCookieLanguage() ?? DEFAULT_LANGUAGE;
 }
 
 function persistLanguage(next: Language) {
@@ -199,11 +216,11 @@ export function useLanguage(): LanguageContextValue {
   const ctx = useContext(LanguageContext);
   if (!ctx) {
     // Fallback during rare route/error remounts so the app doesn't white-screen.
-    const dict = bundledDictionaries.en;
+    const dict = bundledDictionaries.ar;
     return {
-      language: "en",
-      dir: "ltr",
-      isRTL: false,
+      language: "ar",
+      dir: "rtl",
+      isRTL: true,
       setLanguage: () => undefined,
       toggleLanguage: () => undefined,
       t: (key: string) => {

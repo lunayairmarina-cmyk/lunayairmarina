@@ -125,7 +125,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-white/10 py-5 text-center text-[0.7rem] text-white/45">
+        <div className="border-t border-white/10 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-center text-[0.7rem] text-white/45">
           <p>
             <Link
               to="/admin/login"

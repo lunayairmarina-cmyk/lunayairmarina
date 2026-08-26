@@ -76,7 +76,7 @@ export function ContactSection() {
   ];
 
   return (
-    <section className="bg-navy py-24 lg:py-32">
+    <section className="bg-navy py-16 sm:py-20 lg:py-32">
       <div className="container-luxe grid gap-14 lg:grid-cols-2 lg:gap-20">
         <div className="flex flex-col gap-10">
           <Reveal direction="left">
@@ -151,7 +151,7 @@ export function ContactSection() {
                 rows={5}
                 value={form.message}
                 onChange={(event) => setForm({ ...form, message: event.target.value })}
-                className="resize-none border-b border-navy-foreground/20 bg-transparent py-3 text-sm text-navy-foreground outline-none transition-colors placeholder:text-navy-foreground/30 focus:border-gold"
+                className="resize-none border-b border-navy-foreground/20 bg-transparent py-3 text-base text-navy-foreground outline-none transition-colors placeholder:text-navy-foreground/30 focus:border-gold sm:text-sm"
               />
             </div>
 
@@ -203,7 +203,7 @@ function Field({
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="border-b border-navy-foreground/20 bg-transparent py-3 text-sm text-navy-foreground outline-none transition-colors focus:border-gold"
+        className="border-b border-navy-foreground/20 bg-transparent py-3 text-base text-navy-foreground outline-none transition-colors focus:border-gold sm:text-sm"
       />
     </div>
   );

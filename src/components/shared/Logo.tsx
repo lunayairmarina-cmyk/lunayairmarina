@@ -32,7 +32,7 @@ export function Logo({ tone = "dark", className, compact = false, align = "start
         width={compact ? 112 : 176}
         height={compact ? 112 : 176}
         className={cn(
-          "h-full w-auto max-w-none bg-transparent object-contain",
+          "h-full w-auto max-w-full bg-transparent object-contain",
           centered ? "object-center" : "object-left",
         )}
       />

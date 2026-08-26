@@ -83,7 +83,7 @@ export function BlogSection({ limit = 3 }: { limit?: number }) {
   const posts = (remotePosts.length > 0 ? remotePosts : localPosts).slice(0, limit);
 
   return (
-    <section className="border-y border-navy/5 bg-background py-24 lg:py-32">
+    <section className="border-y border-navy/5 bg-background py-16 sm:py-20 lg:py-32">
       <div className="container-luxe">
         <div className="flex flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
           <SectionHeading
