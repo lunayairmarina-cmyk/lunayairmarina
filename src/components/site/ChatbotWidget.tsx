@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Bot, Loader2, SendHorizontal, X } from "lucide-react";
 import { useRouterState } from "@tanstack/react-router";
@@ -23,9 +23,6 @@ interface QuickReply {
   label: string;
   message: string;
 }
-
-const CHATBOT_TEASER_SEEN_KEY = "lunayair.chatbot.teaserSeen";
-const CHATBOT_BADGE_CLEARED_KEY = "lunayair.chatbot.badgeCleared";
 
 function createMessageId(): string {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -52,42 +49,6 @@ function formatTime(date: Date, language: "en" | "ar"): string {
 function isPhoneLikeViewport(): boolean {
   if (typeof window === "undefined") return false;
   return window.matchMedia("(max-width: 640px), (pointer: coarse)").matches;
-}
-
-function hasSeenChatTeasers(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return window.sessionStorage.getItem(CHATBOT_TEASER_SEEN_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function markChatTeasersSeen() {
-  if (typeof window === "undefined") return;
-  try {
-    window.sessionStorage.setItem(CHATBOT_TEASER_SEEN_KEY, "1");
-  } catch {
-    // ignore
-  }
-}
-
-function hasClearedChatBadge(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return window.sessionStorage.getItem(CHATBOT_BADGE_CLEARED_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function markChatBadgeCleared() {
-  if (typeof window === "undefined") return;
-  try {
-    window.sessionStorage.setItem(CHATBOT_BADGE_CLEARED_KEY, "1");
-  } catch {
-    // ignore
-  }
 }
 
 type AudioContextConstructor = typeof AudioContext;
@@ -174,7 +135,7 @@ export function ChatbotWidget() {
   const [sending, setSending] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [sessionId] = useState(() => getOrCreateChatSessionId());
-  // Teasers sync after mount (sessionStorage) via layout effect so first paint is still immediate.
+  // Welcome teasers: replay every time the visitor enters the homepage.
   const [teasersVisible, setTeasersVisible] = useState(false);
   const [teaserDismissed, setTeaserDismissed] = useState(false);
   const [badgeCleared, setBadgeCleared] = useState(false);
@@ -182,24 +143,25 @@ export function ChatbotWidget() {
   const quickReplies = tv<QuickReply[]>("chatbot.quickReplies");
   const teaserMessages = tv<string[]>("chatbot.teasers") ?? [];
   const showQuickReplies = messages.length === 0 && !sending;
-  const showTeasers = !open && !teaserDismissed && teasersVisible && teaserMessages.length > 0;
-  // After teaser bubbles hide, keep "2" on the FAB until the visitor opens chat.
+  const showTeasers =
+    isHome && !open && !teaserDismissed && teasersVisible && teaserMessages.length > 0;
+  // After teaser bubbles hide on home, keep "2" on the FAB until chat opens (this visit).
   const showAttentionBadge =
-    !open && !badgeCleared && teaserDismissed && teaserMessages.length > 0;
+    isHome && !open && !badgeCleared && teaserDismissed && teaserMessages.length > 0;
 
-  useLayoutEffect(() => {
-    if (hasClearedChatBadge()) {
-      setTeaserDismissed(true);
-      setBadgeCleared(true);
-      return;
-    }
-    if (hasSeenChatTeasers()) {
-      // Bubbles already played this session — show badge until chat is opened.
+  useEffect(() => {
+    if (!isHome) {
+      setTeasersVisible(false);
       setTeaserDismissed(true);
       return;
     }
+    // Fresh homepage visit — show welcome bubbles again.
+    teaserSoundPlayedRef.current = false;
+    pendingTeaserSoundRef.current = false;
+    setBadgeCleared(false);
+    setTeaserDismissed(false);
     setTeasersVisible(true);
-  }, []);
+  }, [isHome]);
 
   // Browsers block autoplay: unlock AudioContext on first gesture, then play pending chime.
   useEffect(() => {
@@ -256,7 +218,6 @@ export function ChatbotWidget() {
   useEffect(() => {
     if (!teasersVisible || teaserDismissed || open) return;
     const timer = window.setTimeout(() => {
-      markChatTeasersSeen();
       setTeasersVisible(false);
       setTeaserDismissed(true);
       pendingTeaserSoundRef.current = false;
@@ -410,32 +371,28 @@ export function ChatbotWidget() {
     }
   };
 
-  // Take former WhatsApp FAB corner so AI is the primary contact affordance.
+  // Physical left/right only — never start/end (RTL maps end→left and stretches the FAB row).
   const cornerPosition = isRTL
-    ? "right-4 sm:right-7 items-end"
-    : "left-4 sm:left-7 items-start";
+    ? "left-auto right-3 sm:right-7"
+    : "right-auto left-3 sm:left-7";
 
   const openChat = () => {
-    markChatTeasersSeen();
-    markChatBadgeCleared();
     setTeaserDismissed(true);
     setTeasersVisible(false);
     setBadgeCleared(true);
     setOpen(true);
   };
 
-  const teaserSlideX = isRTL ? 16 : -16;
-
   const teaserBubbles = showTeasers ? (
     <motion.div
       key="chat-teasers"
       role="region"
       aria-label={t("chatbot.teaserAria")}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, transition: { duration: 0.35 } }}
+      initial={{ opacity: 0, x: isRTL ? 12 : -12 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: isRTL ? 8 : -8, transition: { duration: 0.28 } }}
       className={cn(
-        "mb-0.5 flex max-w-[min(17.5rem,calc(100vw-5.75rem))] flex-col gap-2",
+        "flex w-[min(15.5rem,calc(100vw-5.5rem))] flex-col gap-2",
         isRTL ? "items-end" : "items-start",
       )}
     >
@@ -444,15 +401,15 @@ export function ChatbotWidget() {
           key={`${index}-${text.slice(0, 24)}`}
           type="button"
           onClick={openChat}
-          initial={{ opacity: 0, x: teaserSlideX, scale: 0.96 }}
+          initial={{ opacity: 0, x: isRTL ? 14 : -14, scale: 0.97 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           transition={{
-            delay: 0.25 + index * 0.85,
-            duration: 0.45,
+            delay: 0.2 + index * 0.75,
+            duration: 0.4,
             ease: [0.22, 1, 0.36, 1],
           }}
           className={cn(
-            "rounded-2xl border border-navy/8 bg-white px-3.5 py-2.5 text-start text-sm leading-snug text-navy shadow-[0_10px_28px_rgba(15,23,42,0.14)] transition hover:-translate-y-0.5 hover:border-gold/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold",
+            "w-full rounded-2xl border border-navy/8 bg-white px-3.5 py-2.5 text-start text-sm leading-snug text-navy shadow-[0_10px_28px_rgba(15,23,42,0.14)] transition hover:-translate-y-0.5 hover:border-gold/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold",
             isRTL ? "text-right rounded-ee-md" : "text-left rounded-es-md",
           )}
         >
@@ -465,10 +422,10 @@ export function ChatbotWidget() {
   return (
     <div
       className={cn(
-        // Elevate above homepage ad ticker only; elsewhere keep a normal safe FAB offset.
+        // Homepage phone: sit just above the red ad strip (min-h-12 ≈ 3rem).
         "fixed z-50 flex flex-col gap-2.5",
         isHome
-          ? "bottom-[calc(4.25rem+env(safe-area-inset-bottom))] sm:bottom-[calc(5.25rem+env(safe-area-inset-bottom))]"
+          ? "bottom-[calc(3.25rem+env(safe-area-inset-bottom))] sm:bottom-[calc(5.25rem+env(safe-area-inset-bottom))]"
           : "bottom-[max(1rem,env(safe-area-inset-bottom))] sm:bottom-[max(1.5rem,env(safe-area-inset-bottom))]",
         cornerPosition,
       )}
@@ -492,7 +449,7 @@ export function ChatbotWidget() {
               // Mobile: narrower centered column, stretch tall between nav and FAB
               "max-sm:fixed max-sm:left-1/2 max-sm:z-50 max-sm:w-[min(20rem,calc(100vw-3.5rem))] max-sm:-translate-x-1/2 max-sm:h-auto",
               isHome
-                ? "max-sm:top-[calc(3.35rem+env(safe-area-inset-top))] max-sm:bottom-[calc(4.35rem+env(safe-area-inset-bottom))] sm:h-[min(40rem,calc(100dvh-8.5rem))]"
+                ? "max-sm:top-[calc(3.35rem+env(safe-area-inset-top))] max-sm:bottom-[calc(3.25rem+env(safe-area-inset-bottom))] sm:h-[min(40rem,calc(100dvh-8.5rem))]"
                 : "max-sm:top-[calc(3.35rem+env(safe-area-inset-top))] max-sm:bottom-[calc(3.65rem+env(safe-area-inset-bottom))] sm:h-[min(40rem,calc(100dvh-7rem))]",
             )}
           >
@@ -704,11 +661,14 @@ export function ChatbotWidget() {
         ) : null}
       </AnimatePresence>
 
-      {/* dir=ltr keeps physical order: AR → bubbles left of FAB, EN → bubbles right of FAB */}
+      {/*
+        dir=ltr keeps physical order: Arabic → bubbles left of FAB (FAB on right),
+        English → bubbles right of FAB (FAB on left).
+      */}
       <div className="flex flex-row items-end gap-2.5" dir="ltr">
-        <AnimatePresence>{isRTL ? teaserBubbles : null}</AnimatePresence>
+        {isRTL ? <AnimatePresence>{teaserBubbles}</AnimatePresence> : null}
 
-        <div className="relative shrink-0">
+        <div className={cn("relative shrink-0", open && "hidden")}>
           {!open ? (
             <>
               <span
@@ -776,19 +736,13 @@ export function ChatbotWidget() {
               "border border-gold-soft bg-gold text-navy shadow-[0_12px_32px_rgba(15,23,42,0.28),0_0_0_4px_rgba(212,175,55,0.22)]",
               "transition-colors hover:bg-gold-soft hover:shadow-[0_14px_36px_rgba(15,23,42,0.32),0_0_0_5px_rgba(212,175,55,0.28)]",
               "focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-navy",
-              open && "max-sm:hidden",
-              open && "border-navy/15 bg-navy text-navy-foreground shadow-luxe hover:border-gold hover:bg-gold hover:text-navy",
             )}
           >
-            {open ? (
-              <X className="size-6" strokeWidth={1.6} aria-hidden />
-            ) : (
-              <Bot className="size-6" strokeWidth={1.75} aria-hidden />
-            )}
+            <Bot className="size-6" strokeWidth={1.75} aria-hidden />
           </motion.button>
         </div>
 
-        <AnimatePresence>{!isRTL ? teaserBubbles : null}</AnimatePresence>
+        {!isRTL ? <AnimatePresence>{teaserBubbles}</AnimatePresence> : null}
       </div>
     </div>
   );

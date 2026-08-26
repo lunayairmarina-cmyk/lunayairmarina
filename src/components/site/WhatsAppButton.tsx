@@ -83,7 +83,7 @@ export function WhatsAppButton() {
       rel="noreferrer"
       aria-label={t("whatsapp.label")}
       className={`fixed z-50 inline-flex size-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-luxe transition-transform duration-300 hover:-translate-y-0.5 hover:bg-[#1ebe57] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-gold bottom-[max(1rem,env(safe-area-inset-bottom))] sm:size-14 sm:bottom-[max(1.5rem,env(safe-area-inset-bottom))] ${
-        isRTL ? "right-4 sm:right-7" : "left-4 sm:left-7"
+        isRTL ? "left-4 sm:left-7" : "right-4 sm:right-7"
       }`}
     >
       <svg viewBox="0 0 32 32" aria-hidden="true" className="size-7 fill-current">

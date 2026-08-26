@@ -140,9 +140,8 @@ export function VipAdNotice() {
           className={cn(
             "fixed z-40 overflow-hidden rounded-2xl border border-gold/25 bg-[#fbfaf7]/98 backdrop-blur-sm",
             "w-[min(calc(100vw-5.5rem),19rem)] sm:w-[min(22rem,calc(100vw-3rem))]",
-            isRTL
-              ? "bottom-[calc(6.5rem+env(safe-area-inset-bottom))] left-3 sm:left-6"
-              : "bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-3 sm:right-6",
+            // Opposite corner from the chat FAB (always physical left).
+            "bottom-[calc(6.5rem+env(safe-area-inset-bottom))] left-3 sm:left-6",
             "shadow-[0_18px_48px_rgba(11,31,51,0.22)]",
           )}
         >
