@@ -1,5 +1,6 @@
 import { collection, doc, getDoc, setDoc, type Firestore } from "firebase/firestore";
 import type { CustomerContext } from "@/lib/agent/context";
+import { stripUndefinedDeep } from "@/lib/agent/firestoreSanitize";
 import type { AgentIntent } from "@/lib/agent/query";
 import {
   AI_CONVERSATIONS_COLLECTION,
@@ -27,7 +28,7 @@ export async function loadConversation(
 }
 
 export async function saveConversation(db: Firestore, record: AiConversationRecord): Promise<void> {
-  await setDoc(conversationRef(db, record.sessionId), record, { merge: true });
+  await setDoc(conversationRef(db, record.sessionId), stripUndefinedDeep(record), { merge: true });
 }
 
 export async function appendConversationMessage(
@@ -37,7 +38,7 @@ export async function appendConversationMessage(
 ): Promise<void> {
   await setDoc(
     doc(db, AI_CONVERSATIONS_COLLECTION, sessionId, AI_MESSAGES_SUBCOLLECTION, message.id),
-    message,
+    stripUndefinedDeep(message),
     { merge: true },
   );
 }
@@ -51,6 +52,7 @@ export function buildConversationRecord(input: {
 }): AiConversationRecord {
   const now = new Date().toISOString();
   const ctx = input.customerContext ?? { interests: [] };
+  const sanitizedContext = stripUndefinedDeep(ctx as unknown as Record<string, unknown>);
   const record: AiConversationRecord = {
     conversationId: input.sessionId,
     sessionId: input.sessionId,
@@ -58,12 +60,11 @@ export function buildConversationRecord(input: {
     startedAt: now,
     lastMessageAt: now,
     summary: input.summary ?? "",
-    customerContext: ctx as unknown as Record<string, unknown>,
-    lastIntent: input.lastIntent,
+    customerContext: sanitizedContext,
     status: "active",
     leadStatus: "none",
   };
-  // Only set denormalized visitor fields when present (avoids undefined in Firestore writes).
+  if (input.lastIntent) record.lastIntent = input.lastIntent;
   if (ctx.name?.trim()) record.visitorName = ctx.name.trim();
   if (ctx.phone?.trim()) record.visitorPhone = ctx.phone.trim();
   if (ctx.email?.trim()) record.visitorEmail = ctx.email.trim();

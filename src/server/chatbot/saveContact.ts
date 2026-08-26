@@ -11,6 +11,7 @@ import {
   saveConversation,
 } from "@/server/agent/conversationStore";
 import { pairedMessageTimestamps } from "@/lib/agent/messageOrder";
+import { stripUndefinedDeep } from "@/lib/agent/firestoreSanitize";
 import {
   appendConversationMessageAdmin,
   loadConversationAdmin,
@@ -88,7 +89,9 @@ export async function saveChatContact(input: unknown): Promise<SaveChatContactRe
         customerContext,
       });
     record.lastMessageAt = now;
-    record.customerContext = customerContext as unknown as Record<string, unknown>;
+    record.customerContext = stripUndefinedDeep(
+      customerContext as unknown as Record<string, unknown>,
+    );
     record.visitorName = name;
     record.visitorPhone = phone;
     if (resolvedEmail) record.visitorEmail = resolvedEmail;

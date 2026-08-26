@@ -1,26 +1,11 @@
 import type { Firestore as AdminFirestore } from "firebase-admin/firestore";
+import { stripUndefinedDeep } from "@/lib/agent/firestoreSanitize";
 import {
   AI_CONVERSATIONS_COLLECTION,
   AI_MESSAGES_SUBCOLLECTION,
   type AiConversationRecord,
   type AiMessageRecord,
 } from "@/lib/agent/types";
-
-/** Admin SDK rejects `undefined` field values — strip before write. */
-function stripUndefinedDeep<T>(value: T): T {
-  if (Array.isArray(value)) {
-    return value.map((item) => stripUndefinedDeep(item)) as T;
-  }
-  if (value && typeof value === "object") {
-    const out: Record<string, unknown> = {};
-    for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
-      if (nested === undefined) continue;
-      out[key] = stripUndefinedDeep(nested);
-    }
-    return out as T;
-  }
-  return value;
-}
 
 export async function loadConversationAdmin(
   db: AdminFirestore,

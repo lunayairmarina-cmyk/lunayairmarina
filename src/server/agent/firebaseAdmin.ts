@@ -5,6 +5,10 @@
  *
  * Uses dynamic imports so Nitro/Vercel does not bundle firebase-admin into
  * server-fn chunks (bundled admin SDK crashes with SDK_VERSION errors).
+ *
+ * Credentials (first match wins):
+ * 1. FIREBASE_SERVICE_ACCOUNT_JSON — full service-account JSON string (preferred on Vercel)
+ * 2. FIREBASE_SERVICE_ACCOUNT_PATH / GOOGLE_APPLICATION_CREDENTIALS — local file path
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -52,21 +56,47 @@ function resolveProjectId(serviceAccount?: ServiceAccountJson): string {
   return "lunayairmarina-2d694";
 }
 
-function resolveServiceAccountPath(): string {
+function normalizePrivateKey(key: string): string {
+  return key.includes("\\n") ? key.replace(/\\n/g, "\n") : key;
+}
+
+function parseServiceAccountObject(parsed: unknown, source: string): ServiceAccountJson {
+  if (!parsed || typeof parsed !== "object") {
+    throw new Error(`[firebase-admin] ${source} must contain a JSON object.`);
+  }
+  const account = parsed as ServiceAccountJson;
+  if (!account.client_email || !account.private_key) {
+    throw new Error(
+      `[firebase-admin] ${source} is missing required fields (client_email / private_key).`,
+    );
+  }
+  return {
+    ...account,
+    private_key: normalizePrivateKey(account.private_key),
+  };
+}
+
+function loadServiceAccountFromJsonEnv(): ServiceAccountJson | null {
+  const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim();
+  if (!raw) return null;
+  try {
+    return parseServiceAccountObject(JSON.parse(raw), "FIREBASE_SERVICE_ACCOUNT_JSON");
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("[firebase-admin]")) throw error;
+    throw new Error(
+      "[firebase-admin] FIREBASE_SERVICE_ACCOUNT_JSON is not valid JSON. Paste the full service account JSON as one line/string.",
+    );
+  }
+}
+
+function resolveServiceAccountPath(): string | null {
   const path =
     process.env.FIREBASE_SERVICE_ACCOUNT_PATH?.trim() ||
     process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim();
-  if (!path) {
-    throw new Error(
-      "[firebase-admin] Missing FIREBASE_SERVICE_ACCOUNT_PATH (or GOOGLE_APPLICATION_CREDENTIALS). " +
-        "Download a service account JSON from Firebase Console → Project settings → Service accounts, " +
-        "store it outside the repo (or in a gitignored path), and set the env var to that file path.",
-    );
-  }
-  return resolve(path);
+  return path ? resolve(path) : null;
 }
 
-function loadServiceAccount(path: string): ServiceAccountJson {
+function loadServiceAccountFromFile(path: string): ServiceAccountJson {
   let parsed: unknown;
   try {
     parsed = JSON.parse(readFileSync(path, "utf8"));
@@ -76,16 +106,20 @@ function loadServiceAccount(path: string): ServiceAccountJson {
         "Check FIREBASE_SERVICE_ACCOUNT_PATH points to a valid JSON file.",
     );
   }
-  if (!parsed || typeof parsed !== "object") {
-    throw new Error("[firebase-admin] Service account file must contain a JSON object.");
-  }
-  const account = parsed as ServiceAccountJson;
-  if (!account.client_email || !account.private_key) {
-    throw new Error(
-      "[firebase-admin] Service account JSON is missing required fields (client_email / private_key).",
-    );
-  }
-  return account;
+  return parseServiceAccountObject(parsed, "service account file");
+}
+
+function loadServiceAccount(): ServiceAccountJson {
+  const fromJson = loadServiceAccountFromJsonEnv();
+  if (fromJson) return fromJson;
+
+  const path = resolveServiceAccountPath();
+  if (path) return loadServiceAccountFromFile(path);
+
+  throw new Error(
+    "[firebase-admin] Missing credentials. Set FIREBASE_SERVICE_ACCOUNT_JSON (Vercel) " +
+      "or FIREBASE_SERVICE_ACCOUNT_PATH / GOOGLE_APPLICATION_CREDENTIALS (local file).",
+  );
 }
 
 export async function getFirebaseAdminApp(): Promise<AdminApp> {
@@ -97,8 +131,7 @@ export async function getFirebaseAdminApp(): Promise<AdminApp> {
     return adminApp;
   }
 
-  const accountPath = resolveServiceAccountPath();
-  const serviceAccount = loadServiceAccount(accountPath);
+  const serviceAccount = loadServiceAccount();
   const projectId = resolveProjectId(serviceAccount);
 
   adminApp = initializeApp({
@@ -116,11 +149,12 @@ export async function getAdminFirestore(): Promise<AdminFirestore> {
   return adminDb;
 }
 
-/** True when a service account path is configured (does not load the key). */
+/** True when Admin credentials are configured (does not validate the key). */
 export function hasFirebaseAdminCredentials(): boolean {
   return Boolean(
-    process.env.FIREBASE_SERVICE_ACCOUNT_PATH?.trim() ||
-    process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim(),
+    process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim() ||
+      process.env.FIREBASE_SERVICE_ACCOUNT_PATH?.trim() ||
+      process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim(),
   );
 }
 
@@ -129,7 +163,11 @@ export async function tryGetAdminFirestore(): Promise<AdminFirestore | null> {
   if (!hasFirebaseAdminCredentials()) return null;
   try {
     return await getAdminFirestore();
-  } catch {
+  } catch (error) {
+    console.error(
+      "[firebase-admin] init failed:",
+      error instanceof Error ? error.message : "unknown error",
+    );
     return null;
   }
 }
@@ -141,8 +179,10 @@ export async function assertFirebaseAdminReady(): Promise<{
 }> {
   const app = await getFirebaseAdminApp();
   const projectId = app.options.projectId ?? resolveProjectId();
-  const source = process.env.FIREBASE_SERVICE_ACCOUNT_PATH?.trim()
-    ? "FIREBASE_SERVICE_ACCOUNT_PATH"
-    : "GOOGLE_APPLICATION_CREDENTIALS";
+  const source = process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim()
+    ? "FIREBASE_SERVICE_ACCOUNT_JSON"
+    : process.env.FIREBASE_SERVICE_ACCOUNT_PATH?.trim()
+      ? "FIREBASE_SERVICE_ACCOUNT_PATH"
+      : "GOOGLE_APPLICATION_CREDENTIALS";
   return { projectId, credentialSource: source };
 }
