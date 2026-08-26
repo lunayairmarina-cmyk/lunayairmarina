@@ -1270,20 +1270,20 @@
     }
   },
   "chatbot": {
-    "fabLabel": "AI Assistant",
-    "title": "Lunayair AI Assistant",
+    "fabLabel": "Assistant Captain",
+    "title": "Assistant Captain",
     "welcome": "Welcome to Lunayair Marina 👋\nHow can we help you today?",
     "placeholder": "Type your message…",
     "send": "Send",
-    "typing": "Assistant is typing",
+    "typing": "Assistant Captain is typing",
     "retry": "Try again",
     "error": "Something went wrong temporarily. Please try again or reach us via the contact page.",
     "rateLimit": "Too many messages. Please wait a moment and try again.",
-    "teaserAria": "AI assistant greeting messages",
+    "teaserAria": "Assistant Captain greeting messages",
     "statusOnline": "Online now",
     "teasers": [
-      "Hi there 👋 I'm Lunayair's AI assistant",
-      "I can help you pick the right service for your yacht"
+      "Welcome 👋 I'm your Assistant Captain",
+      "I'd be glad to help you choose the right service for your yacht"
     ],
     "quickReplies": [
       { "label": "Our Services", "message": "What services do you provide?" },
