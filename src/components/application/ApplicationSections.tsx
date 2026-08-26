@@ -15,7 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
-import { Reveal, staggerContainer, staggerItem } from "@/components/shared/Reveal";
+import { Reveal } from "@/components/shared/Reveal";
 import { PhoneFrame, PhoneScreenshot } from "@/components/application/PhoneFrame";
 import {
   appFeaturedScreens,
@@ -39,7 +39,7 @@ const overviewIcons = {
   UserRound,
 } as const;
 
-const overviewStagger: typeof staggerContainer = {
+const overviewStagger = {
   hidden: {},
   show: {
     transition: {
@@ -49,7 +49,7 @@ const overviewStagger: typeof staggerContainer = {
   },
 };
 
-const overviewItem: typeof staggerItem = {
+const overviewItem = {
   hidden: { opacity: 0, y: 14, filter: "blur(4px)" },
   show: {
     opacity: 1,

@@ -62,25 +62,29 @@ export function VipAdNotice() {
     }
 
     const previous = readState();
+    const now = Date.now();
+
+    // After dismiss/show, stay quiet for the full interval — don't rotate into another VIP immediately.
+    if (
+      !isVipPreview() &&
+      previous &&
+      now - previous.shownAt < INTERVAL_MS &&
+      (previous.dismissed || previous.shownAt > 0)
+    ) {
+      const keep =
+        liveVip.find((item) => item.id === previous.adId) ?? liveVip[0];
+      setAd(keep);
+      setOpen(false);
+      return;
+    }
+
     let selected = liveVip[0]!;
 
-    // With 2+ VIP ads, advance to the next one after the last shown id.
+    // With 2+ VIP ads, advance to the next one after the last shown id (only when interval elapsed).
     if (liveVip.length > 1 && previous?.adId) {
       const lastIndex = liveVip.findIndex((item) => item.id === previous.adId);
       if (lastIndex >= 0) {
         selected = liveVip[(lastIndex + 1) % liveVip.length]!;
-      }
-    }
-
-    // If the chosen ad was shown/dismissed in this cycle, try another VIP once.
-    const now = Date.now();
-    const selectedRecent =
-      previous?.adId === selected.id && now - previous.shownAt < INTERVAL_MS;
-    if (selectedRecent && liveVip.length > 1) {
-      const alt = liveVip.find((item) => item.id !== selected.id);
-      if (alt) {
-        const altRecent = previous?.adId === alt.id && now - previous.shownAt < INTERVAL_MS;
-        if (!altRecent) selected = alt;
       }
     }
 
@@ -91,17 +95,10 @@ export function VipAdNotice() {
       return;
     }
 
-    const stillRecent =
-      previous?.adId === selected.id && now - previous.shownAt < INTERVAL_MS;
-    if (stillRecent) {
-      setOpen(false);
-      return;
-    }
-
     const timer = window.setTimeout(() => {
       setOpen(true);
       writeState({ adId: selected.id, shownAt: Date.now(), dismissed: false });
-    }, 1500);
+    }, 30_000);
 
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run when VIP set changes
@@ -136,126 +133,100 @@ export function VipAdNotice() {
         <motion.aside
           role="dialog"
           aria-label={t("advertising.vipNotice")}
-          initial={{ opacity: 0, y: 24, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 14, scale: 0.98 }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, y: 28, x: isRTL ? -10 : 10, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 18, x: isRTL ? -8 : 8, scale: 0.98 }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           className={cn(
-            "fixed z-40 overflow-hidden overflow-y-auto rounded-2xl",
-            // Leave physical gap beside the chat FAB (RTL → right, LTR → left)
+            "fixed z-40 overflow-hidden rounded-2xl border border-gold/25 bg-[#fbfaf7]/98 backdrop-blur-sm",
+            "w-[min(calc(100vw-5.5rem),19rem)] sm:w-[min(22rem,calc(100vw-3rem))]",
             isRTL
-              ? "left-3 right-[4.75rem] bottom-[calc(5.75rem+env(safe-area-inset-bottom))]"
-              : "right-3 left-[4.75rem] bottom-[calc(5.75rem+env(safe-area-inset-bottom))]",
-            "w-auto max-w-none sm:inset-x-auto sm:right-6 sm:left-auto sm:bottom-[calc(6.25rem+env(safe-area-inset-bottom))] sm:w-[min(100%-3rem,22rem)]",
-            "border border-gold/25 bg-[#fbfaf7]",
-            "shadow-[0_22px_60px_rgba(11,31,51,0.28)]",
-            "max-h-[min(68dvh,32rem)]",
+              ? "bottom-[calc(6.5rem+env(safe-area-inset-bottom))] left-3 sm:left-6"
+              : "bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-3 sm:right-6",
+            "shadow-[0_18px_48px_rgba(11,31,51,0.22)]",
           )}
         >
           <div
             aria-hidden
-            className="absolute inset-x-0 top-0 z-[3] h-[2px] bg-gradient-to-r from-transparent via-gold to-transparent"
+            className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-gold to-transparent"
           />
 
-          <div className="relative overflow-hidden">
-            <div
-              aria-hidden
-              className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,color-mix(in_oklab,var(--ocean)_35%,transparent),transparent_55%),linear-gradient(160deg,var(--navy),color-mix(in_oklab,var(--navy)_82%,var(--ocean)))]"
-            />
-
-            {ad.image ? (
-              <ResolvedImage
-                src={ad.image}
-                alt=""
-                className="relative z-[1] aspect-[2.2/1] w-full object-contain object-center p-3 opacity-95 sm:aspect-[16/9] sm:object-cover sm:p-0"
-                loading="lazy"
-              />
-            ) : (
-              <div className="relative z-[1] aspect-[2.2/1] w-full sm:aspect-[16/9]" />
-            )}
-
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-[#fbfaf7] via-navy/20 to-navy/35"
-            />
-
-            <div className="absolute inset-x-0 top-0 z-[4] flex items-start justify-between gap-2 p-2.5 sm:p-3">
-              <span className="inline-flex max-w-[70%] items-center gap-1.5 rounded-full border border-gold/40 bg-navy/80 px-2.5 py-1 text-[0.55rem] tracking-[0.12em] text-gold uppercase shadow-sm backdrop-blur-md sm:text-[0.58rem] sm:tracking-[0.14em]">
-                <Crown className="size-3 shrink-0 text-gold" strokeWidth={1.75} aria-hidden />
-                <span className="truncate">{t("advertising.vipNotice")}</span>
-              </span>
-              <button
-                type="button"
-                onClick={dismiss}
-                aria-label={t("common.close")}
-                className="grid size-9 shrink-0 place-items-center rounded-full border border-white/20 bg-navy/60 text-white shadow-sm backdrop-blur-md transition hover:border-gold/45 hover:bg-navy/75 hover:text-gold sm:size-8"
-              >
-                <X className="size-3.5" strokeWidth={1.7} />
-              </button>
-            </div>
-          </div>
-
-          <div className="relative -mt-5 px-3.5 pb-3.5 pt-0 sm:-mt-7 sm:px-5 sm:pb-5">
-            <div className="mb-3 flex items-center gap-2.5 sm:mb-3.5 sm:items-end sm:gap-3">
-              <div className="relative shrink-0">
-                {ad.logo ? (
-                  <ResolvedImage
-                    src={ad.logo}
-                    alt=""
-                    className="size-12 rounded-xl border border-white object-contain bg-white p-1 shadow-[0_8px_22px_rgba(11,31,51,0.2)] ring-1 ring-gold/35 sm:size-14 sm:rounded-2xl sm:object-cover sm:p-0"
-                    loading="lazy"
-                  />
-                ) : (
-                  <span className="grid size-12 place-items-center rounded-xl border border-white bg-navy font-display text-xs tracking-[0.08em] text-gold shadow-[0_8px_22px_rgba(11,31,51,0.2)] ring-1 ring-gold/35 sm:size-14 sm:rounded-2xl sm:text-sm">
-                    {initials || "VIP"}
-                  </span>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                {category ? (
-                  <p className="mb-0.5 truncate text-[0.55rem] tracking-[0.14em] text-gold/90 uppercase sm:mb-1 sm:text-[0.58rem] sm:tracking-[0.16em]">
-                    {category}
-                  </p>
-                ) : null}
-                <h2 className="line-clamp-2 font-display text-[1.15rem] leading-snug text-navy sm:line-clamp-1 sm:truncate sm:text-[1.35rem] sm:leading-tight">
-                  {companyName}
-                </h2>
-              </div>
-            </div>
-
-            {description ? (
-              <p className="line-clamp-2 text-[0.85rem] leading-relaxed text-navy/60 sm:line-clamp-3 sm:text-[0.92rem] sm:text-navy/58">
-                {description}
-              </p>
-            ) : null}
-
-            <div className="mt-3.5 flex flex-col gap-1.5 sm:mt-4 sm:gap-2">
-              {websiteUrl ? (
-                <a
-                  href={websiteUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={dismiss}
-                  className="group inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-gold bg-gold px-4 py-2.5 text-[0.65rem] tracking-[0.12em] text-navy uppercase transition hover:-translate-y-0.5 hover:border-navy hover:bg-navy hover:text-navy-foreground sm:min-h-0 sm:py-3 sm:text-[0.68rem] sm:tracking-[0.14em]"
-                >
-                  {ctaLabel}
-                  <Arrow
-                    className="size-3.5 opacity-70 transition group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
-                    strokeWidth={1.75}
-                    aria-hidden
-                  />
-                </a>
-              ) : null}
-              <Link
-                to="/advertising"
-                onClick={dismiss}
-                className="inline-flex w-full items-center justify-center gap-1.5 py-1.5 text-[0.6rem] tracking-[0.12em] text-navy/50 uppercase transition hover:text-navy sm:text-[0.62rem] sm:tracking-[0.14em]"
-              >
-                {t("advertising.stripCta")}
-                <span aria-hidden className="text-gold/80">
-                  {isRTL ? "←" : "→"}
+          <div className="flex items-start gap-2.5 p-3 sm:gap-3 sm:p-3.5">
+            <div className="relative shrink-0">
+              {ad.logo ? (
+                <ResolvedImage
+                  src={ad.logo}
+                  alt=""
+                  className="size-11 rounded-xl border border-white bg-white object-contain p-1 shadow-[0_8px_22px_rgba(11,31,51,0.12)] ring-1 ring-gold/35"
+                  loading="lazy"
+                />
+              ) : (
+                <span className="grid size-11 place-items-center rounded-xl border border-white bg-navy font-display text-xs tracking-[0.08em] text-gold shadow-[0_8px_22px_rgba(11,31,51,0.12)] ring-1 ring-gold/35">
+                  {initials || "VIP"}
                 </span>
-              </Link>
+              )}
+              <span className="absolute -top-1 -end-1 inline-flex items-center gap-1 rounded-full bg-navy px-1.5 py-0.5 text-[0.5rem] tracking-[0.12em] text-gold uppercase shadow-sm">
+                <Crown className="size-2.5 text-gold" strokeWidth={1.8} aria-hidden />
+                VIP
+              </span>
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <div className="flex items-start gap-2">
+                <div className="min-w-0 flex-1">
+                  {category ? (
+                    <p className="mb-0.5 truncate text-[0.52rem] tracking-[0.14em] text-gold/90 uppercase">
+                      {category}
+                    </p>
+                  ) : null}
+                  <h2 className="font-display text-[0.98rem] leading-snug text-navy">
+                    {companyName}
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={dismiss}
+                  aria-label={t("common.close")}
+                  className="grid size-7 shrink-0 place-items-center rounded-full border border-navy/10 bg-white text-navy/70 transition hover:border-gold/40 hover:text-gold"
+                >
+                  <X className="size-3.5" strokeWidth={1.7} />
+                </button>
+              </div>
+
+              {description ? (
+                <p className="mt-1 text-[0.74rem] leading-relaxed text-navy/60">
+                  {description}
+                </p>
+              ) : null}
+
+              <div className="mt-2 flex items-center gap-2">
+                {websiteUrl ? (
+                  <a
+                    href={websiteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={dismiss}
+                    className="group inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-gold bg-gold px-3 py-2 text-[0.58rem] tracking-[0.12em] text-navy uppercase transition hover:border-navy hover:bg-navy hover:text-navy-foreground"
+                  >
+                    {ctaLabel}
+                    <Arrow
+                      className="size-3 opacity-70 transition group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
+                      strokeWidth={1.8}
+                      aria-hidden
+                    />
+                  </a>
+                ) : null}
+                <Link
+                  to="/advertising"
+                  onClick={dismiss}
+                  className="inline-flex shrink-0 items-center justify-center gap-1 text-[0.55rem] tracking-[0.12em] text-navy/55 uppercase transition hover:text-navy"
+                >
+                  {t("advertising.stripCta")}
+                  <span aria-hidden className="text-gold/80">
+                    {isRTL ? "←" : "→"}
+                  </span>
+                </Link>
+              </div>
             </div>
           </div>
         </motion.aside>

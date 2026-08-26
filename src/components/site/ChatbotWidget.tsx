@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Loader2, MessageCircle, SendHorizontal, X } from "lucide-react";
+import { Bot, Loader2, SendHorizontal, X } from "lucide-react";
 import { useRouterState } from "@tanstack/react-router";
 import { sendChatbotMessage } from "@/functions/chatbot";
 import { useLanguage } from "@/lib/i18n";
@@ -24,6 +24,9 @@ interface QuickReply {
   message: string;
 }
 
+const CHATBOT_TEASER_SEEN_KEY = "lunayair.chatbot.teaserSeen";
+const CHATBOT_BADGE_CLEARED_KEY = "lunayair.chatbot.badgeCleared";
+
 function createMessageId(): string {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
@@ -46,45 +49,45 @@ function formatTime(date: Date, language: "en" | "ar"): string {
   }).format(date);
 }
 
-function waitForFirstContentfulPaint(): Promise<void> {
-  return new Promise((resolve) => {
-    const done = () => resolve();
-    try {
-      if (performance.getEntriesByName("first-contentful-paint").length > 0) {
-        done();
-        return;
-      }
-    } catch {
-      // ignore
-    }
-    if (typeof PerformanceObserver === "undefined") {
-      window.setTimeout(done, 400);
-      return;
-    }
-    let settled = false;
-    const finish = () => {
-      if (settled) return;
-      settled = true;
-      try {
-        observer.disconnect();
-      } catch {
-        // ignore
-      }
-      done();
-    };
-    const observer = new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) {
-        if (entry.name === "first-contentful-paint") finish();
-      }
-    });
-    try {
-      observer.observe({ type: "paint", buffered: true });
-    } catch {
-      window.setTimeout(finish, 400);
-      return;
-    }
-    window.setTimeout(finish, 2500);
-  });
+function isPhoneLikeViewport(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(max-width: 640px), (pointer: coarse)").matches;
+}
+
+function hasSeenChatTeasers(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.sessionStorage.getItem(CHATBOT_TEASER_SEEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markChatTeasersSeen() {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(CHATBOT_TEASER_SEEN_KEY, "1");
+  } catch {
+    // ignore
+  }
+}
+
+function hasClearedChatBadge(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.sessionStorage.getItem(CHATBOT_BADGE_CLEARED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markChatBadgeCleared() {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(CHATBOT_BADGE_CLEARED_KEY, "1");
+  } catch {
+    // ignore
+  }
 }
 
 type AudioContextConstructor = typeof AudioContext;
@@ -166,12 +169,12 @@ export function ChatbotWidget() {
   const teaserSoundPlayedRef = useRef(false);
   const pendingTeaserSoundRef = useRef(false);
 
-  const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [sessionId] = useState(() => getOrCreateChatSessionId());
+  // Teasers sync after mount (sessionStorage) via layout effect so first paint is still immediate.
   const [teasersVisible, setTeasersVisible] = useState(false);
   const [teaserDismissed, setTeaserDismissed] = useState(false);
   const [badgeCleared, setBadgeCleared] = useState(false);
@@ -179,27 +182,23 @@ export function ChatbotWidget() {
   const quickReplies = tv<QuickReply[]>("chatbot.quickReplies");
   const teaserMessages = tv<string[]>("chatbot.teasers") ?? [];
   const showQuickReplies = messages.length === 0 && !sending;
-  const showTeasers = ready && !open && !teaserDismissed && teasersVisible && teaserMessages.length > 0;
-  // Keep a notification mark on the FAB after teaser bubbles auto-hide, until chat is opened.
+  const showTeasers = !open && !teaserDismissed && teasersVisible && teaserMessages.length > 0;
+  // After teaser bubbles hide, keep "2" on the FAB until the visitor opens chat.
   const showAttentionBadge =
-    ready &&
-    !open &&
-    !badgeCleared &&
-    teaserMessages.length > 0 &&
-    (showTeasers || teaserDismissed);
+    !open && !badgeCleared && teaserDismissed && teaserMessages.length > 0;
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      await waitForFirstContentfulPaint();
-      await new Promise((r) => window.setTimeout(r, 450));
-      if (!cancelled) setReady(true);
-      await new Promise((r) => window.setTimeout(r, 700));
-      if (!cancelled) setTeasersVisible(true);
-    })();
-    return () => {
-      cancelled = true;
-    };
+  useLayoutEffect(() => {
+    if (hasClearedChatBadge()) {
+      setTeaserDismissed(true);
+      setBadgeCleared(true);
+      return;
+    }
+    if (hasSeenChatTeasers()) {
+      // Bubbles already played this session — show badge until chat is opened.
+      setTeaserDismissed(true);
+      return;
+    }
+    setTeasersVisible(true);
   }, []);
 
   // Browsers block autoplay: unlock AudioContext on first gesture, then play pending chime.
@@ -253,15 +252,15 @@ export function ChatbotWidget() {
     };
   }, [teasersVisible, teaserDismissed, open]);
 
-  // Grab attention briefly, then auto-hide teasers (badge included).
+  // Keep welcome bubbles ~6s, then leave the "2" badge until chat opens.
   useEffect(() => {
     if (!teasersVisible || teaserDismissed || open) return;
     const timer = window.setTimeout(() => {
+      markChatTeasersSeen();
       setTeasersVisible(false);
       setTeaserDismissed(true);
-      // Drop pending sound once teasers are gone if it never unlocked.
       pendingTeaserSoundRef.current = false;
-    }, 5600);
+    }, 6_000);
     return () => window.clearTimeout(timer);
   }, [teasersVisible, teaserDismissed, open]);
 
@@ -280,11 +279,17 @@ export function ChatbotWidget() {
 
   useEffect(() => {
     if (open) {
-      window.setTimeout(() => inputRef.current?.focus(), 120);
+      if (!isPhoneLikeViewport()) {
+        window.setTimeout(() => inputRef.current?.focus(), 120);
+      }
     }
   }, [open]);
 
   useEffect(() => {
+    if (isPhoneLikeViewport()) {
+      document.body.style.overflow = "";
+      return;
+    }
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
@@ -405,14 +410,14 @@ export function ChatbotWidget() {
     }
   };
 
-  if (!ready) return null;
-
   // Take former WhatsApp FAB corner so AI is the primary contact affordance.
   const cornerPosition = isRTL
     ? "right-4 sm:right-7 items-end"
     : "left-4 sm:left-7 items-start";
 
   const openChat = () => {
+    markChatTeasersSeen();
+    markChatBadgeCleared();
     setTeaserDismissed(true);
     setTeasersVisible(false);
     setBadgeCleared(true);
@@ -426,10 +431,9 @@ export function ChatbotWidget() {
       key="chat-teasers"
       role="region"
       aria-label={t("chatbot.teaserAria")}
-      initial={{ opacity: 0, x: teaserSlideX }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: teaserSlideX * 0.5 }}
-      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 0.35 } }}
       className={cn(
         "mb-0.5 flex max-w-[min(17.5rem,calc(100vw-5.75rem))] flex-col gap-2",
         isRTL ? "items-end" : "items-start",
@@ -442,7 +446,11 @@ export function ChatbotWidget() {
           onClick={openChat}
           initial={{ opacity: 0, x: teaserSlideX, scale: 0.96 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
-          transition={{ delay: 0.1 + index * 0.16, duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          transition={{
+            delay: 0.25 + index * 0.85,
+            duration: 0.45,
+            ease: [0.22, 1, 0.36, 1],
+          }}
           className={cn(
             "rounded-2xl border border-navy/8 bg-white px-3.5 py-2.5 text-start text-sm leading-snug text-navy shadow-[0_10px_28px_rgba(15,23,42,0.14)] transition hover:-translate-y-0.5 hover:border-gold/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold",
             isRTL ? "text-right rounded-ee-md" : "text-left rounded-es-md",
@@ -495,7 +503,7 @@ export function ChatbotWidget() {
                 }}
                 aria-hidden
               />
-              <div className="relative flex items-center gap-3">
+              <div className={cn("relative flex items-center gap-3", isRTL && "pe-12")}>
                 <div className="relative size-11 shrink-0 overflow-hidden rounded-full border-2 border-gold/50 bg-[#f4f1ea] shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
                   <img
                     src="/images/brand/chatbot-robot-avatar.png"
@@ -526,7 +534,10 @@ export function ChatbotWidget() {
                     fabRef.current?.focus();
                   }}
                   aria-label={t("common.close")}
-                  className="grid size-9 shrink-0 place-items-center rounded-full border border-white/12 bg-white/5 text-white/90 transition hover:border-gold/50 hover:bg-white/10 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+                  className={cn(
+                    "grid size-9 shrink-0 place-items-center rounded-full border border-white/12 bg-white/5 text-white/90 transition hover:border-gold/50 hover:bg-white/10 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold",
+                    isRTL && "absolute end-0 top-1/2 -translate-y-1/2",
+                  )}
                 >
                   <X className="size-4" strokeWidth={1.75} />
                 </button>
@@ -696,6 +707,19 @@ export function ChatbotWidget() {
         <AnimatePresence>{isRTL ? teaserBubbles : null}</AnimatePresence>
 
         <div className="relative shrink-0">
+          {!open ? (
+            <>
+              <span
+                className="pointer-events-none absolute -inset-1.5 -z-10 rounded-full bg-gold/25 blur-md animate-pulse"
+                aria-hidden
+              />
+              <span
+                className="pointer-events-none absolute -inset-2.5 -z-20 rounded-full border border-gold/35 animate-ping opacity-75 [animation-duration:2.4s]"
+                aria-hidden
+              />
+            </>
+          ) : null}
+
           <AnimatePresence>
             {showAttentionBadge ? (
               <motion.span
@@ -750,13 +774,14 @@ export function ChatbotWidget() {
               "border border-gold-soft bg-gold text-navy shadow-[0_12px_32px_rgba(15,23,42,0.28),0_0_0_4px_rgba(212,175,55,0.22)]",
               "transition-colors hover:bg-gold-soft hover:shadow-[0_14px_36px_rgba(15,23,42,0.32),0_0_0_5px_rgba(212,175,55,0.28)]",
               "focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-navy",
+              open && "max-sm:hidden",
               open && "border-navy/15 bg-navy text-navy-foreground shadow-luxe hover:border-gold hover:bg-gold hover:text-navy",
             )}
           >
             {open ? (
               <X className="size-6" strokeWidth={1.6} aria-hidden />
             ) : (
-              <MessageCircle className="size-6" strokeWidth={1.75} aria-hidden />
+              <Bot className="size-6" strokeWidth={1.75} aria-hidden />
             )}
           </motion.button>
         </div>

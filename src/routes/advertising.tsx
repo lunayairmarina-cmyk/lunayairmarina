@@ -179,32 +179,42 @@ function AdvertisementCard({
       </div>
 
       <div
-        className={cn("relative z-[1] flex flex-1 flex-col", isFeatured ? "p-3.5 sm:p-4" : "p-4")}
+        className={cn(
+          "relative z-[1] flex flex-1 flex-col",
+          isFeatured ? "p-3.5 sm:p-4" : "p-2.5 sm:p-4",
+        )}
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
           {ad.logo ? (
             <ResolvedImage
               src={ad.logo}
               alt=""
               className={cn(
-                "rounded-full border object-cover",
-                isFeatured ? "size-8 border-gold/30" : "size-8 border-navy/10",
+                "shrink-0 rounded-full border object-cover",
+                isFeatured ? "size-8 border-gold/30" : "size-7 border-navy/10 sm:size-8",
               )}
               loading="lazy"
             />
           ) : (
-            <span className="grid size-8 place-items-center rounded-full bg-navy/5 text-[0.6rem] tracking-[0.1em] text-navy">
+            <span
+              className={cn(
+                "grid shrink-0 place-items-center rounded-full bg-navy/5 tracking-[0.1em] text-navy",
+                isFeatured ? "size-8 text-[0.6rem]" : "size-7 text-[0.55rem] sm:size-8 sm:text-[0.6rem]",
+              )}
+            >
               {companyName.slice(0, 2).toUpperCase()}
             </span>
           )}
           <div className="min-w-0">
             {category ? (
-              <p className="text-[0.58rem] tracking-[0.14em] text-gold uppercase">{category}</p>
+              <p className="truncate text-[0.52rem] tracking-[0.12em] text-gold uppercase sm:text-[0.58rem] sm:tracking-[0.14em]">
+                {category}
+              </p>
             ) : null}
             <h2
               className={cn(
                 "truncate font-display text-navy",
-                isFeatured ? "text-base sm:text-lg" : "text-base",
+                isFeatured ? "text-base sm:text-lg" : "text-[0.8125rem] sm:text-base",
               )}
             >
               {companyName}
@@ -214,8 +224,10 @@ function AdvertisementCard({
 
         <p
           className={cn(
-            "mt-2.5 flex-1 leading-relaxed text-muted-foreground",
-            isFeatured ? "line-clamp-2 text-[0.8125rem]" : "mt-3 line-clamp-2 text-sm",
+            "mt-2 flex-1 leading-relaxed text-muted-foreground",
+            isFeatured
+              ? "line-clamp-2 text-[0.8125rem]"
+              : "line-clamp-2 text-[0.7rem] sm:mt-3 sm:text-sm",
           )}
         >
           {description}
@@ -228,10 +240,10 @@ function AdvertisementCard({
             rel="noopener noreferrer"
             onClick={() => trackAdClick({ ...ad, websiteUrl })}
             className={cn(
-              "mt-3.5 inline-flex w-full max-w-full items-center justify-center border px-3.5 py-2 text-[0.58rem] tracking-[0.16em] uppercase transition sm:w-fit sm:py-1.5",
+              "mt-2.5 inline-flex w-full max-w-full items-center justify-center border px-2 py-1.5 text-center uppercase transition sm:mt-3.5 sm:w-fit sm:px-3.5 sm:py-1.5",
               isFeatured
-                ? "border-gold bg-gold text-navy hover:border-navy hover:bg-navy hover:text-navy-foreground"
-                : "mt-4 border-navy bg-navy px-4 py-2 text-[0.62rem] text-navy-foreground hover:border-gold hover:bg-gold hover:text-navy",
+                ? "border-gold bg-gold text-[0.58rem] tracking-[0.16em] text-navy hover:border-navy hover:bg-navy hover:text-navy-foreground"
+                : "border-navy bg-navy text-[0.55rem] tracking-[0.1em] text-navy-foreground hover:border-gold hover:bg-gold hover:text-navy sm:mt-4 sm:px-4 sm:py-2 sm:text-[0.62rem] sm:tracking-[0.16em]",
             )}
           >
             {ctaLabel}
@@ -333,13 +345,16 @@ function AdvertisingPage() {
 
               {standardAds.length > 0 ? (
                 <AdSection title={t("advertising.sections.standard")} tone="standard">
-                  <div className="mx-auto flex flex-wrap justify-center gap-4">
+                  <div
+                    className={cn(
+                      "mx-auto grid gap-3 sm:gap-4",
+                      standardAds.length === 1
+                        ? "max-w-sm grid-cols-1"
+                        : "grid-cols-2 lg:grid-cols-3",
+                    )}
+                  >
                     {standardAds.map((ad, index) => (
-                      <Reveal
-                        key={ad.id}
-                        delay={index * 0.04}
-                        className="w-full min-w-0 sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.7rem)] lg:max-w-sm"
-                      >
+                      <Reveal key={ad.id} delay={index * 0.04} className="min-w-0 h-full">
                         <AdvertisementCard ad={ad} size="standard" />
                       </Reveal>
                     ))}
