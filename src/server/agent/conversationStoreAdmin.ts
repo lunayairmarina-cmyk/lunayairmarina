@@ -6,6 +6,22 @@ import {
   type AiMessageRecord,
 } from "@/lib/agent/types";
 
+/** Admin SDK rejects `undefined` field values — strip before write. */
+function stripUndefinedDeep<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((item) => stripUndefinedDeep(item)) as T;
+  }
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+      if (nested === undefined) continue;
+      out[key] = stripUndefinedDeep(nested);
+    }
+    return out as T;
+  }
+  return value;
+}
+
 export async function loadConversationAdmin(
   db: AdminFirestore,
   sessionId: string,
@@ -23,9 +39,10 @@ export async function saveConversationAdmin(
   db: AdminFirestore,
   record: AiConversationRecord,
 ): Promise<void> {
-  await db.collection(AI_CONVERSATIONS_COLLECTION).doc(record.sessionId).set(record, {
-    merge: true,
-  });
+  await db
+    .collection(AI_CONVERSATIONS_COLLECTION)
+    .doc(record.sessionId)
+    .set(stripUndefinedDeep(record), { merge: true });
 }
 
 export async function appendConversationMessageAdmin(
@@ -38,7 +55,7 @@ export async function appendConversationMessageAdmin(
     .doc(sessionId)
     .collection(AI_MESSAGES_SUBCOLLECTION)
     .doc(message.id)
-    .set(message, { merge: true });
+    .set(stripUndefinedDeep(message), { merge: true });
 }
 
 export async function listRecentConversationsAdmin(

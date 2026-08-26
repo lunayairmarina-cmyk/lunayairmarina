@@ -68,6 +68,10 @@ export interface AiConversationRecord {
   lastMessageAt: string;
   summary: string;
   customerContext: Record<string, unknown>;
+  /** Denormalized for admin tables / CRM follow-up. */
+  visitorName?: string;
+  visitorPhone?: string;
+  visitorEmail?: string;
   lastIntent?: string;
   status: "active" | "closed";
   leadStatus: "none" | "potential" | "handoff";

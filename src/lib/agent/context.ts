@@ -1,6 +1,8 @@
 export interface CustomerContext {
   customerType?: string;
   name?: string;
+  phone?: string;
+  email?: string;
   yachtLength?: string;
   yachtType?: string;
   location?: string;
@@ -27,6 +29,10 @@ export function mergeCustomerContext(
   };
 }
 
+export function hasVisitorContact(context: CustomerContext): boolean {
+  return Boolean(context.name?.trim() && context.phone?.trim());
+}
+
 export function formatCustomerContext(context: CustomerContext, language: "ar" | "en"): string {
   const lines: string[] = [];
   if (context.customerType) {
@@ -38,6 +44,10 @@ export function formatCustomerContext(context: CustomerContext, language: "ar" |
   }
   if (context.name)
     lines.push(language === "ar" ? `الاسم: ${context.name}` : `Name: ${context.name}`);
+  if (context.phone)
+    lines.push(language === "ar" ? `الهاتف: ${context.phone}` : `Phone: ${context.phone}`);
+  if (context.email)
+    lines.push(language === "ar" ? `الإيميل: ${context.email}` : `Email: ${context.email}`);
   if (context.yachtLength) {
     lines.push(
       language === "ar"
@@ -84,6 +94,13 @@ export function formatCustomerContext(context: CustomerContext, language: "ar" |
         : `Intent: ${context.customerIntent}`,
     );
   }
+  if (!context.name || !context.phone) {
+    lines.push(
+      language === "ar"
+        ? "ملاحظة: بيانات التواصل تُجمع عبر نموذج الشات — لا تطلب الاسم/الجوال في النص."
+        : "Note: contact is collected via the chat form — do not ask for name/phone in text.",
+    );
+  }
   return lines.join("\n");
 }
 
@@ -92,6 +109,9 @@ export interface ConversationTurn {
   content: string;
 }
 
+const PHONE_RE = /(?:\+?\d[\d\s\-()]{7,}\d)/;
+const EMAIL_RE = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i;
+
 /** Rule-based context extraction from user messages (no LLM). */
 export function extractContextFromMessage(
   message: string,
@@ -99,6 +119,7 @@ export function extractContextFromMessage(
   prior: CustomerContext,
 ): { context: CustomerContext } {
   const normalized = message.normalize("NFKC").toLowerCase();
+  const original = message.normalize("NFKC").trim();
   const patch: Partial<CustomerContext> = {};
 
   const lengthMatch = normalized.match(/(\d+)\s*(?:ft|feet|foot|قدم)/i);
@@ -111,10 +132,47 @@ export function extractContextFromMessage(
     patch.location = language === "ar" ? "البحر الأحمر" : "Red Sea";
   }
 
-  const nameMatch = normalized.match(
-    language === "ar" ? /(?:اسمي|أنا)\s+([^\s،,.]+)/ : /(?:my name is|i am|i'm)\s+([a-z]+)/i,
+  const phoneMatch = original.match(PHONE_RE);
+  if (phoneMatch?.[0]) {
+    patch.phone = phoneMatch[0].replace(/\s+/g, " ").trim();
+    if (!patch.requestedContactMethod) patch.requestedContactMethod = "phone";
+  }
+
+  const emailMatch = original.match(EMAIL_RE);
+  if (emailMatch?.[0]) {
+    patch.email = emailMatch[0].trim().toLowerCase();
+    if (!patch.requestedContactMethod) patch.requestedContactMethod = "email";
+  }
+
+  const nameMatch = original.match(
+    language === "ar"
+      ? /(?:اسمي|أنا اسمي|انا اسمي|الاسم\s*[:=]?\s*|my name is)\s*([^\n,،.]{2,40})/i
+      : /(?:my name is|i am|i'm|name\s*[:=]\s*)\s*([a-z][a-z\s'-]{1,40})/i,
   );
-  if (nameMatch?.[1] && nameMatch[1].length > 1) patch.name = nameMatch[1];
+  if (nameMatch?.[1]) {
+    const cleaned = nameMatch[1].replace(PHONE_RE, "").replace(EMAIL_RE, "").trim();
+    if (cleaned.length > 1 && cleaned.length < 60) patch.name = cleaned;
+  }
+
+  // Short reply that looks like a bare name after we already asked (no digits).
+  if (
+    !patch.name &&
+    !prior.name &&
+    original.length >= 2 &&
+    original.length <= 40 &&
+    !PHONE_RE.test(original) &&
+    !EMAIL_RE.test(original) &&
+    !/[?]/.test(original) &&
+    (language === "ar"
+      ? /^[\u0600-\u06FF\s'.-]+$/.test(original)
+      : /^[a-zA-Z][a-zA-Z\s'.-]{1,39}$/.test(original))
+  ) {
+    if (
+      !/^(نعم|لا|ok|okay|thanks|شكرا|مرحبا|السلام|hi|hello|yes|no)$/i.test(original.trim())
+    ) {
+      patch.name = original.trim();
+    }
+  }
 
   const interests = [...prior.interests];
   if (/إدارة\s*ال?طاق|طاقم|crew management|crew/i.test(normalized)) {
@@ -145,7 +203,7 @@ export function extractContextFromMessage(
 
   if (/whatsapp|واتس/i.test(normalized)) patch.requestedContactMethod = "whatsapp";
   if (/email|ايميل|إيميل|بريد/i.test(normalized)) patch.requestedContactMethod = "email";
-  if (/phone|هاتف|اتصل/i.test(normalized)) patch.requestedContactMethod = "phone";
+  if (/phone|هاتف|اتصل|جوال|موبايل/i.test(normalized)) patch.requestedContactMethod = "phone";
 
   return { context: mergeCustomerContext(prior, patch) };
 }
@@ -158,6 +216,12 @@ export function updateConversationSummary(
   context: CustomerContext,
 ): string {
   const parts: string[] = [];
+  if (context.name) {
+    parts.push(language === "ar" ? `الاسم: ${context.name}.` : `Name: ${context.name}.`);
+  }
+  if (context.phone) {
+    parts.push(language === "ar" ? `الجوال: ${context.phone}.` : `Phone: ${context.phone}.`);
+  }
   if (context.yachtLength) {
     parts.push(
       language === "ar"

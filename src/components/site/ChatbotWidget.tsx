@@ -2,13 +2,14 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Bot, Loader2, SendHorizontal, X } from "lucide-react";
 import { useRouterState } from "@tanstack/react-router";
-import { sendChatbotMessage } from "@/functions/chatbot";
+import { sendChatbotMessage, submitChatbotContact } from "@/functions/chatbot";
 import { useLanguage } from "@/lib/i18n";
 import type { ChatErrorCode, ChatHistoryItem } from "@/lib/chatbot/types";
 import { CHATBOT_MAX_MESSAGE_LENGTH, getOrCreateChatSessionId } from "@/lib/chatbot/session";
 import { AssistantMessageContent } from "@/lib/chatbot/renderAssistantMessage";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 interface ChatMessage {
@@ -22,6 +23,26 @@ interface ChatMessage {
 interface QuickReply {
   label: string;
   message: string;
+}
+
+const CHATBOT_CONTACT_SAVED_KEY = "lunayair.chatbot.contactSaved";
+
+function hasSavedChatContact(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.sessionStorage.getItem(CHATBOT_CONTACT_SAVED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markChatContactSaved() {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(CHATBOT_CONTACT_SAVED_KEY, "1");
+  } catch {
+    // ignore
+  }
 }
 
 function createMessageId(): string {
@@ -139,10 +160,19 @@ export function ChatbotWidget() {
   const [teasersVisible, setTeasersVisible] = useState(false);
   const [teaserDismissed, setTeaserDismissed] = useState(false);
   const [badgeCleared, setBadgeCleared] = useState(false);
+  const [contactSaved, setContactSaved] = useState(false);
+  const [contactName, setContactName] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactSaving, setContactSaving] = useState(false);
+  const [contactError, setContactError] = useState("");
+
+  useEffect(() => {
+    setContactSaved(hasSavedChatContact());
+  }, []);
 
   const quickReplies = tv<QuickReply[]>("chatbot.quickReplies");
   const teaserMessages = tv<string[]>("chatbot.teasers") ?? [];
-  const showQuickReplies = messages.length === 0 && !sending;
+  const showQuickReplies = contactSaved && messages.length === 0 && !sending;
   const showTeasers =
     isHome && !open && !teaserDismissed && teasersVisible && teaserMessages.length > 0;
   // After teaser bubbles hide on home, keep "2" on the FAB until chat opens (this visit).
@@ -286,7 +316,7 @@ export function ChatbotWidget() {
   const submitMessage = useCallback(
     async (rawMessage: string) => {
       const message = rawMessage.trim();
-      if (!message || sending || message.length > CHATBOT_MAX_MESSAGE_LENGTH) return;
+      if (!contactSaved || !message || sending || message.length > CHATBOT_MAX_MESSAGE_LENGTH) return;
 
       lastUserMessageRef.current = message;
       stickToBottomRef.current = true;
@@ -350,12 +380,62 @@ export function ChatbotWidget() {
         setSending(false);
       }
     },
-    [language, messages, resolveErrorMessage, sending, sessionId, t],
+    [contactSaved, language, messages, resolveErrorMessage, sending, sessionId, t],
   );
 
   const handleSubmit = (event?: React.FormEvent) => {
     event?.preventDefault();
     void submitMessage(input);
+  };
+
+  const handleContactSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const name = contactName.trim();
+    const phone = contactPhone.trim();
+    if (name.length < 2 || phone.length < 7 || contactSaving) return;
+
+    setContactSaving(true);
+    setContactError("");
+    try {
+      const result = await submitChatbotContact({
+        data: {
+          sessionId,
+          language,
+          name,
+          phone,
+        },
+      });
+      if (!result.ok) {
+        setContactError(t("chatbot.contactError"));
+        return;
+      }
+      markChatContactSaved();
+      setContactSaved(true);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: createMessageId(),
+          role: "user",
+          content:
+            language === "ar"
+              ? `بيانات التواصل:\nالاسم: ${name}\nالجوال: ${phone}`
+              : `Contact details:\nName: ${name}\nMobile: ${phone}`,
+          timestamp: new Date(),
+        },
+        {
+          id: createMessageId(),
+          role: "assistant",
+          content: result.confirmation,
+          timestamp: new Date(),
+        },
+      ]);
+      setContactName("");
+      setContactPhone("");
+    } catch {
+      setContactError(t("chatbot.contactError"));
+    } finally {
+      setContactSaving(false);
+    }
   };
 
   const handleInputKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -504,10 +584,73 @@ export function ChatbotWidget() {
               <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gold/50 to-transparent" aria-hidden />
             </header>
 
+            {!contactSaved ? (
+              <div className="flex min-h-0 flex-1 flex-col justify-center px-4 py-5">
+                <p className="text-center text-sm leading-relaxed text-navy/80">
+                  {t("chatbot.welcome")}
+                </p>
+                <form
+                  onSubmit={(event) => void handleContactSubmit(event)}
+                  className="mt-5 rounded-2xl border border-gold/30 bg-gradient-to-b from-[#fffdf8] to-white p-3.5 shadow-[0_8px_24px_rgba(15,23,42,0.06)]"
+                >
+                  <p className="text-center text-[0.8rem] font-medium text-navy">
+                    {t("chatbot.contactTitle")}
+                  </p>
+                  <p className="mt-1 text-center text-[0.7rem] leading-snug text-navy/55">
+                    {t("chatbot.contactHint")}
+                  </p>
+                  <div className="mt-3 space-y-2">
+                    <Input
+                      value={contactName}
+                      onChange={(event) => setContactName(event.target.value.slice(0, 120))}
+                      placeholder={t("chatbot.contactName")}
+                      autoComplete="name"
+                      disabled={contactSaving}
+                      dir={isRTL ? "rtl" : "ltr"}
+                      className="h-11 border-navy/12 bg-white text-base sm:text-sm"
+                      aria-label={t("chatbot.contactName")}
+                      autoFocus
+                    />
+                    <Input
+                      value={contactPhone}
+                      onChange={(event) => setContactPhone(event.target.value.slice(0, 40))}
+                      placeholder={t("chatbot.contactPhone")}
+                      autoComplete="tel"
+                      inputMode="tel"
+                      disabled={contactSaving}
+                      dir="ltr"
+                      className="h-11 border-navy/12 bg-white text-base sm:text-sm"
+                      aria-label={t("chatbot.contactPhone")}
+                    />
+                  </div>
+                  {contactError ? (
+                    <p className="mt-2 text-center text-[0.68rem] text-red-600">{contactError}</p>
+                  ) : (
+                    <p className="mt-2 text-center text-[0.65rem] text-navy/45">{t("chatbot.contactGate")}</p>
+                  )}
+                  <Button
+                    type="submit"
+                    disabled={
+                      contactSaving ||
+                      contactName.trim().length < 2 ||
+                      contactPhone.trim().length < 7
+                    }
+                    className="mt-3 h-10 w-full rounded-xl border border-gold bg-gold text-navy hover:bg-gold-soft disabled:opacity-40"
+                  >
+                    {contactSaving ? (
+                      <Loader2 className="size-4 animate-spin" aria-hidden />
+                    ) : (
+                      t("chatbot.contactSubmit")
+                    )}
+                  </Button>
+                </form>
+              </div>
+            ) : (
+              <>
             <div
               ref={scrollContainerRef}
               onScroll={handleScroll}
-              className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-3.5 sm:space-y-3.5 sm:px-3.5 sm:py-4"
+              className="min-h-0 flex-1 space-y-3 overflow-x-hidden overflow-y-auto px-3 py-3.5 sm:space-y-3.5 sm:px-3.5 sm:py-4"
               style={{
                 background:
                   "linear-gradient(180deg, color-mix(in oklab, var(--sand) 88%, white), color-mix(in oklab, var(--sand) 55%, #eef2f6))",
@@ -517,11 +660,11 @@ export function ChatbotWidget() {
             >
               <div
                 className={cn(
-                  "max-w-[92%] rounded-2xl border border-navy/6 bg-white/95 px-3 py-2.5 text-[0.8125rem] leading-relaxed text-navy shadow-[0_8px_24px_rgba(15,23,42,0.06)] sm:px-3.5 sm:py-3 sm:text-sm",
+                  "max-w-[min(92%,100%)] min-w-0 break-words rounded-2xl border border-navy/6 bg-white/95 px-3 py-2.5 text-[0.8125rem] leading-relaxed text-navy shadow-[0_8px_24px_rgba(15,23,42,0.06)] [overflow-wrap:anywhere] sm:px-3.5 sm:py-3 sm:text-sm",
                   isRTL ? "ms-auto me-0 rounded-ee-md" : "me-auto ms-0 rounded-es-md",
                 )}
               >
-                <p className="whitespace-pre-line">{t("chatbot.welcome")}</p>
+                <p className="whitespace-pre-line break-words [overflow-wrap:anywhere]">{t("chatbot.welcome")}</p>
                 <time
                   className="mt-1.5 block text-[0.62rem] text-navy/40 sm:mt-2 sm:text-[0.65rem]"
                   dateTime={new Date().toISOString()}
@@ -554,19 +697,19 @@ export function ChatbotWidget() {
                 <div
                   key={message.id}
                   className={cn(
-                    "flex max-w-[92%] flex-col gap-1",
+                    "flex w-full max-w-[min(92%,100%)] min-w-0 flex-col gap-1",
                     message.role === "user"
                       ? isRTL
                         ? "ms-0 me-auto items-start"
                         : "me-0 ms-auto items-end"
                       : isRTL
-                        ? "ms-auto me-0 items-end"
-                        : "me-auto ms-0 items-start",
+                        ? "ms-auto me-0 items-stretch"
+                        : "me-auto ms-0 items-stretch",
                   )}
                 >
                   <div
                     className={cn(
-                      "rounded-2xl px-3 py-2.5 text-[0.8125rem] leading-relaxed sm:px-3.5 sm:py-3 sm:text-sm",
+                      "min-w-0 max-w-full break-words rounded-2xl px-3 py-2.5 text-[0.8125rem] leading-relaxed [overflow-wrap:anywhere] sm:px-3.5 sm:py-3 sm:text-sm",
                       message.role === "user"
                         ? "rounded-es-md bg-navy text-navy-foreground shadow-[0_10px_28px_rgba(15,23,42,0.18)]"
                         : message.error
@@ -579,7 +722,7 @@ export function ChatbotWidget() {
                     {message.role === "assistant" && !message.error ? (
                       <AssistantMessageContent content={message.content} />
                     ) : (
-                      <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                      <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{message.content}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-2 px-1">
@@ -657,6 +800,8 @@ export function ChatbotWidget() {
                 </Button>
               </div>
             </form>
+              </>
+            )}
           </motion.section>
         ) : null}
       </AnimatePresence>

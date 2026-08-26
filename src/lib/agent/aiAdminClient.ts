@@ -34,8 +34,8 @@ export function buildAiLeadRecord(input: {
   return {
     id: buildLeadId(),
     name: (input.name ?? input.context.name ?? "").slice(0, 120),
-    phone: (input.phone ?? "").slice(0, 40),
-    email: (input.email ?? "").slice(0, 200),
+    phone: (input.phone ?? input.context.phone ?? "").slice(0, 40),
+    email: (input.email ?? input.context.email ?? "").slice(0, 200),
     yachtType: (input.context.yachtType ?? input.context.customerType ?? "").slice(0, 80),
     yachtLength: (input.context.yachtLength ?? "").slice(0, 40),
     location: (input.context.location ?? "").slice(0, 80),
@@ -53,6 +53,14 @@ export async function createAiLeadClient(
 ): Promise<AiLeadRecord> {
   await setDoc(doc(db, AI_LEADS_COLLECTION, record.id), record);
   return record;
+}
+
+export async function updateAiLeadClient(
+  db: Firestore,
+  id: string,
+  patch: Partial<AiLeadRecord>,
+): Promise<void> {
+  await setDoc(doc(db, AI_LEADS_COLLECTION, id), patch, { merge: true });
 }
 
 export async function updateAiLeadStatusClient(

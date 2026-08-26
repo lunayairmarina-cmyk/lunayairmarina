@@ -1,10 +1,12 @@
 import type { CustomerContext } from "@/lib/agent/context";
+import { hasVisitorContact } from "@/lib/agent/context";
 import type { AgentIntent } from "@/lib/agent/query";
 
 export type LeadSignal = {
   leadStatus: "none" | "potential" | "handoff";
   shouldOfferHandoff: boolean;
   shouldCreateLead: boolean;
+  shouldUpdateLead: boolean;
   phone?: string;
   email?: string;
   name?: string;
@@ -36,24 +38,39 @@ export function detectLeadSignal(
 ): LeadSignal {
   const phoneMatch = message.match(PHONE_RE);
   const emailMatch = message.match(EMAIL_RE);
-  const phone = phoneMatch?.[0]?.replace(/\s+/g, " ").trim();
-  const email = emailMatch?.[0]?.trim().toLowerCase();
-  const name = context.name;
+  const phone = (phoneMatch?.[0] ?? context.phone)?.replace(/\s+/g, " ").trim();
+  const email = (emailMatch?.[0] ?? context.email)?.trim().toLowerCase();
+  const name = context.name?.trim();
 
   const consent =
     /تواصلوا|كلموني|yes contact|call me|whatsapp me|ابعتولي|تواصل معاي|تواصل معي|contact me|reach out/i.test(
       message,
     );
 
+  const hasContact = Boolean(phone || email);
+
   if (
-    phone ||
-    email ||
-    (consent && (priorLeadStatus === "potential" || priorLeadStatus === "handoff"))
+    (phone && name) ||
+    (email && name) ||
+    (hasContact && (name || consent || hasVisitorContact(context)))
   ) {
     return {
       leadStatus: "handoff",
       shouldOfferHandoff: false,
-      shouldCreateLead: Boolean(phone || email || name),
+      shouldCreateLead: true,
+      shouldUpdateLead: true,
+      phone,
+      email,
+      name,
+    };
+  }
+
+  if (hasContact || consent) {
+    return {
+      leadStatus: "handoff",
+      shouldOfferHandoff: false,
+      shouldCreateLead: Boolean(phone || email),
+      shouldUpdateLead: true,
       phone,
       email,
       name,
@@ -65,6 +82,7 @@ export function detectLeadSignal(
       leadStatus: "potential",
       shouldOfferHandoff: priorLeadStatus === "none",
       shouldCreateLead: false,
+      shouldUpdateLead: false,
       name,
     };
   }
@@ -73,5 +91,6 @@ export function detectLeadSignal(
     leadStatus: priorLeadStatus,
     shouldOfferHandoff: false,
     shouldCreateLead: false,
+    shouldUpdateLead: false,
   };
 }

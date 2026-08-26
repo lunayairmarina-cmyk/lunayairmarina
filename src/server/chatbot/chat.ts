@@ -18,6 +18,7 @@ import {
   makeMessageId,
   saveConversation,
 } from "@/server/agent/conversationStore";
+import { pairedMessageTimestamps } from "@/lib/agent/messageOrder";
 import {
   appendConversationMessageAdmin,
   loadConversationAdmin,
@@ -29,8 +30,12 @@ import {
   shouldCreateKnowledgeCandidate,
 } from "@/server/agent/knowledgeCandidates";
 import { detectLeadSignal } from "@/server/agent/leadDetection";
-import { buildAiLeadRecord, createAiLeadClient } from "@/lib/agent/aiAdminClient";
-import { createAiLeadAdmin } from "@/server/agent/leadsStoreAdmin";
+import {
+  buildAiLeadRecord,
+  createAiLeadClient,
+  updateAiLeadClient,
+} from "@/lib/agent/aiAdminClient";
+import { createAiLeadAdmin, updateAiLeadAdmin } from "@/server/agent/leadsStoreAdmin";
 import { maybeRunPendingKnowledgeSync } from "@/server/agent/knowledgeSync";
 import { buildHistoryContextSnippet, retrieveKnowledge } from "@/server/agent/retrieve";
 import { tryGetAdminFirestore } from "@/server/agent/firebaseAdmin";
@@ -116,15 +121,25 @@ async function persistConversationTurn(input: {
     record.lastMessageAt = new Date().toISOString();
     record.summary = input.summary;
     record.customerContext = input.customerContext as unknown as Record<string, unknown>;
+    const visitorName = input.customerContext.name?.trim() || record.visitorName;
+    const visitorPhone = input.customerContext.phone?.trim() || record.visitorPhone;
+    const visitorEmail = input.customerContext.email?.trim() || record.visitorEmail;
+    if (visitorName) record.visitorName = visitorName;
+    else delete record.visitorName;
+    if (visitorPhone) record.visitorPhone = visitorPhone;
+    else delete record.visitorPhone;
+    if (visitorEmail) record.visitorEmail = visitorEmail;
+    else delete record.visitorEmail;
     record.lastIntent = input.intent;
     record.leadStatus = input.leadStatus;
     if (input.leadId) record.leadId = input.leadId;
 
+    const { userAt, assistantAt } = pairedMessageTimestamps();
     const userMsg = {
       id: makeMessageId("user"),
       role: "user" as const,
       content: input.userMessage,
-      timestamp: new Date().toISOString(),
+      timestamp: userAt,
       intent: input.intent,
       entities: input.customerContext.interests,
       confidence: input.confidence,
@@ -133,7 +148,7 @@ async function persistConversationTurn(input: {
       id: makeMessageId("assistant"),
       role: "assistant" as const,
       content: input.assistantReply,
-      timestamp: new Date().toISOString(),
+      timestamp: assistantAt,
       retrievedKnowledgeIds: input.retrievedIds,
       confidence: input.confidence,
     };
@@ -146,8 +161,12 @@ async function persistConversationTurn(input: {
       return;
     }
 
+    const clientRecord = { ...record };
+    delete clientRecord.visitorName;
+    delete clientRecord.visitorPhone;
+    delete clientRecord.visitorEmail;
     const db = getDb();
-    await saveConversation(db, record);
+    await saveConversation(db, clientRecord);
     await appendConversationMessage(db, input.sessionId, userMsg);
     await appendConversationMessage(db, input.sessionId, assistantMsg);
   } catch {
@@ -251,9 +270,15 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       retrieval.analysis.intent,
       priorLeadStatus,
     );
-
-    const topScore = retrieval.diagnostic.selected[0]?.score ?? 0;
-    const confidence = estimateAnswerConfidence(topScore, retrieval.documents.length);
+    if (lead.phone && !customerContext.phone) {
+      customerContext = { ...customerContext, phone: lead.phone };
+    }
+    if (lead.email && !customerContext.email) {
+      customerContext = { ...customerContext, email: lead.email };
+    }
+    if (lead.name && !customerContext.name) {
+      customerContext = { ...customerContext, name: lead.name };
+    }
 
     const reply = await generateChatReply(
       config,
@@ -265,29 +290,48 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
         conversationSummary: summary,
         customerContext,
         offerHandoff: lead.shouldOfferHandoff,
+        needsContactCapture: false,
+        contactAlreadyAsked: false,
       },
     );
 
+    const topScore = retrieval.diagnostic.selected[0]?.score ?? 0;
+    const confidence = estimateAnswerConfidence(topScore, retrieval.documents.length);
+
     let leadId = existing?.leadId;
-    if (lead.shouldCreateLead && !leadId) {
+    if (lead.shouldCreateLead || lead.shouldUpdateLead) {
       try {
-        const record = buildAiLeadRecord({
-          conversationId: validated.data.sessionId,
-          context: customerContext,
-          phone: lead.phone,
-          email: lead.email,
-          name: lead.name,
-        });
         const adminDb = await tryGetAdminFirestore();
-        if (adminDb) await createAiLeadAdmin(adminDb, record);
-        else await createAiLeadClient(getDb(), record);
-        leadId = record.id;
-        logAiUsage({
-          event: "lead_created",
-          sessionId: validated.data.sessionId,
-          language: validated.data.language,
-          intent: retrieval.analysis.intent,
-        });
+        if (leadId && lead.shouldUpdateLead) {
+          const patch = {
+            name: (lead.name ?? customerContext.name ?? "").slice(0, 120),
+            phone: (lead.phone ?? customerContext.phone ?? "").slice(0, 40),
+            email: (lead.email ?? customerContext.email ?? "").slice(0, 200),
+            yachtType: (customerContext.yachtType ?? customerContext.customerType ?? "").slice(0, 80),
+            yachtLength: (customerContext.yachtLength ?? "").slice(0, 40),
+            location: (customerContext.location ?? "").slice(0, 80),
+            serviceInterest: (customerContext.interests ?? []).slice(0, 12),
+          };
+          if (adminDb) await updateAiLeadAdmin(adminDb, leadId, patch);
+          else await updateAiLeadClient(getDb(), leadId, patch);
+        } else if (lead.shouldCreateLead && !leadId) {
+          const record = buildAiLeadRecord({
+            conversationId: validated.data.sessionId,
+            context: customerContext,
+            phone: lead.phone ?? customerContext.phone,
+            email: lead.email ?? customerContext.email,
+            name: lead.name ?? customerContext.name,
+          });
+          if (adminDb) await createAiLeadAdmin(adminDb, record);
+          else await createAiLeadClient(getDb(), record);
+          leadId = record.id;
+          logAiUsage({
+            event: "lead_created",
+            sessionId: validated.data.sessionId,
+            language: validated.data.language,
+            intent: retrieval.analysis.intent,
+          });
+        }
       } catch {
         // Lead write is best-effort.
       }

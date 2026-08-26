@@ -74,7 +74,8 @@ service cloud.firestore {
     function isValidAiConversationWrite() {
       return request.resource.data.keys().hasOnly([
           'conversationId', 'sessionId', 'language', 'startedAt', 'lastMessageAt', 'summary',
-          'customerContext', 'status', 'leadStatus', 'lastIntent', 'leadId'
+          'customerContext', 'status', 'leadStatus', 'lastIntent', 'leadId',
+          'visitorName', 'visitorPhone', 'visitorEmail'
         ])
         && request.resource.data.keys().hasAll([
           'conversationId', 'sessionId', 'language', 'startedAt', 'lastMessageAt', 'summary',
@@ -97,7 +98,16 @@ service cloud.firestore {
                 && request.resource.data.lastIntent.size() <= 64))
         && (!('leadId' in request.resource.data)
             || (request.resource.data.leadId is string
-                && request.resource.data.leadId.size() <= 80));
+                && request.resource.data.leadId.size() <= 80))
+        && (!('visitorName' in request.resource.data)
+            || (request.resource.data.visitorName is string
+                && request.resource.data.visitorName.size() <= 120))
+        && (!('visitorPhone' in request.resource.data)
+            || (request.resource.data.visitorPhone is string
+                && request.resource.data.visitorPhone.size() <= 40))
+        && (!('visitorEmail' in request.resource.data)
+            || (request.resource.data.visitorEmail is string
+                && request.resource.data.visitorEmail.size() <= 200));
     }
 
     function ownsAiConversation() {

@@ -51,6 +51,8 @@ async function callGeminiOnce(
     conversationSummary?: string;
     customerContext?: CustomerContext;
     offerHandoff?: boolean;
+    needsContactCapture?: boolean;
+    contactAlreadyAsked?: boolean;
   },
 ): Promise<string> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(config.geminiModel)}:generateContent`;
@@ -63,6 +65,8 @@ async function callGeminiOnce(
             conversationSummary: agentContext?.conversationSummary,
             customerContext: agentContext?.customerContext,
             offerHandoff: agentContext?.offerHandoff,
+            needsContactCapture: agentContext?.needsContactCapture,
+            contactAlreadyAsked: agentContext?.contactAlreadyAsked,
           }),
         },
       ],
@@ -129,6 +133,8 @@ export async function generateChatReply(
     conversationSummary?: string;
     customerContext?: CustomerContext;
     offerHandoff?: boolean;
+    needsContactCapture?: boolean;
+    contactAlreadyAsked?: boolean;
   },
 ): Promise<string> {
   try {

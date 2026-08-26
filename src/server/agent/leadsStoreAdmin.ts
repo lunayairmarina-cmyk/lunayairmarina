@@ -8,3 +8,11 @@ export async function createAiLeadAdmin(
   await db.collection(AI_LEADS_COLLECTION).doc(record.id).set(record);
   return record;
 }
+
+export async function updateAiLeadAdmin(
+  db: AdminFirestore,
+  id: string,
+  patch: Partial<AiLeadRecord>,
+): Promise<void> {
+  await db.collection(AI_LEADS_COLLECTION).doc(id).set(patch, { merge: true });
+}

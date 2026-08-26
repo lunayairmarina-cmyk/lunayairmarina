@@ -50,21 +50,24 @@ export function buildConversationRecord(input: {
   lastIntent?: AgentIntent;
 }): AiConversationRecord {
   const now = new Date().toISOString();
-  return {
+  const ctx = input.customerContext ?? { interests: [] };
+  const record: AiConversationRecord = {
     conversationId: input.sessionId,
     sessionId: input.sessionId,
     language: input.language,
     startedAt: now,
     lastMessageAt: now,
     summary: input.summary ?? "",
-    customerContext: (input.customerContext ?? { interests: [] }) as unknown as Record<
-      string,
-      unknown
-    >,
+    customerContext: ctx as unknown as Record<string, unknown>,
     lastIntent: input.lastIntent,
     status: "active",
     leadStatus: "none",
   };
+  // Only set denormalized visitor fields when present (avoids undefined in Firestore writes).
+  if (ctx.name?.trim()) record.visitorName = ctx.name.trim();
+  if (ctx.phone?.trim()) record.visitorPhone = ctx.phone.trim();
+  if (ctx.email?.trim()) record.visitorEmail = ctx.email.trim();
+  return record;
 }
 
 export function makeMessageId(prefix: string): string {

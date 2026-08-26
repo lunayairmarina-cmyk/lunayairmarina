@@ -6,35 +6,48 @@ import {
   limit,
   orderBy,
   query,
-  doc,
-  setDoc,
   type Firestore,
 } from "firebase/firestore";
-import { Bot, Check, RefreshCw, X } from "lucide-react";
+import { Bot, MessageSquareText, Phone, RefreshCw } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { DataTable, RowAction, StatusBadge, type Column } from "@/components/admin/DataTable";
+import { Modal } from "@/components/admin/Modal";
 import { useLanguage } from "@/lib/i18n";
 import { getDb } from "@/lib/firebase";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
   AI_CONVERSATIONS_COLLECTION,
-  AI_LEADS_COLLECTION,
-  KNOWLEDGE_CANDIDATES_COLLECTION,
+  AI_MESSAGES_SUBCOLLECTION,
   KNOWLEDGE_COLLECTION,
   type AiConversationRecord,
-  type AiLeadRecord,
-  type KnowledgeCandidateRecord,
+  type AiMessageRecord,
 } from "@/lib/agent/types";
-import {
-  updateAiLeadStatusClient,
-  approveKnowledgeCandidateClient,
-} from "@/lib/agent/aiAdminClient";
+import { sortMessagesChronologically } from "@/lib/agent/messageOrder";
 import { readKnowledgeSyncStatusClient } from "@/lib/agent/knowledgeSyncClient";
 import { triggerKnowledgeSync } from "@/functions/aiAdmin";
+import { cn } from "@/lib/utils";
 
 export const Route = createLazyFileRoute("/admin/ai")({
   component: AdminAiPage,
 });
+
+function visitorName(row: AiConversationRecord): string {
+  const ctx = row.customerContext ?? {};
+  return row.visitorName || (typeof ctx.name === "string" ? ctx.name : "") || "";
+}
+
+function visitorPhone(row: AiConversationRecord): string {
+  const ctx = row.customerContext ?? {};
+  return row.visitorPhone || (typeof ctx.phone === "string" ? ctx.phone : "") || "";
+}
+
+function whatsappHref(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  if (!digits) return "#";
+  const normalized =
+    digits.startsWith("0") && digits.length >= 10 ? `20${digits.slice(1)}` : digits;
+  return `https://wa.me/${normalized}`;
+}
 
 async function listConversations(db: Firestore): Promise<AiConversationRecord[]> {
   try {
@@ -42,7 +55,7 @@ async function listConversations(db: Firestore): Promise<AiConversationRecord[]>
       query(
         collection(db, AI_CONVERSATIONS_COLLECTION),
         orderBy("lastMessageAt", "desc"),
-        limit(40),
+        limit(80),
       ),
     );
     return snap.docs.map((item) => item.data() as AiConversationRecord);
@@ -51,30 +64,32 @@ async function listConversations(db: Firestore): Promise<AiConversationRecord[]>
     return snap.docs
       .map((item) => item.data() as AiConversationRecord)
       .sort((a, b) => b.lastMessageAt.localeCompare(a.lastMessageAt))
-      .slice(0, 40);
+      .slice(0, 80);
   }
 }
 
-async function listCandidates(db: Firestore): Promise<KnowledgeCandidateRecord[]> {
-  const snap = await getDocs(collection(db, KNOWLEDGE_CANDIDATES_COLLECTION));
-  return snap.docs
-    .map((item) => item.data() as KnowledgeCandidateRecord)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .slice(0, 50);
-}
-
-async function listLeads(db: Firestore): Promise<AiLeadRecord[]> {
+async function listConversationMessages(
+  db: Firestore,
+  sessionId: string,
+): Promise<AiMessageRecord[]> {
   try {
     const snap = await getDocs(
-      query(collection(db, AI_LEADS_COLLECTION), orderBy("createdAt", "desc"), limit(40)),
+      query(
+        collection(db, AI_CONVERSATIONS_COLLECTION, sessionId, AI_MESSAGES_SUBCOLLECTION),
+        orderBy("timestamp", "asc"),
+        limit(200),
+      ),
     );
-    return snap.docs.map((item) => item.data() as AiLeadRecord);
+    return sortMessagesChronologically(
+      snap.docs.map((item) => item.data() as AiMessageRecord),
+    );
   } catch {
-    const snap = await getDocs(collection(db, AI_LEADS_COLLECTION));
-    return snap.docs
-      .map((item) => item.data() as AiLeadRecord)
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      .slice(0, 40);
+    const snap = await getDocs(
+      collection(db, AI_CONVERSATIONS_COLLECTION, sessionId, AI_MESSAGES_SUBCOLLECTION),
+    );
+    return sortMessagesChronologically(
+      snap.docs.map((item) => item.data() as AiMessageRecord),
+    );
   }
 }
 
@@ -85,30 +100,27 @@ async function countKnowledge(db: Firestore): Promise<number> {
 
 function AdminAiPage() {
   const { t, language } = useLanguage();
-  const { can, user } = useAdminAuth();
+  const { can } = useAdminAuth();
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("");
   const [conversations, setConversations] = useState<AiConversationRecord[]>([]);
-  const [candidates, setCandidates] = useState<KnowledgeCandidateRecord[]>([]);
-  const [leads, setLeads] = useState<AiLeadRecord[]>([]);
   const [knowledgeCount, setKnowledgeCount] = useState(0);
   const [syncNeeds, setSyncNeeds] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [activeConversation, setActiveConversation] = useState<AiConversationRecord | null>(null);
+  const [transcript, setTranscript] = useState<AiMessageRecord[]>([]);
+  const [transcriptLoading, setTranscriptLoading] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
       const db = getDb();
-      const [conv, cand, leadRows, count, sync] = await Promise.all([
+      const [conv, count, sync] = await Promise.all([
         listConversations(db),
-        listCandidates(db),
-        listLeads(db),
         countKnowledge(db),
         readKnowledgeSyncStatusClient(db),
       ]);
       setConversations(conv);
-      setCandidates(cand);
-      setLeads(leadRows);
       setKnowledgeCount(count);
       setSyncNeeds(Boolean(sync?.needsReingest));
     } catch {
@@ -123,33 +135,57 @@ function AdminAiPage() {
     void refresh();
   }, [can, refresh]);
 
-  const intentStats = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const row of conversations) {
-      const intent = row.lastIntent || "unknown";
-      map.set(intent, (map.get(intent) ?? 0) + 1);
+  const openTranscript = useCallback(async (row: AiConversationRecord) => {
+    setActiveConversation(row);
+    setTranscript([]);
+    setTranscriptLoading(true);
+    try {
+      const messages = await listConversationMessages(getDb(), row.sessionId);
+      setTranscript(messages);
+    } catch {
+      setTranscript([]);
+    } finally {
+      setTranscriptLoading(false);
     }
-    return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
-  }, [conversations]);
+  }, []);
 
-  const pendingCandidates = candidates.filter((item) => item.status === "pending");
-  const approvedCandidates = candidates.filter((item) => item.status === "approved");
+  const contactsWithPhone = useMemo(
+    () => conversations.filter((row) => Boolean(visitorPhone(row))),
+    [conversations],
+  );
+
+  const readyFollowUp = useMemo(
+    () => conversations.filter((row) => row.leadStatus === "handoff"),
+    [conversations],
+  );
 
   const conversationColumns: Column<AiConversationRecord>[] = [
     {
-      key: "session",
-      header: t("admin.ai.session"),
-      render: (row) => <span className="font-mono text-xs">{row.sessionId.slice(0, 12)}…</span>,
+      key: "name",
+      header: t("admin.ai.name"),
+      render: (row) => (
+        <span className="font-medium text-navy">{visitorName(row) || "—"}</span>
+      ),
     },
     {
-      key: "lang",
-      header: t("admin.ai.language"),
-      render: (row) => row.language.toUpperCase(),
-    },
-    {
-      key: "intent",
-      header: t("admin.ai.intent"),
-      render: (row) => row.lastIntent || "—",
+      key: "phone",
+      header: t("admin.ai.phone"),
+      render: (row) => {
+        const phone = visitorPhone(row);
+        if (!phone) return <span className="text-navy/40">—</span>;
+        return (
+          <a
+            href={whatsappHref(phone)}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 text-sm text-navy underline-offset-2 hover:text-gold hover:underline"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <Phone className="size-3.5 shrink-0 text-gold" aria-hidden />
+            <span dir="ltr">{phone}</span>
+          </a>
+        );
+      },
     },
     {
       key: "lead",
@@ -163,9 +199,20 @@ function AdminAiPage() {
                 ? "scheduled"
                 : "draft"
           }
-          label={row.leadStatus}
+          label={
+            row.leadStatus === "handoff"
+              ? t("admin.ai.leadHandoff")
+              : row.leadStatus === "potential"
+                ? t("admin.ai.leadPotential")
+                : t("admin.ai.leadNone")
+          }
         />
       ),
+    },
+    {
+      key: "lang",
+      header: t("admin.ai.language"),
+      render: (row) => row.language.toUpperCase(),
     },
     {
       key: "updated",
@@ -173,89 +220,6 @@ function AdminAiPage() {
       render: (row) => new Date(row.lastMessageAt).toLocaleString(language === "ar" ? "ar" : "en"),
     },
   ];
-
-  const candidateColumns: Column<KnowledgeCandidateRecord>[] = [
-    {
-      key: "q",
-      header: t("admin.ai.question"),
-      render: (row) => <span className="line-clamp-2 max-w-md text-sm">{row.question}</span>,
-    },
-    { key: "lang", header: t("admin.ai.language"), render: (row) => row.language },
-    {
-      key: "status",
-      header: t("admin.table.status"),
-      render: (row) => (
-        <StatusBadge
-          tone={
-            row.status === "approved"
-              ? "active"
-              : row.status === "rejected"
-                ? "expired"
-                : "scheduled"
-          }
-          label={row.status}
-        />
-      ),
-    },
-  ];
-
-  const leadColumns: Column<AiLeadRecord>[] = [
-    { key: "name", header: t("admin.ai.name"), render: (row) => row.name || "—" },
-    { key: "phone", header: t("admin.ai.phone"), render: (row) => row.phone || "—" },
-    { key: "email", header: t("admin.ai.email"), render: (row) => row.email || "—" },
-    {
-      key: "interest",
-      header: t("admin.ai.interest"),
-      render: (row) => row.serviceInterest.join(", ") || "—",
-    },
-    {
-      key: "status",
-      header: t("admin.table.status"),
-      render: (row) => (
-        <StatusBadge tone={row.status === "new" ? "scheduled" : "active"} label={row.status} />
-      ),
-    },
-  ];
-
-  async function onApprove(candidate: KnowledgeCandidateRecord) {
-    const answer = window.prompt(t("admin.ai.approvePrompt"), candidate.suggestedAnswer || "");
-    if (!answer?.trim()) return;
-    try {
-      await approveKnowledgeCandidateClient(getDb(), candidate, answer.trim());
-      setStatus(t("admin.ai.approved"));
-      await refresh();
-    } catch {
-      setStatus(t("admin.ai.approveFailed"));
-    }
-  }
-
-  async function onReject(candidate: KnowledgeCandidateRecord) {
-    try {
-      await setDoc(
-        doc(getDb(), KNOWLEDGE_CANDIDATES_COLLECTION, candidate.id),
-        {
-          ...candidate,
-          status: "rejected",
-          reviewedAt: new Date().toISOString(),
-          reviewedBy: user?.email || user?.id || "admin",
-        },
-        { merge: true },
-      );
-      setStatus(t("admin.ai.rejected"));
-      await refresh();
-    } catch {
-      setStatus(t("admin.ai.approveFailed"));
-    }
-  }
-
-  async function onCloseLead(lead: AiLeadRecord) {
-    try {
-      await updateAiLeadStatusClient(getDb(), lead.id, "closed");
-      await refresh();
-    } catch {
-      setStatus(t("admin.ai.loadFailed"));
-    }
-  }
 
   async function onSync() {
     setSyncing(true);
@@ -287,6 +251,9 @@ function AdminAiPage() {
     );
   }
 
+  const activePhone = activeConversation ? visitorPhone(activeConversation) : "";
+  const activeName = activeConversation ? visitorName(activeConversation) : "";
+
   return (
     <AdminLayout title={t("admin.nav.ai")}>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -315,94 +282,140 @@ function AdminAiPage() {
       {status ? <p className="mb-4 text-sm text-navy/80">{status}</p> : null}
       {loading ? <p className="mb-4 text-xs text-navy/55">{t("admin.ai.loading")}</p> : null}
 
-      <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label={t("admin.ai.knowledgeDocs")} value={String(knowledgeCount)} />
+      <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <StatCard label={t("admin.ai.contactsWithPhone")} value={String(contactsWithPhone.length)} />
         <StatCard label={t("admin.ai.conversations")} value={String(conversations.length)} />
-        <StatCard
-          label={t("admin.ai.pendingCandidates")}
-          value={String(pendingCandidates.length)}
-        />
-        <StatCard
-          label={t("admin.ai.syncStatus")}
-          value={syncNeeds ? t("admin.ai.syncNeeded") : t("admin.ai.syncOk")}
-        />
+        <StatCard label={t("admin.ai.readyFollowUp")} value={String(readyFollowUp.length)} />
       </div>
 
-      {intentStats.length > 0 ? (
-        <section className="mb-8">
-          <h3 className="mb-3 font-display text-lg text-navy">{t("admin.ai.popularIntents")}</h3>
-          <ul className="flex flex-wrap gap-2">
-            {intentStats.map(([intent, count]) => (
-              <li
-                key={intent}
-                className="rounded-full border border-navy/10 bg-white px-3 py-1 text-xs text-navy/80"
-              >
-                {intent}: {count}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      <section className="mb-10">
-        <h3 className="mb-3 font-display text-lg text-navy">{t("admin.ai.conversations")}</h3>
+      <section>
+        <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h3 className="font-display text-lg text-navy">{t("admin.ai.conversations")}</h3>
+            <p className="mt-0.5 text-xs text-navy/50">{t("admin.ai.conversationsHint")}</p>
+          </div>
+          <p className="text-xs text-navy/45">
+            {t("admin.ai.knowledgeDocs")}: {knowledgeCount}
+            {syncNeeds ? ` · ${t("admin.ai.syncNeeded")}` : ""}
+          </p>
+        </div>
         <DataTable
           columns={conversationColumns}
           rows={conversations}
           getRowId={(row) => row.conversationId}
-        />
-      </section>
-
-      <section className="mb-10">
-        <h3 className="mb-3 font-display text-lg text-navy">{t("admin.ai.leads")}</h3>
-        <DataTable
-          columns={leadColumns}
-          rows={leads}
-          getRowId={(row) => row.id}
-          actions={(row) =>
-            row.status === "new" ? (
-              <RowAction
-                icon={Check}
-                label={t("admin.ai.closeLead")}
-                onClick={() => void onCloseLead(row)}
-              />
-            ) : null
-          }
-        />
-      </section>
-
-      <section className="mb-10">
-        <h3 className="mb-3 font-display text-lg text-navy">{t("admin.ai.candidates")}</h3>
-        <DataTable
-          columns={candidateColumns}
-          rows={pendingCandidates}
-          getRowId={(row) => row.id}
           actions={(row) => (
-            <>
-              <RowAction
-                icon={Check}
-                label={t("admin.ai.approve")}
-                onClick={() => void onApprove(row)}
-              />
-              <RowAction
-                icon={X}
-                label={t("admin.ai.reject")}
-                tone="danger"
-                onClick={() => void onReject(row)}
-              />
-            </>
+            <RowAction
+              icon={MessageSquareText}
+              label={t("admin.ai.viewChat")}
+              onClick={() => void openTranscript(row)}
+            />
           )}
         />
       </section>
 
-      <section>
-        <h3 className="mb-3 font-display text-lg text-navy">{t("admin.ai.approvedKnowledge")}</h3>
-        <DataTable
-          columns={candidateColumns}
-          rows={approvedCandidates}
-          getRowId={(row) => row.id}
-        />
-      </section>
+      <Modal
+        open={Boolean(activeConversation)}
+        title={t("admin.ai.chatTranscript")}
+        onClose={() => {
+          setActiveConversation(null);
+          setTranscript([]);
+        }}
+        size="lg"
+      >
+        {activeConversation ? (
+          <div className="space-y-4">
+            <div className="rounded-xl border border-navy/10 bg-sand/40 px-3 py-3 text-sm text-navy">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="font-medium">
+                    {activeName || t("admin.ai.visitor")}
+                    {activePhone ? (
+                      <span className="ms-2 font-normal text-navy/70" dir="ltr">
+                        {activePhone}
+                      </span>
+                    ) : null}
+                  </p>
+                  <p className="mt-1 font-mono text-[0.65rem] text-navy/45">
+                    {activeConversation.sessionId}
+                  </p>
+                </div>
+                {activePhone ? (
+                  <a
+                    href={whatsappHref(activePhone)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/15 px-3 py-1.5 text-xs font-medium text-navy hover:bg-gold/25"
+                  >
+                    <Phone className="size-3.5" aria-hidden />
+                    WhatsApp
+                  </a>
+                ) : null}
+              </div>
+              {activeConversation.summary ? (
+                <p className="mt-2 text-xs leading-relaxed text-navy/70">
+                  {activeConversation.summary}
+                </p>
+              ) : null}
+            </div>
+            {transcriptLoading ? (
+              <p className="text-sm text-muted-foreground">{t("admin.ai.loading")}</p>
+            ) : transcript.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{t("admin.ai.emptyTranscript")}</p>
+            ) : (
+              <div className="max-h-[min(28rem,60vh)] space-y-1 overflow-y-auto pe-1">
+                <p className="mb-3 text-[0.65rem] text-navy/45">{t("admin.ai.transcriptOrderHint")}</p>
+                <ul className="space-y-3">
+                  {transcript.map((message, index) => {
+                    const isUser = message.role === "user";
+                    const prev = transcript[index - 1];
+                    const showDayDivider =
+                      !prev ||
+                      new Date(prev.timestamp).toDateString() !==
+                        new Date(message.timestamp).toDateString();
+                    return (
+                      <li key={message.id} className="space-y-2">
+                        {showDayDivider ? (
+                          <p className="py-1 text-center text-[0.65rem] tracking-wide text-navy/40">
+                            {new Date(message.timestamp).toLocaleDateString(
+                              language === "ar" ? "ar" : "en",
+                              { weekday: "short", day: "numeric", month: "short" },
+                            )}
+                          </p>
+                        ) : null}
+                        <div
+                          className={cn("flex w-full", isUser ? "justify-end" : "justify-start")}
+                        >
+                          <div
+                            className={cn(
+                              "max-w-[92%] rounded-2xl border px-3 py-2.5 text-sm leading-relaxed shadow-sm",
+                              isUser
+                                ? "rounded-ee-md border-navy/15 bg-navy text-navy-foreground"
+                                : "rounded-es-md border-navy/10 bg-white text-navy",
+                            )}
+                          >
+                            <p className="mb-1 text-[0.65rem] tracking-wide uppercase opacity-60">
+                              {isUser ? t("admin.ai.roleUser") : t("admin.ai.roleAssistant")}
+                            </p>
+                            <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+                              {message.content}
+                            </p>
+                            <time className="mt-2 block text-[0.65rem] opacity-50" dir="ltr">
+                              {new Date(message.timestamp).toLocaleTimeString(
+                                language === "ar" ? "ar" : "en",
+                                { hour: "2-digit", minute: "2-digit", second: "2-digit" },
+                              )}
+                            </time>
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+          </div>
+        ) : null}
+      </Modal>
     </AdminLayout>
   );
 }
