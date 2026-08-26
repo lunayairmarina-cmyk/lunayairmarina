@@ -44,7 +44,7 @@ export function HomeAdvertisingStrip({ className }: { className?: string }) {
 
   const sequence = buildSeamlessTickerItems(lines);
   // Slower pace so VIP/featured lines stay readable.
-  const durationSec = Math.max(78, lines.length * 42);
+  const durationSec = Math.max(110, lines.length * 58);
 
   return (
     <aside

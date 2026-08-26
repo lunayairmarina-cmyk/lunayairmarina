@@ -85,7 +85,7 @@ export function validateChatRequest(
 }
 
 async function loadExistingConversation(sessionId: string): Promise<AiConversationRecord | null> {
-  const adminDb = tryGetAdminFirestore();
+  const adminDb = await tryGetAdminFirestore();
   if (adminDb) return loadConversationAdmin(adminDb, sessionId);
   return loadConversation(getDb(), sessionId);
 }
@@ -138,7 +138,7 @@ async function persistConversationTurn(input: {
       confidence: input.confidence,
     };
 
-    const adminDb = tryGetAdminFirestore();
+    const adminDb = await tryGetAdminFirestore();
     if (adminDb) {
       await saveConversationAdmin(adminDb, record);
       await appendConversationMessageAdmin(adminDb, input.sessionId, userMsg);
@@ -278,7 +278,7 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
           email: lead.email,
           name: lead.name,
         });
-        const adminDb = tryGetAdminFirestore();
+        const adminDb = await tryGetAdminFirestore();
         if (adminDb) await createAiLeadAdmin(adminDb, record);
         else await createAiLeadClient(getDb(), record);
         leadId = record.id;
@@ -317,7 +317,7 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       })
     ) {
       try {
-        const adminDb = tryGetAdminFirestore();
+        const adminDb = await tryGetAdminFirestore();
         if (adminDb) {
           const id = `kc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
           await adminDb

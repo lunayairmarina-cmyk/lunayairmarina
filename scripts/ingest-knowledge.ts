@@ -34,7 +34,7 @@ const root = resolve(__dirname, "..");
 loadEnv({ path: resolve(root, ".env") });
 
 async function verifyFirestoreDocuments() {
-  const db = getAdminFirestore();
+  const db = await getAdminFirestore();
   const total = await countKnowledgeDocumentsAdmin(db);
   console.log(
     `\n[ingest-knowledge] Firestore verification: ${total} documents in knowledgeDocuments`,
@@ -54,8 +54,8 @@ async function main() {
     // Prefer Admin read when credentials exist; otherwise build from static locales only.
     let documentsReport;
     try {
-      assertFirebaseAdminReady();
-      const bundle = await loadKnowledgeSourceBundleAdmin(getAdminFirestore());
+      await assertFirebaseAdminReady();
+      const bundle = await loadKnowledgeSourceBundleAdmin(await getAdminFirestore());
       const { documents, skipped } = buildKnowledgeDocuments(bundle);
       documentsReport = summarizeIngestion(documents, skipped);
       console.log("[ingest-knowledge] Dry-run source: Admin SDK (CMS + locales).");
@@ -72,11 +72,11 @@ async function main() {
   }
 
   try {
-    const ready = assertFirebaseAdminReady();
+    const ready = await assertFirebaseAdminReady();
     console.log(
       `[ingest-knowledge] Admin SDK ready (project=${ready.projectId}, credential=${ready.credentialSource}).`,
     );
-    const db = getAdminFirestore();
+    const db = await getAdminFirestore();
     const report = await runKnowledgeIngestionAdmin(db);
     printIngestionReport(report);
     const verifiedCount = await verifyFirestoreDocuments();

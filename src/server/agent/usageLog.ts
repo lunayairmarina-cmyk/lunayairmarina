@@ -55,9 +55,11 @@ export async function writeAiUsageLogAdmin(
 
 /** Fire-and-forget usage log when Admin credentials exist. */
 export function logAiUsage(input: AiUsageLogInput): void {
-  const adminDb = tryGetAdminFirestore();
-  if (!adminDb) return;
-  void writeAiUsageLogAdmin(adminDb, input).catch(() => {
+  void (async () => {
+    const adminDb = await tryGetAdminFirestore();
+    if (!adminDb) return;
+    await writeAiUsageLogAdmin(adminDb, input);
+  })().catch(() => {
     // Telemetry must never break chat.
   });
 }

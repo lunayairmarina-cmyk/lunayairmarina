@@ -282,7 +282,7 @@ async function loadFirestoreDocuments(): Promise<KnowledgeDocument[]> {
     return cachedFirestoreDocuments;
   }
 
-  const adminDb = tryGetAdminFirestore();
+  const adminDb = await tryGetAdminFirestore();
   if (adminDb) {
     try {
       const docs = await loadAllKnowledgeDocumentsAdmin(adminDb);

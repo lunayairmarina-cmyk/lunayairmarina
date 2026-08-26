@@ -163,7 +163,7 @@ export async function loadLiveWebsiteKnowledgeDocuments(): Promise<KnowledgeDocu
   }
 
   try {
-    const adminDb = tryGetAdminFirestore();
+    const adminDb = await tryGetAdminFirestore();
     const bundle = adminDb
       ? await loadKnowledgeSourceBundleAdmin(adminDb)
       : loadStaticKnowledgeSourceBundle();

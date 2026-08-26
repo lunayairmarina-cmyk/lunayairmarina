@@ -59,7 +59,7 @@ const EXPECTED_INTENTS: Record<string, string[]> = {
 
 async function countViaAdmin(): Promise<number | null> {
   if (!hasFirebaseAdminCredentials()) return null;
-  const db = tryGetAdminFirestore();
+  const db = await tryGetAdminFirestore();
   if (!db) return null;
   return countKnowledgeDocumentsAdmin(db);
 }

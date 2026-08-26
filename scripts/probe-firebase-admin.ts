@@ -17,12 +17,12 @@ loadEnv({ path: resolve(__dirname, "../.env") });
 
 async function main() {
   console.log(`has_credentials=${hasFirebaseAdminCredentials()}`);
-  const ready = assertFirebaseAdminReady();
+  const ready = await assertFirebaseAdminReady();
   console.log(`admin_ready=true`);
   console.log(`projectId=${ready.projectId}`);
   console.log(`credentialSource=${ready.credentialSource}`);
 
-  const db = getAdminFirestore();
+  const db = await getAdminFirestore();
   const snap = await db.collection("knowledgeDocuments").limit(1).get();
   console.log(`firestore_reachable=true`);
   console.log(`knowledgeDocuments_sample_exists=${!snap.empty}`);

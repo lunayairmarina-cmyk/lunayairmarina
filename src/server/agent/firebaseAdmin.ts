@@ -2,17 +2,47 @@
  * Server-only Firebase Admin SDK bootstrap for knowledge ingestion.
  * Bypasses Firestore Security Rules (service account privilege).
  * Never import this module from client/browser code.
+ *
+ * Uses dynamic imports so Nitro/Vercel does not bundle firebase-admin into
+ * server-fn chunks (bundled admin SDK crashes with SDK_VERSION errors).
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { cert, getApps, initializeApp, type App } from "firebase-admin/app";
-import { getFirestore, type Firestore } from "firebase-admin/firestore";
 
 type ServiceAccountJson = {
   project_id?: string;
   client_email?: string;
   private_key?: string;
 };
+
+type AdminApp = import("firebase-admin/app").App;
+type AdminFirestore = import("firebase-admin/firestore").Firestore;
+
+type AdminModules = {
+  cert: typeof import("firebase-admin/app").cert;
+  getApps: typeof import("firebase-admin/app").getApps;
+  initializeApp: typeof import("firebase-admin/app").initializeApp;
+  getFirestore: typeof import("firebase-admin/firestore").getFirestore;
+};
+
+let adminModulesPromise: Promise<AdminModules> | undefined;
+let adminApp: AdminApp | undefined;
+let adminDb: AdminFirestore | undefined;
+
+async function loadAdminModules(): Promise<AdminModules> {
+  if (!adminModulesPromise) {
+    adminModulesPromise = Promise.all([
+      import("firebase-admin/app"),
+      import("firebase-admin/firestore"),
+    ]).then(([appMod, firestoreMod]) => ({
+      cert: appMod.cert,
+      getApps: appMod.getApps,
+      initializeApp: appMod.initializeApp,
+      getFirestore: firestoreMod.getFirestore,
+    }));
+  }
+  return adminModulesPromise;
+}
 
 function resolveProjectId(serviceAccount?: ServiceAccountJson): string {
   const fromEnv =
@@ -58,11 +88,9 @@ function loadServiceAccount(path: string): ServiceAccountJson {
   return account;
 }
 
-let adminApp: App | undefined;
-let adminDb: Firestore | undefined;
-
-export function getFirebaseAdminApp(): App {
+export async function getFirebaseAdminApp(): Promise<AdminApp> {
   if (adminApp) return adminApp;
+  const { cert, getApps, initializeApp } = await loadAdminModules();
   const existing = getApps()[0];
   if (existing) {
     adminApp = existing;
@@ -80,8 +108,11 @@ export function getFirebaseAdminApp(): App {
   return adminApp;
 }
 
-export function getAdminFirestore(): Firestore {
-  if (!adminDb) adminDb = getFirestore(getFirebaseAdminApp());
+export async function getAdminFirestore(): Promise<AdminFirestore> {
+  if (!adminDb) {
+    const { getFirestore } = await loadAdminModules();
+    adminDb = getFirestore(await getFirebaseAdminApp());
+  }
   return adminDb;
 }
 
@@ -94,18 +125,21 @@ export function hasFirebaseAdminCredentials(): boolean {
 }
 
 /** Soft init — returns null when credentials are missing or invalid (no secrets logged). */
-export function tryGetAdminFirestore(): Firestore | null {
+export async function tryGetAdminFirestore(): Promise<AdminFirestore | null> {
   if (!hasFirebaseAdminCredentials()) return null;
   try {
-    return getAdminFirestore();
+    return await getAdminFirestore();
   } catch {
     return null;
   }
 }
 
 /** Confirms Admin SDK can initialize without logging secrets. */
-export function assertFirebaseAdminReady(): { projectId: string; credentialSource: string } {
-  const app = getFirebaseAdminApp();
+export async function assertFirebaseAdminReady(): Promise<{
+  projectId: string;
+  credentialSource: string;
+}> {
+  const app = await getFirebaseAdminApp();
   const projectId = app.options.projectId ?? resolveProjectId();
   const source = process.env.FIREBASE_SERVICE_ACCOUNT_PATH?.trim()
     ? "FIREBASE_SERVICE_ACCOUNT_PATH"

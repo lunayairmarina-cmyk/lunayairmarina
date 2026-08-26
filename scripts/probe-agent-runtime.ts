@@ -42,8 +42,8 @@ loadEnv({ path: resolve(__dirname, "../.env") });
 const SESSION_ID = `test-sess-${Date.now().toString(36)}`;
 
 async function main() {
-  assertFirebaseAdminReady();
-  const db = getAdminFirestore();
+  await assertFirebaseAdminReady();
+  const db = await getAdminFirestore();
   resetKnowledgeCacheForTests();
 
   console.log("\n=== CONVERSATION PERSISTENCE ===\n");

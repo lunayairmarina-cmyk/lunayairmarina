@@ -39,7 +39,7 @@ export async function maybeRunPendingKnowledgeSync(): Promise<{
   if (ingestInFlight) return { ran: false };
   if (Date.now() - lastIngestAttemptAt < DEBOUNCE_MS) return { ran: false };
 
-  const adminDb = tryGetAdminFirestore();
+  const adminDb = await tryGetAdminFirestore();
   if (!adminDb) return { ran: false };
 
   const status = await readKnowledgeSyncStatusAdmin(adminDb);
@@ -82,7 +82,7 @@ export async function runKnowledgeSyncNow(reason = "manual_admin"): Promise<{
   total?: number;
   error?: string;
 }> {
-  const adminDb = tryGetAdminFirestore();
+  const adminDb = await tryGetAdminFirestore();
   if (!adminDb) {
     return {
       ok: false,

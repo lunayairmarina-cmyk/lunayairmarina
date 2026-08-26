@@ -577,7 +577,7 @@ html[dir="rtl"] .media-mirror-for-rtl {
   width: max-content;
   align-items: center;
   gap: 0;
-  animation: ad-ticker-scroll 80s linear infinite;
+  animation: ad-ticker-scroll 110s linear infinite;
   will-change: transform;
   backface-visibility: hidden;
 }
