@@ -48,14 +48,14 @@ export function DashboardCard({
       />
       <div className="relative flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[0.6rem] tracking-[0.22em] text-muted-foreground uppercase">
-            {label}
-          </p>
+          <p className="text-[0.6rem] tracking-[0.22em] text-muted-foreground uppercase">{label}</p>
           <p className="mt-2 font-display text-3xl text-navy sm:mt-3 sm:text-4xl">
             <Counter value={value} suffix={suffix} />
           </p>
           {trend ? <p className="mt-2 text-xs text-gold">{trend}</p> : null}
-          {hint ? <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{hint}</p> : null}
+          {hint ? (
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{hint}</p>
+          ) : null}
         </div>
         <span
           className={cn(

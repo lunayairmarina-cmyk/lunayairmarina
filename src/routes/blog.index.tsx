@@ -5,12 +5,7 @@ import { PageHeader } from "@/components/site/PageHeader";
 import { Reveal } from "@/components/shared/Reveal";
 import { ResolvedImage } from "@/components/shared/ResolvedImage";
 import { useLanguage } from "@/lib/i18n";
-import {
-  buildBlogListJsonLd,
-  getPublishedPosts,
-  tx,
-  type BlogPost,
-} from "@/data/blog";
+import { buildBlogListJsonLd, getPublishedPosts, tx, type BlogPost } from "@/data/blog";
 import { CMS_UPDATED_EVENT } from "@/lib/cms-store";
 import { buildSeoHead } from "@/services/seoService";
 import { usePageHeaderImage } from "@/hooks/usePageHeaderImage";

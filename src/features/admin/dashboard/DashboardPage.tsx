@@ -121,9 +121,9 @@ export function DashboardPage() {
   }, []);
 
   const galleryCount = site?.bundle?.gallery?.length || galleryImages.length;
-  const servicesCount = site?.bundle?.services?.length || SERVICE_SLUGS.length || serviceRecords.length;
-  const testimonialsCount =
-    site?.bundle?.testimonials?.length || testimonialRecords.length;
+  const servicesCount =
+    site?.bundle?.services?.length || SERVICE_SLUGS.length || serviceRecords.length;
+  const testimonialsCount = site?.bundle?.testimonials?.length || testimonialRecords.length;
   const faqCount = site?.bundle?.faq?.length || faqRecords.length;
   const newMessages = { length: newMessageCount };
   const firebaseReady = syncStatus === "synced";
@@ -307,7 +307,10 @@ export function DashboardPage() {
           value={inboxCount}
           trend={
             newMessages.length > 0
-              ? t("admin.dashboard.stats.newMessages").replace("{count}", String(newMessages.length))
+              ? t("admin.dashboard.stats.newMessages").replace(
+                  "{count}",
+                  String(newMessages.length),
+                )
               : undefined
           }
           to="/admin/messages"

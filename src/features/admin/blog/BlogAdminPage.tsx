@@ -200,8 +200,9 @@ export function BlogAdminPage() {
     () =>
       draft.blocks
         .map((block, index) => ({ block, index }))
-        .filter((item): item is { block: Extract<BlogBlock, { type: "paragraph" }>; index: number } =>
-          item.block.type === "paragraph",
+        .filter(
+          (item): item is { block: Extract<BlogBlock, { type: "paragraph" }>; index: number } =>
+            item.block.type === "paragraph",
         ),
     [draft.blocks],
   );
@@ -210,8 +211,9 @@ export function BlogAdminPage() {
     () =>
       draft.blocks
         .map((block, index) => ({ block, index }))
-        .filter((item): item is { block: Extract<BlogBlock, { type: "heading" }>; index: number } =>
-          item.block.type === "heading",
+        .filter(
+          (item): item is { block: Extract<BlogBlock, { type: "heading" }>; index: number } =>
+            item.block.type === "heading",
         ),
     [draft.blocks],
   );
@@ -406,10 +408,22 @@ export function BlogAdminPage() {
     setDraft((current) => ({ ...current, blocks: [...current.blocks, block] }));
   };
 
-  const applyLinkToParagraph = (paragraphId: string, keywordEn: string, keywordAr: string, href: string) => {
-    const target = draft.blocks.find((block) => block.id === paragraphId && block.type === "paragraph");
+  const applyLinkToParagraph = (
+    paragraphId: string,
+    keywordEn: string,
+    keywordAr: string,
+    href: string,
+  ) => {
+    const target = draft.blocks.find(
+      (block) => block.id === paragraphId && block.type === "paragraph",
+    );
     if (!target || target.type !== "paragraph") return;
-    const spans = wrapKeywordInParagraph(target.spans, keywordEn.trim(), keywordAr.trim(), href.trim());
+    const spans = wrapKeywordInParagraph(
+      target.spans,
+      keywordEn.trim(),
+      keywordAr.trim(),
+      href.trim(),
+    );
     if (!spans) return;
     updateBlock(paragraphId, { spans });
   };
@@ -496,10 +510,7 @@ export function BlogAdminPage() {
     [t, language],
   );
 
-  const paragraphOptions = (
-    value: string,
-    onChange: (id: string) => void,
-  ) => (
+  const paragraphOptions = (value: string, onChange: (id: string) => void) => (
     <label className="flex flex-col gap-2">
       <span className="text-[0.6rem] tracking-[0.22em] text-muted-foreground uppercase">
         {t("admin.blog.activeParagraph")}
@@ -546,7 +557,11 @@ export function BlogAdminPage() {
         getRowId={(row) => row.id}
         actions={(row) => (
           <>
-            <RowAction icon={Pencil} label={t("admin.actions.edit")} onClick={() => openEdit(row)} />
+            <RowAction
+              icon={Pencil}
+              label={t("admin.actions.edit")}
+              onClick={() => openEdit(row)}
+            />
             <RowAction
               icon={Trash2}
               tone="danger"
@@ -776,48 +791,48 @@ export function BlogAdminPage() {
                       className="rounded-md border border-navy/10 px-3 py-2 text-sm outline-none focus:border-navy/30"
                     />
                     <div className="grid gap-3 sm:grid-cols-2">
-                    <input
-                      value={tx(block.alt, "en")}
-                      onChange={(event) =>
-                        updateBlock(block.id, {
-                          alt: { en: event.target.value, ar: tx(block.alt, "ar") },
-                        })
-                      }
-                      placeholder={`${t("admin.blog.imageAlt")} · ${t("admin.blog.langEn")}`}
-                      className="rounded-md border border-navy/10 px-3 py-2 text-sm outline-none focus:border-navy/30"
-                    />
-                    <input
-                      value={tx(block.alt, "ar")}
-                      onChange={(event) =>
-                        updateBlock(block.id, {
-                          alt: { en: tx(block.alt, "en"), ar: event.target.value },
-                        })
-                      }
-                      placeholder={`${t("admin.blog.imageAlt")} · ${t("admin.blog.langAr")}`}
-                      dir="rtl"
-                      className="rounded-md border border-navy/10 px-3 py-2 text-sm outline-none focus:border-navy/30"
-                    />
-                    <input
-                      value={tx(block.caption, "en")}
-                      onChange={(event) =>
-                        updateBlock(block.id, {
-                          caption: { en: event.target.value, ar: tx(block.caption, "ar") },
-                        })
-                      }
-                      placeholder={`${t("admin.blog.imageCaption")} · ${t("admin.blog.langEn")}`}
-                      className="rounded-md border border-navy/10 px-3 py-2 text-sm outline-none focus:border-navy/30"
-                    />
-                    <input
-                      value={tx(block.caption, "ar")}
-                      onChange={(event) =>
-                        updateBlock(block.id, {
-                          caption: { en: tx(block.caption, "en"), ar: event.target.value },
-                        })
-                      }
-                      placeholder={`${t("admin.blog.imageCaption")} · ${t("admin.blog.langAr")}`}
-                      dir="rtl"
-                      className="rounded-md border border-navy/10 px-3 py-2 text-sm outline-none focus:border-navy/30"
-                    />
+                      <input
+                        value={tx(block.alt, "en")}
+                        onChange={(event) =>
+                          updateBlock(block.id, {
+                            alt: { en: event.target.value, ar: tx(block.alt, "ar") },
+                          })
+                        }
+                        placeholder={`${t("admin.blog.imageAlt")} · ${t("admin.blog.langEn")}`}
+                        className="rounded-md border border-navy/10 px-3 py-2 text-sm outline-none focus:border-navy/30"
+                      />
+                      <input
+                        value={tx(block.alt, "ar")}
+                        onChange={(event) =>
+                          updateBlock(block.id, {
+                            alt: { en: tx(block.alt, "en"), ar: event.target.value },
+                          })
+                        }
+                        placeholder={`${t("admin.blog.imageAlt")} · ${t("admin.blog.langAr")}`}
+                        dir="rtl"
+                        className="rounded-md border border-navy/10 px-3 py-2 text-sm outline-none focus:border-navy/30"
+                      />
+                      <input
+                        value={tx(block.caption, "en")}
+                        onChange={(event) =>
+                          updateBlock(block.id, {
+                            caption: { en: event.target.value, ar: tx(block.caption, "ar") },
+                          })
+                        }
+                        placeholder={`${t("admin.blog.imageCaption")} · ${t("admin.blog.langEn")}`}
+                        className="rounded-md border border-navy/10 px-3 py-2 text-sm outline-none focus:border-navy/30"
+                      />
+                      <input
+                        value={tx(block.caption, "ar")}
+                        onChange={(event) =>
+                          updateBlock(block.id, {
+                            caption: { en: tx(block.caption, "en"), ar: event.target.value },
+                          })
+                        }
+                        placeholder={`${t("admin.blog.imageCaption")} · ${t("admin.blog.langAr")}`}
+                        dir="rtl"
+                        className="rounded-md border border-navy/10 px-3 py-2 text-sm outline-none focus:border-navy/30"
+                      />
                     </div>
                   </div>
                 ) : null}
@@ -864,7 +879,9 @@ export function BlogAdminPage() {
                 <p className="text-[0.65rem] tracking-[0.2em] text-navy uppercase">
                   {t("admin.blog.toolsExternalTitle")}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">{t("admin.blog.toolsExternalHint")}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t("admin.blog.toolsExternalHint")}
+                </p>
               </div>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -907,7 +924,11 @@ export function BlogAdminPage() {
             <button
               type="button"
               onClick={insertExternalLink}
-              disabled={(!extLinkEn.trim() && !extLinkAr.trim()) || !extUrl.trim() || paragraphBlocks.length === 0}
+              disabled={
+                (!extLinkEn.trim() && !extLinkAr.trim()) ||
+                !extUrl.trim() ||
+                paragraphBlocks.length === 0
+              }
               className={cn(toolBtnClass, "mt-4")}
             >
               <Link className="size-3.5" strokeWidth={1.5} />
@@ -923,7 +944,9 @@ export function BlogAdminPage() {
                 <p className="text-[0.65rem] tracking-[0.2em] text-navy uppercase">
                   {t("admin.blog.toolsInternalTitle")}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">{t("admin.blog.toolsInternalHint")}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t("admin.blog.toolsInternalHint")}
+                </p>
               </div>
             </div>
             {headingBlocks.length === 0 ? (
@@ -977,7 +1000,9 @@ export function BlogAdminPage() {
                 <button
                   type="button"
                   onClick={insertInternalLink}
-                  disabled={(!intLinkEn.trim() && !intLinkAr.trim()) || paragraphBlocks.length === 0}
+                  disabled={
+                    (!intLinkEn.trim() && !intLinkAr.trim()) || paragraphBlocks.length === 0
+                  }
                   className={cn(toolBtnClass, "mt-4")}
                 >
                   <ListPlus className="size-3.5" strokeWidth={1.5} />
@@ -995,7 +1020,9 @@ export function BlogAdminPage() {
                 <p className="text-[0.65rem] tracking-[0.2em] text-navy uppercase">
                   {t("admin.blog.toolsImagesTitle")}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">{t("admin.blog.toolsImagesHint")}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t("admin.blog.toolsImagesHint")}
+                </p>
               </div>
             </div>
             <div className="mt-4 space-y-3">
@@ -1209,7 +1236,9 @@ export function BlogAdminPage() {
 
         {/* SEO */}
         <div className="rounded-xl border border-gold/30 bg-gold/5 p-4">
-          <p className="text-[0.65rem] tracking-[0.2em] text-gold uppercase">{t("admin.blog.seoBox")}</p>
+          <p className="text-[0.65rem] tracking-[0.2em] text-gold uppercase">
+            {t("admin.blog.seoBox")}
+          </p>
           <p className="mt-2 text-xs text-muted-foreground">{t("admin.blog.seoLead")}</p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div>

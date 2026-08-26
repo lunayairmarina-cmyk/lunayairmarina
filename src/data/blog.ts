@@ -14,8 +14,7 @@ const aboutMarina = "/images/about/yacht_side_transom_landscape.png";
 export type Localized = { en: string; ar: string };
 
 export type BlogInline =
-  | { type: "text"; text: Localized }
-  | { type: "keyword"; text: Localized; href: string };
+  { type: "text"; text: Localized } | { type: "keyword"; text: Localized; href: string };
 
 export type BlogBlock =
   | { id: string; type: "paragraph"; spans: BlogInline[] }
@@ -87,11 +86,7 @@ export const DEFAULT_BLOG_POSTS: BlogPost[] = [
       "تعرّف على إدارة اليخوت الاحترافية في البحر الأحمر: الصيانة والطواقم والامتثال والتقارير مع lunayairmarina.",
     ),
     focusKeyword: L("yacht management Red Sea", "إدارة اليخوت البحر الأحمر"),
-    tags: [
-      L("yacht management", "إدارة اليخوت"),
-      L("Red Sea", "البحر الأحمر"),
-      L("Jeddah", "جدة"),
-    ],
+    tags: [L("yacht management", "إدارة اليخوت"), L("Red Sea", "البحر الأحمر"), L("Jeddah", "جدة")],
     blocks: [
       {
         id: "b1-h1",
@@ -131,10 +126,7 @@ export const DEFAULT_BLOG_POSTS: BlogPost[] = [
         id: "b1-img1",
         type: "image",
         src: aboutMarina,
-        alt: L(
-          "Luxury yacht berthed at dusk in a marina",
-          "يخت فاخر راسٍ عند الغروب في المارينا",
-        ),
+        alt: L("Luxury yacht berthed at dusk in a marina", "يخت فاخر راسٍ عند الغروب في المارينا"),
         caption: L(
           "Dedicated berthing and operations planning protect asset value.",
           "الرسو المخصص وتخطيط العمليات يحميان قيمة الأصول.",
@@ -216,11 +208,7 @@ export const DEFAULT_BLOG_POSTS: BlogPost[] = [
       "أفضل الممارسات لخدمات وكالة اليخوت الزائرة والرسو واللوجستيات في السعودية مع lunayairmarina.",
     ),
     focusKeyword: L("marina operations", "عمليات المارينا"),
-    tags: [
-      L("marina", "مارينا"),
-      L("visiting yachts", "يخوت زائرة"),
-      L("agency", "وكالة"),
-    ],
+    tags: [L("marina", "مارينا"), L("visiting yachts", "يخوت زائرة"), L("agency", "وكالة")],
     blocks: [
       {
         id: "b2-p1",
@@ -301,7 +289,12 @@ function normalizeInline(span: unknown): BlogInline {
 }
 
 function normalizeBlock(block: unknown): BlogBlock | null {
-  const raw = block as BlogBlock & { text?: unknown; alt?: unknown; caption?: unknown; spans?: unknown[] };
+  const raw = block as BlogBlock & {
+    text?: unknown;
+    alt?: unknown;
+    caption?: unknown;
+    spans?: unknown[];
+  };
   if (!raw?.id || !raw?.type) return null;
   if (raw.type === "paragraph") {
     return {
@@ -340,9 +333,7 @@ export function normalizePost(raw: unknown): BlogPost | null {
   const blocks = Array.isArray(post.blocks)
     ? post.blocks.map(normalizeBlock).filter((b): b is BlogBlock => Boolean(b))
     : [];
-  const tags = Array.isArray(post.tags)
-    ? post.tags.map((tag) => asLocalized(tag))
-    : [];
+  const tags = Array.isArray(post.tags) ? post.tags.map((tag) => asLocalized(tag)) : [];
   return {
     id: post.id,
     slug: post.slug,
@@ -385,10 +376,8 @@ export function loadBlogPosts(): BlogPost[] {
       .map((item) =>
         normalizePost({
           ...item,
-          coverImage:
-            typeof item.coverImage === "string" ? item.coverImage : item.image,
-          publishedAt:
-            typeof item.publishedAt === "string" ? item.publishedAt : item.date,
+          coverImage: typeof item.coverImage === "string" ? item.coverImage : item.image,
+          publishedAt: typeof item.publishedAt === "string" ? item.publishedAt : item.date,
         }),
       )
       .filter((post): post is BlogPost => Boolean(post));

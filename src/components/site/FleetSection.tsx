@@ -21,7 +21,11 @@ export function FleetSection({ limit }: { limit?: number }) {
         />
         <div className="mt-10 grid gap-6 sm:mt-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           {items.map((yacht, index) => (
-            <Reveal key={yacht.id} delay={index * 0.05} className="overflow-hidden border border-navy/10 bg-white">
+            <Reveal
+              key={yacht.id}
+              delay={index * 0.05}
+              className="overflow-hidden border border-navy/10 bg-white"
+            >
               <ResolvedImage
                 src={yacht.image}
                 alt={yacht.yachtName}

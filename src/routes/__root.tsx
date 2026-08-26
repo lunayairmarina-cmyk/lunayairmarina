@@ -80,7 +80,7 @@ const organizationSchema = {
         "Red Sea",
         "Arabian Gulf",
         "Mediterranean",
-        "Europe"
+        "Europe",
       ],
       description:
         "Comprehensive operational, technical, crew, and financial yacht management focusing on Saudi Arabia and the GCC, Egypt, expanding to the Red Sea, Mediterranean, and Europe.",
@@ -150,8 +150,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { 
-        title: "lunayairmarina | إدارة يخوت فاخرة في السعودية والخليج — Yacht Management Saudi Arabia & GCC" 
+      {
+        title:
+          "lunayairmarina | إدارة يخوت فاخرة في السعودية والخليج — Yacht Management Saudi Arabia & GCC",
       },
       {
         name: "description",
@@ -180,7 +181,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:image", content: ogCover },
       { property: "og:image:secure_url", content: ogCover },
-      { property: "og:image:alt", content: "lunayairmarina — إدارة يخوت فاخرة | Luxury Yacht Management" },
+      {
+        property: "og:image:alt",
+        content: "lunayairmarina — إدارة يخوت فاخرة | Luxury Yacht Management",
+      },
       { name: "twitter:card", content: "summary_large_image" },
       {
         name: "twitter:title",

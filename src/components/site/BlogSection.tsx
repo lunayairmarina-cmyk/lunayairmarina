@@ -65,7 +65,9 @@ export function BlogSection({ limit = 3 }: { limit?: number }) {
   const { t, language } = useLanguage();
   const site = useOptionalSiteContent();
   const remotePosts = useMemo(() => mapRemotePosts(site?.bundle ?? null), [site?.bundle]);
-  const [localPosts, setLocalPosts] = useState<BlogPost[]>(() => getPublishedPosts().slice(0, limit));
+  const [localPosts, setLocalPosts] = useState<BlogPost[]>(() =>
+    getPublishedPosts().slice(0, limit),
+  );
 
   useEffect(() => {
     const refresh = () => setLocalPosts(getPublishedPosts().slice(0, limit));

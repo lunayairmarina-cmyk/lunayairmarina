@@ -388,9 +388,8 @@
 
 @utility nav-link {
   position: relative;
-  font-size: 0.82rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
 
   &::after {
     content: "";
@@ -562,15 +561,15 @@ html[dir="rtl"] .media-mirror-for-rtl {
 /* Homepage advertising news ticker */
 @keyframes ad-ticker-scroll {
   from {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
 .ad-ticker {
-  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
 
 .ad-ticker-track {
@@ -578,19 +577,21 @@ html[dir="rtl"] .media-mirror-for-rtl {
   width: max-content;
   align-items: center;
   gap: 0;
-  animation: ad-ticker-scroll 22s linear infinite;
+  animation: ad-ticker-scroll 80s linear infinite;
   will-change: transform;
+  backface-visibility: hidden;
 }
 
-[dir="rtl"] .ad-ticker-track {
-  animation-direction: reverse;
+.ad-ticker:hover .ad-ticker-track {
+  animation-play-state: paused;
 }
 
 .ad-ticker-item {
   display: inline-flex;
   align-items: center;
   gap: 1rem;
-  padding-inline-end: 1.25rem;
+  /* Extra gap between items so 2 short VIP lines still read clearly */
+  padding-inline-end: 2rem;
   white-space: nowrap;
 }
 
@@ -599,6 +600,7 @@ html[dir="rtl"] .media-mirror-for-rtl {
   width: 4px;
   height: 4px;
   border-radius: 999px;
+  flex-shrink: 0;
   background: color-mix(in oklab, var(--gold) 70%, transparent);
 }
 
@@ -618,5 +620,6 @@ html[dir="rtl"] .media-mirror-for-rtl {
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
+    padding-inline-end: 0;
   }
 }

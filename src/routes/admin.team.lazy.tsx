@@ -121,11 +121,7 @@ function AdminTeamPage() {
         header: t("admin.table.image"),
         render: (row) =>
           row.image ? (
-            <ResolvedImage
-              src={row.image}
-              alt=""
-              className="size-12 rounded-full object-cover"
-            />
+            <ResolvedImage src={row.image} alt="" className="size-12 rounded-full object-cover" />
           ) : (
             <span className="grid size-12 place-items-center rounded-full bg-navy/6 text-xs">
               {row.name[language].slice(0, 2).toUpperCase()}

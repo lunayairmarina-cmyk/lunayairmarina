@@ -128,12 +128,12 @@ function ServiceDetailPage() {
           src: item.src,
           captionKey: `g${index + 1}`,
         }))
-      : staticDef?.gallery ??
+      : (staticDef?.gallery ??
         (remote?.image
           ? [{ src: remote.image, captionKey: "g1" }]
           : fallbackCover
             ? [{ src: fallbackCover, captionKey: "g1" }]
-            : []);
+            : []));
 
   const localeCopy = tv<ServiceDetailCopy | undefined>(`services.details.${slug}`);
   const localeListItem = (
@@ -237,15 +237,23 @@ function ServiceDetailPage() {
       <section id="details" className="bg-background py-24 lg:py-32">
         <div className="container-luxe grid gap-14 lg:grid-cols-2 lg:gap-20">
           <Reveal>
-            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">{copy.detailEyebrow}</p>
+            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
+              {copy.detailEyebrow}
+            </p>
             <h2 className="mt-4 font-display text-3xl text-navy sm:text-4xl">{copy.detailTitle}</h2>
             <span className="gold-rule mt-6" />
-            <p className="mt-8 text-base leading-relaxed text-navy/80 sm:text-lg">{copy.detailBody}</p>
+            <p className="mt-8 text-base leading-relaxed text-navy/80 sm:text-lg">
+              {copy.detailBody}
+            </p>
           </Reveal>
 
           <Reveal delay={0.1}>
-            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">{copy.benefitsEyebrow}</p>
-            <h2 className="mt-4 font-display text-3xl text-navy sm:text-4xl">{copy.benefitsLead}</h2>
+            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
+              {copy.benefitsEyebrow}
+            </p>
+            <h2 className="mt-4 font-display text-3xl text-navy sm:text-4xl">
+              {copy.benefitsLead}
+            </h2>
             <ul className="mt-8 space-y-5">
               {copy.benefits.map((benefit) => (
                 <li
@@ -264,17 +272,27 @@ function ServiceDetailPage() {
       <section className="bg-sand py-24 lg:py-32">
         <div className="container-luxe">
           <Reveal className="mx-auto max-w-2xl text-center">
-            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">{copy.valueEyebrow}</p>
+            <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
+              {copy.valueEyebrow}
+            </p>
             <h2 className="mt-4 font-display text-3xl text-navy sm:text-5xl">{copy.valueTitle}</h2>
             <p className="mt-5 text-base leading-relaxed text-muted-foreground">{copy.valueLead}</p>
           </Reveal>
 
           <div className="mt-14 grid gap-6 md:grid-cols-3">
             {copy.values.map((item, index) => (
-              <Reveal key={item.title} delay={index * 0.08} className="border border-navy/10 bg-background p-8">
-                <span className="font-display text-3xl text-gold">{String(index + 1).padStart(2, "0")}</span>
+              <Reveal
+                key={item.title}
+                delay={index * 0.08}
+                className="border border-navy/10 bg-background p-8"
+              >
+                <span className="font-display text-3xl text-gold">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
                 <h3 className="mt-5 text-xl text-navy">{item.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.description}</p>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                  {item.description}
+                </p>
               </Reveal>
             ))}
           </div>
@@ -285,9 +303,15 @@ function ServiceDetailPage() {
         <section className="bg-background py-24 lg:py-32">
           <div className="container-luxe">
             <Reveal className="max-w-2xl">
-              <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">{copy.galleryEyebrow}</p>
-              <h2 className="mt-4 font-display text-3xl text-navy sm:text-5xl">{copy.galleryTitle}</h2>
-              <p className="mt-5 text-base leading-relaxed text-muted-foreground">{copy.galleryLead}</p>
+              <p className="text-[0.7rem] tracking-[0.28em] text-gold uppercase">
+                {copy.galleryEyebrow}
+              </p>
+              <h2 className="mt-4 font-display text-3xl text-navy sm:text-5xl">
+                {copy.galleryTitle}
+              </h2>
+              <p className="mt-5 text-base leading-relaxed text-muted-foreground">
+                {copy.galleryLead}
+              </p>
             </Reveal>
 
             <div className="mt-14 grid gap-5 md:grid-cols-3">

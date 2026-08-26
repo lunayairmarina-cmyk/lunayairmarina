@@ -97,9 +97,7 @@ export async function resolveMediaSrc(
   return fallback;
 }
 
-export async function resolveManyMediaSrcs(
-  srcs: string[],
-): Promise<Record<string, string>> {
+export async function resolveManyMediaSrcs(srcs: string[]): Promise<Record<string, string>> {
   const out: Record<string, string> = {};
   await Promise.all(
     srcs.map(async (src) => {

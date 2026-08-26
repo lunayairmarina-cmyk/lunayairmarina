@@ -6,15 +6,7 @@ import {
   updateProfile,
   type User,
 } from "firebase/auth";
-import {
-  collection,
-  deleteDoc,
-  doc,
-  getDoc,
-  getDocs,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 import { getDb, getFirebaseAuth, getSecondaryAuth, getSecondaryDb } from "@/lib/firebase";
 import {
   ADMIN_PERMISSIONS,

@@ -143,7 +143,9 @@ export function SeoForm() {
             onClick={() => setTab(id)}
             className={cn(
               "rounded-full px-4 py-2 text-xs tracking-[0.16em] uppercase transition-colors",
-              tab === id ? "bg-navy text-white" : "border border-navy/15 text-navy/65 hover:bg-white",
+              tab === id
+                ? "bg-navy text-white"
+                : "border border-navy/15 text-navy/65 hover:bg-white",
             )}
           >
             {label}
@@ -264,10 +266,7 @@ export function SeoForm() {
                 {score.checks.map((check) => (
                   <li
                     key={check.id}
-                    className={cn(
-                      "text-xs",
-                      check.ok ? "text-emerald-700" : "text-navy/55",
-                    )}
+                    className={cn("text-xs", check.ok ? "text-emerald-700" : "text-navy/55")}
                   >
                     {check.ok ? "✓" : "○"} {seoCheckLabel(check, t)}
                   </li>

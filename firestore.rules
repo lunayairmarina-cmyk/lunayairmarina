@@ -58,6 +58,71 @@ service cloud.firestore {
       ];
     }
 
+    // Knowledge writes from CMS admin approve UI (Admin SDK ingestion bypasses rules)
+    function isValidKnowledgeWrite() {
+      return request.resource.data.keys().hasAll([
+          'id', 'type', 'language', 'title', 'content', 'source', 'sourcePath', 'updatedAt', 'version'
+        ])
+        && request.resource.data.id == id
+        && request.resource.data.language in ['ar', 'en']
+        && request.resource.data.content is string
+        && request.resource.data.content.size() > 0
+        && request.resource.data.content.size() <= 50000;
+    }
+
+    // Anonymous chatbot conversation schema (sessionId == conversationId == doc id)
+    function isValidAiConversationWrite() {
+      return request.resource.data.keys().hasOnly([
+          'conversationId', 'sessionId', 'language', 'startedAt', 'lastMessageAt', 'summary',
+          'customerContext', 'status', 'leadStatus', 'lastIntent', 'leadId'
+        ])
+        && request.resource.data.keys().hasAll([
+          'conversationId', 'sessionId', 'language', 'startedAt', 'lastMessageAt', 'summary',
+          'customerContext', 'status', 'leadStatus'
+        ])
+        && request.resource.data.conversationId == conversationId
+        && request.resource.data.sessionId == conversationId
+        && request.resource.data.language in ['ar', 'en']
+        && request.resource.data.status in ['active', 'closed']
+        && request.resource.data.leadStatus in ['none', 'potential', 'handoff']
+        && request.resource.data.summary is string
+        && request.resource.data.summary.size() <= 2000
+        && request.resource.data.customerContext is map
+        && request.resource.data.startedAt is string
+        && request.resource.data.startedAt.size() <= 40
+        && request.resource.data.lastMessageAt is string
+        && request.resource.data.lastMessageAt.size() <= 40
+        && (!('lastIntent' in request.resource.data)
+            || (request.resource.data.lastIntent is string
+                && request.resource.data.lastIntent.size() <= 64))
+        && (!('leadId' in request.resource.data)
+            || (request.resource.data.leadId is string
+                && request.resource.data.leadId.size() <= 80));
+    }
+
+    function ownsAiConversation() {
+      return resource.data.sessionId == conversationId
+        && resource.data.conversationId == conversationId;
+    }
+
+    function isValidAiMessageCreate() {
+      return exists(/databases/$(database)/documents/aiConversations/$(conversationId))
+        && get(/databases/$(database)/documents/aiConversations/$(conversationId)).data.sessionId == conversationId
+        && get(/databases/$(database)/documents/aiConversations/$(conversationId)).data.conversationId == conversationId
+        && request.resource.data.keys().hasOnly([
+            'id', 'role', 'content', 'timestamp', 'intent', 'entities',
+            'retrievedKnowledgeIds', 'confidence'
+          ])
+        && request.resource.data.keys().hasAll(['id', 'role', 'content', 'timestamp'])
+        && request.resource.data.id == messageId
+        && request.resource.data.role in ['user', 'assistant']
+        && request.resource.data.content is string
+        && request.resource.data.content.size() > 0
+        && request.resource.data.content.size() <= 8000
+        && request.resource.data.timestamp is string
+        && request.resource.data.timestamp.size() <= 40;
+    }
+
     // First Super Admin bootstrap lock
     match /config/bootstrap {
       allow read: if true;
@@ -113,6 +178,66 @@ service cloud.firestore {
     match /media/{id} {
       allow read: if true;
       allow write: if isActiveAdmin();
+    }
+
+    // Legacy AI auth-user registry — no credentials stored; lock client self-registration
+    match /aiServiceAccounts/{uid} {
+      allow read: if isActiveAdmin();
+      allow create, update, delete: if false;
+    }
+
+    // AI knowledge base — server-side via Admin SDK; client read/write for active admins only
+    match /knowledgeDocuments/{id} {
+      allow read: if isActiveAdmin();
+      allow create, update: if isActiveAdmin() && isValidKnowledgeWrite();
+      allow delete: if isActiveAdmin();
+    }
+
+    // AI conversations — anonymous chatbot may access only own session doc (id == sessionId)
+    match /aiConversations/{conversationId} {
+      allow read: if isActiveAdmin() || ownsAiConversation();
+      allow create: if isValidAiConversationWrite();
+      allow update: if isActiveAdmin()
+        || (
+          ownsAiConversation()
+          && isValidAiConversationWrite()
+          && request.resource.data.sessionId == resource.data.sessionId
+          && request.resource.data.conversationId == resource.data.conversationId
+          && request.resource.data.startedAt == resource.data.startedAt
+        );
+
+      match /messages/{messageId} {
+        allow read: if isActiveAdmin()
+          || (
+            exists(/databases/$(database)/documents/aiConversations/$(conversationId))
+            && get(/databases/$(database)/documents/aiConversations/$(conversationId)).data.sessionId == conversationId
+          );
+        allow create: if isValidAiMessageCreate();
+        allow update, delete: if false;
+      }
+    }
+
+    // Knowledge learning candidates — Admin SDK create only; admins review
+    match /knowledgeCandidates/{id} {
+      allow read, update, delete: if isActiveAdmin();
+      allow create: if false;
+    }
+
+    // AI agent leads — Admin SDK create only; admins manage
+    match /aiLeads/{id} {
+      allow read, update, delete: if isActiveAdmin();
+      allow create: if false;
+    }
+
+    // Usage / error logs — admin read only; writes via Admin SDK
+    match /aiUsageLogs/{id} {
+      allow read: if isActiveAdmin();
+      allow write: if false;
+    }
+
+    // CMS → knowledge reingest flag — admin read/write
+    match /knowledgeSync/{id} {
+      allow read, write: if isActiveAdmin();
     }
 
     // Public marketing content

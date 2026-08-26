@@ -2,16 +2,17 @@
  * Content repository: Firestore reads, session/memory cache, and CMS localStorage overlay.
  * Prefer importing the public API from `@/services/content` (content.service).
  */
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  orderBy,
-  query,
-} from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, orderBy, query } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
-import { deepMergeCopy, diffCopyAgainstLocale, emptyCmsStore, isCollectionManaged, loadCmsStore, repairWrongLanguageCopy, saveCmsStore } from "@/lib/cms-store";
+import {
+  deepMergeCopy,
+  diffCopyAgainstLocale,
+  emptyCmsStore,
+  isCollectionManaged,
+  loadCmsStore,
+  repairWrongLanguageCopy,
+  saveCmsStore,
+} from "@/lib/cms-store";
 import enLocale from "@/locales/en.json";
 import arLocale from "@/locales/ar.json";
 import type {
@@ -85,10 +86,7 @@ function stripId<T extends object>(value: T & { id?: string }): T {
 }
 
 /** Merge CMS + remote lists by id (CMS wins on conflict; keep remote-only uploads). */
-function mergeById<T extends { id: string; order?: number }>(
-  cms: T[],
-  remote: T[],
-): T[] {
+function mergeById<T extends { id: string; order?: number }>(cms: T[], remote: T[]): T[] {
   if (!cms.length) return remote;
   if (!remote.length) return cms;
   const map = new Map<string, T>();
@@ -103,10 +101,7 @@ function mergeById<T extends { id: string; order?: number }>(
  * Gallery is a full snapshot from admin (including deletions).
  * Once managed, never re-introduce remote-only ids that were removed in CMS.
  */
-function mergeGallery(
-  cms: GalleryContent[],
-  remote: GalleryContent[],
-): GalleryContent[] {
+function mergeGallery(cms: GalleryContent[], remote: GalleryContent[]): GalleryContent[] {
   if (isCollectionManaged("gallery")) return cms;
   return mergeById(cms, remote);
 }
@@ -268,9 +263,7 @@ function isCorruptedLocalized(value: { en?: string; ar?: string } | undefined): 
   return looksLikeI18nKey(value.en) || looksLikeI18nKey(value.ar);
 }
 
-function sanitizeHomepageForBundle(
-  homepage: HomepageContent | null,
-): HomepageContent | null {
+function sanitizeHomepageForBundle(homepage: HomepageContent | null): HomepageContent | null {
   if (!homepage) return null;
   if (
     isCorruptedLocalized(homepage.heroTitle) ||
@@ -306,10 +299,8 @@ function mergeCmsOverFirebase(remote: SiteBundle): SiteBundle {
   // Persist repaired Arabic/English copy so the UI stops flipping languages.
   // Store diffs only — never dump the full locale tree into CMS localStorage.
   if (copy && cms.copy) {
-    const arWasContaminated =
-      JSON.stringify(cms.copy.ar ?? {}) !== JSON.stringify(copy.ar);
-    const enWasContaminated =
-      JSON.stringify(cms.copy.en ?? {}) !== JSON.stringify(copy.en);
+    const arWasContaminated = JSON.stringify(cms.copy.ar ?? {}) !== JSON.stringify(copy.ar);
+    const enWasContaminated = JSON.stringify(cms.copy.en ?? {}) !== JSON.stringify(copy.en);
     if (arWasContaminated || enWasContaminated) {
       saveCmsStore({
         ...cms,
@@ -327,8 +318,7 @@ function mergeCmsOverFirebase(remote: SiteBundle): SiteBundle {
   }
 
   const homepage =
-    sanitizeHomepageForBundle(cms.homepage) ??
-    sanitizeHomepageForBundle(remote.homepage);
+    sanitizeHomepageForBundle(cms.homepage) ?? sanitizeHomepageForBundle(remote.homepage);
 
   // Drop corrupted homepage from local CMS so it stops overriding locales.
   if (cms.homepage && !sanitizeHomepageForBundle(cms.homepage)) {
@@ -359,9 +349,7 @@ function mergeCmsOverFirebase(remote: SiteBundle): SiteBundle {
   };
 }
 
-export async function getSiteContent(options?: {
-  force?: boolean;
-}): Promise<SiteBundle> {
+export async function getSiteContent(options?: { force?: boolean }): Promise<SiteBundle> {
   if (!options?.force) {
     if (memoryCache) return memoryCache;
     const session = readSessionCache();
@@ -392,4 +380,3 @@ export function clearContentCache() {
     window.sessionStorage.removeItem(CACHE_KEY);
   }
 }
-

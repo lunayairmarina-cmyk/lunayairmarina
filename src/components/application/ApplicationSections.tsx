@@ -59,11 +59,7 @@ const overviewItem: typeof staggerItem = {
   },
 };
 
-function OverviewFeature({
-  card,
-}: {
-  card: (typeof appOverviewCards)[number];
-}) {
+function OverviewFeature({ card }: { card: (typeof appOverviewCards)[number] }) {
   const { t } = useLanguage();
   const Icon = overviewIcons[card.icon as keyof typeof overviewIcons];
   return (
@@ -212,21 +208,13 @@ function HeroPhones() {
   );
 }
 
-function ComingSoonStores({
-  className,
-  light = false,
-}: {
-  className?: string;
-  light?: boolean;
-}) {
+function ComingSoonStores({ className, light = false }: { className?: string; light?: boolean }) {
   const { t } = useLanguage();
   return (
     <div
       className={cn(
         "relative overflow-hidden border px-5 py-4 sm:px-6",
-        light
-          ? "border-white/35 bg-[#03111f]/90 text-white"
-          : "border-navy/15 bg-white text-navy",
+        light ? "border-white/35 bg-[#03111f]/90 text-white" : "border-navy/15 bg-white text-navy",
         className,
       )}
     >
@@ -485,10 +473,7 @@ export function ApplicationSections() {
           <div className="mt-14 grid grid-cols-2 gap-6 sm:grid-cols-3 sm:gap-8 lg:grid-cols-5 lg:gap-6">
             {galleryScreens.map((screen, index) => (
               <Reveal key={screen.src} delay={Math.min(index, 8) * 0.04}>
-                <motion.div
-                  whileHover={{ y: -6 }}
-                  className="flex flex-col items-center gap-3"
-                >
+                <motion.div whileHover={{ y: -6 }} className="flex flex-col items-center gap-3">
                   <PhoneFrame className="w-full max-w-[180px]" glow={false}>
                     <PhoneScreenshot
                       src={screen.src}

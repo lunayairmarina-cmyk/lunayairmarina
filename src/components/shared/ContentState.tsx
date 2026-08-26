@@ -1,12 +1,6 @@
 import { cn } from "@/lib/utils";
 
-export function ContentSkeleton({
-  className,
-  rows = 3,
-}: {
-  className?: string;
-  rows?: number;
-}) {
+export function ContentSkeleton({ className, rows = 3 }: { className?: string; rows?: number }) {
   return (
     <div className={cn("animate-pulse space-y-3", className)} aria-hidden>
       {Array.from({ length: rows }).map((_, index) => (
@@ -23,13 +17,7 @@ export function ContentSkeleton({
   );
 }
 
-export function ContentError({
-  message,
-  onRetry,
-}: {
-  message?: string;
-  onRetry?: () => void;
-}) {
+export function ContentError({ message, onRetry }: { message?: string; onRetry?: () => void }) {
   return (
     <div className="rounded-lg border border-gold/20 bg-navy/5 px-6 py-8 text-center">
       <p className="text-sm text-foreground/70">

@@ -16,8 +16,10 @@ import {
 export const Route = createFileRoute("/blog/$slug")({
   loader: ({ params }) => {
     const post =
-      getPostBySlug(params.slug, DEFAULT_BLOG_POSTS.filter((item) => item.status === "published")) ??
-      getPostBySlug(params.slug);
+      getPostBySlug(
+        params.slug,
+        DEFAULT_BLOG_POSTS.filter((item) => item.status === "published"),
+      ) ?? getPostBySlug(params.slug);
     if (!post || post.status !== "published") throw notFound();
     return post;
   },
@@ -89,7 +91,10 @@ function BlogPostPage() {
   }, [slug]);
 
   const related = useMemo(
-    () => getPublishedPosts().filter((item) => item.id !== post.id).slice(0, 2),
+    () =>
+      getPublishedPosts()
+        .filter((item) => item.id !== post.id)
+        .slice(0, 2),
     [post.id],
   );
 

@@ -15,7 +15,9 @@ function extractBalanced(src, startIdx) {
   throw new Error("Unbalanced");
 }
 
-for (const f of fs.readdirSync(dir).filter((x) => x.startsWith("admin.") && x.endsWith(".lazy.tsx"))) {
+for (const f of fs
+  .readdirSync(dir)
+  .filter((x) => x.startsWith("admin.") && x.endsWith(".lazy.tsx"))) {
   const p = path.join(dir, f);
   let s = fs.readFileSync(p, "utf8");
   const m = s.match(/createLazyFileRoute\(\s*(["'])([^"']+)\1\s*\)/);
@@ -39,7 +41,9 @@ for (const f of fs.readdirSync(dir).filter((x) => x.startsWith("admin.") && x.en
   console.log("lazy cleaned", f);
 }
 
-for (const f of fs.readdirSync(dir).filter((x) => x.startsWith("admin.") && x.endsWith(".tsx") && !x.includes(".lazy."))) {
+for (const f of fs
+  .readdirSync(dir)
+  .filter((x) => x.startsWith("admin.") && x.endsWith(".tsx") && !x.includes(".lazy."))) {
   const p = path.join(dir, f);
   let s = fs.readFileSync(p, "utf8");
   if (!s.includes("createFileRoute")) continue;

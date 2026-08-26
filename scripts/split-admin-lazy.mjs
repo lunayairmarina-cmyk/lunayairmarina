@@ -48,7 +48,9 @@ for (const file of files) {
   const optionsObj = extractBalanced(src, optionsStart);
 
   // Split options into critical (head, beforeLoad, loader, ...) vs component
-  const componentMatch = optionsObj.match(/,\s*component:\s*([A-Za-z0-9_]+)\s*$|^\{\s*component:\s*([A-Za-z0-9_]+)\s*$/);
+  const componentMatch = optionsObj.match(
+    /,\s*component:\s*([A-Za-z0-9_]+)\s*$|^\{\s*component:\s*([A-Za-z0-9_]+)\s*$/,
+  );
   // More reliable: find `component: Identifier` at top level of options
   let componentName = null;
   let criticalOptions = optionsObj;
@@ -75,7 +77,10 @@ for (const file of files) {
   lazySrc = lazySrc.replace(
     /import\s*\{\s*([^}]+)\s*\}\s*from\s*["']@tanstack\/react-router["']/,
     (fullImp, names) => {
-      const parts = names.split(",").map((s) => s.trim()).filter(Boolean);
+      const parts = names
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
       const filtered = parts.filter(
         (n) => !["createFileRoute", "redirect"].includes(n.split(/\s+as\s+/)[0]),
       );

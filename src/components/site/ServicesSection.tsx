@@ -175,7 +175,10 @@ export function ServicesSection({
 
                   <ul className="mt-5 space-y-2.5 border-t border-navy/8 pt-5">
                     {item.features.slice(0, 3).map((feature) => (
-                      <li key={feature} className="type-body-sm flex items-start gap-2.5 text-navy/70">
+                      <li
+                        key={feature}
+                        className="type-body-sm flex items-start gap-2.5 text-navy/70"
+                      >
                         <span className="mt-1.5 size-1.5 shrink-0 bg-gold" />
                         {feature}
                       </li>

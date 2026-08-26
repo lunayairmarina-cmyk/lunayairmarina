@@ -8,15 +8,9 @@ import gallery2 from "@/assets/gallery/gallery-02-deck.jpg";
 import gallery6 from "@/assets/gallery/gallery-06-crew.jpg";
 import gallery5 from "@/assets/gallery/gallery-05-arrival.jpg";
 import gallery8 from "@/assets/gallery/gallery-08-bridge.jpg";
+import { SERVICE_SLUGS, type ServiceSlug } from "@/data/serviceSlugs";
 
-export const SERVICE_SLUGS = [
-  "yacht-management-360",
-  "visiting-yacht-agency",
-  "marina-management",
-  "crew-management",
-] as const;
-
-export type ServiceSlug = (typeof SERVICE_SLUGS)[number];
+export { SERVICE_SLUGS, type ServiceSlug };
 
 export interface ServiceDefinition {
   slug: ServiceSlug;

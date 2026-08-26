@@ -53,15 +53,10 @@ export function isCollectionManaged(name: ManagedCollection): boolean {
 }
 
 export type SeoPageId =
-  | "home"
-  | "about"
-  | "services"
-  | "contact"
-  | "blog"
-  | "application"
-  | "advertising";
+  "home" | "about" | "services" | "contact" | "blog" | "application" | "advertising";
 
-export type PageHeaderId = "about" | "services" | "contact" | "blog" | "application" | "advertising";
+export type PageHeaderId =
+  "about" | "services" | "contact" | "blog" | "application" | "advertising";
 
 export interface SeoPageMeta {
   title: LocalizedString;
@@ -176,10 +171,12 @@ export function saveCmsStore(store: CmsStore) {
   const next: CmsStore = {
     ...store,
     // Drop inline data URLs so localStorage does not blow the quota and wipe CMS state.
-    gallery: store.gallery.map((item) => ({
-      ...item,
-      src: item.src.startsWith("data:") ? "" : item.src,
-    })).filter((item) => Boolean(item.src)),
+    gallery: store.gallery
+      .map((item) => ({
+        ...item,
+        src: item.src.startsWith("data:") ? "" : item.src,
+      }))
+      .filter((item) => Boolean(item.src)),
     updatedAt: new Date().toISOString(),
   };
   try {
@@ -348,7 +345,10 @@ export function setCopyPath(
   return { ...copy, [language]: root };
 }
 
-export function getCopyPath(dict: Record<string, unknown> | null | undefined, path: string): unknown {
+export function getCopyPath(
+  dict: Record<string, unknown> | null | undefined,
+  path: string,
+): unknown {
   if (!dict) return undefined;
   return path.split(".").reduce<unknown>((acc, part) => {
     if (acc && typeof acc === "object" && part in (acc as Record<string, unknown>)) {

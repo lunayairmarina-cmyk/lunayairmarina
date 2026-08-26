@@ -126,9 +126,7 @@ function AdminTrustPage() {
   };
 
   const updateSlot = (id: string, patch: Partial<Pick<TrustSlot, "title" | "body">>) => {
-    setSlots((prev) =>
-      prev.map((slot) => (slot.id === id ? { ...slot, ...patch } : slot)),
-    );
+    setSlots((prev) => prev.map((slot) => (slot.id === id ? { ...slot, ...patch } : slot)));
   };
 
   const save = async () => {

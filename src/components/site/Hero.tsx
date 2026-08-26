@@ -43,9 +43,11 @@ export function Hero() {
   // Poster-first: delay the ~28MB MP4 until after first paint, then actually fetch+play.
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const connection = (navigator as Navigator & {
-      connection?: { saveData?: boolean; effectiveType?: string };
-    }).connection;
+    const connection = (
+      navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string };
+      }
+    ).connection;
     const saveData = Boolean(connection?.saveData);
     const slowNet = connection?.effectiveType === "2g" || connection?.effectiveType === "slow-2g";
 
@@ -184,11 +186,7 @@ export function Hero() {
 
       {/* Visible immediately — Motion only does a soft lift after paint (no opacity:0 gate). */}
       <div className="container-luxe relative z-10 flex w-full flex-col items-center px-1 py-8 text-center sm:py-10">
-        <motion.span
-          initial={false}
-          animate={{ y: 0 }}
-          className="eyebrow"
-        >
+        <motion.span initial={false} animate={{ y: 0 }} className="eyebrow">
           {eyebrow}
         </motion.span>
 

@@ -11,7 +11,13 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "seed:firebase": "tsx scripts/seedFirebase.ts"
+    "seed:firebase": "tsx scripts/seedFirebase.ts",
+    "ingest:knowledge": "tsx scripts/ingest-knowledge.ts",
+    "ingest:knowledge:dry": "tsx scripts/ingest-knowledge.ts --dry-run",
+    "test:chatbot": "tsx scripts/test-chatbot.ts",
+    "test:agent:live": "tsx scripts/test-agent-live.ts",
+    "verify:agent": "tsx scripts/verify-agent-retrieval.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -52,6 +58,7 @@
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "firebase": "^12.17.0",
+    "firebase-admin": "^14.3.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.575.0",
     "motion": "^12.43.0",

@@ -5,12 +5,7 @@ import type {
 } from "@/types/content";
 
 /** Derived display status for admin tables and badges. */
-export type AdvertisementEffectiveStatus =
-  | "draft"
-  | "scheduled"
-  | "active"
-  | "expired"
-  | "paused";
+export type AdvertisementEffectiveStatus = "draft" | "scheduled" | "active" | "expired" | "paused";
 
 const PACKAGE_RANK: Record<AdvertisementPackage, number> = {
   vip: 3,
@@ -29,9 +24,7 @@ function parseDayBoundary(isoDate: string, endOfDay: boolean): Date | null {
   return new Date(year, month - 1, day, 0, 0, 0, 0);
 }
 
-export function normalizeAdvertisementStatus(
-  value: unknown,
-): AdvertisementStatus {
+export function normalizeAdvertisementStatus(value: unknown): AdvertisementStatus {
   if (value === "draft" || value === "paused" || value === "active") return value;
   return "draft";
 }
@@ -68,21 +61,18 @@ export function getAdvertisementEffectiveStatus(
 }
 
 /** Public page visibility: active window + manual status active. */
-export function isAdvertisementVisiblePublic(
-  ad: AdvertisementContent,
-  now = new Date(),
-): boolean {
+export function isAdvertisementVisiblePublic(ad: AdvertisementContent, now = new Date()): boolean {
   return getAdvertisementEffectiveStatus(ad, now) === "active";
 }
 
-export function sortAdvertisementsForPublic(
-  ads: AdvertisementContent[],
-): AdvertisementContent[] {
+export function sortAdvertisementsForPublic(ads: AdvertisementContent[]): AdvertisementContent[] {
   return [...ads].sort((a, b) => {
     const packageDelta =
       PACKAGE_RANK[getAdvertisementPackage(b)] - PACKAGE_RANK[getAdvertisementPackage(a)];
     if (packageDelta !== 0) return packageDelta;
-    return (a.displayOrder ?? Number.MAX_SAFE_INTEGER) - (b.displayOrder ?? Number.MAX_SAFE_INTEGER);
+    return (
+      (a.displayOrder ?? Number.MAX_SAFE_INTEGER) - (b.displayOrder ?? Number.MAX_SAFE_INTEGER)
+    );
   });
 }
 
@@ -90,9 +80,7 @@ export function listVisibleAdvertisements(
   ads: AdvertisementContent[],
   now = new Date(),
 ): AdvertisementContent[] {
-  return sortAdvertisementsForPublic(
-    ads.filter((ad) => isAdvertisementVisiblePublic(ad, now)),
-  );
+  return sortAdvertisementsForPublic(ads.filter((ad) => isAdvertisementVisiblePublic(ad, now)));
 }
 
 /** Featured + VIP appear in the homepage hero ticker. */
@@ -111,9 +99,7 @@ export function listVipNoticeAdvertisements(
   ads: AdvertisementContent[],
   now = new Date(),
 ): AdvertisementContent[] {
-  return listVisibleAdvertisements(ads, now).filter(
-    (ad) => getAdvertisementPackage(ad) === "vip",
-  );
+  return listVisibleAdvertisements(ads, now).filter((ad) => getAdvertisementPackage(ad) === "vip");
 }
 
 export function isVipAdvertisement(ad: AdvertisementContent): boolean {

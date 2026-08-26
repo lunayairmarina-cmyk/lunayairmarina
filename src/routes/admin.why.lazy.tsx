@@ -27,10 +27,10 @@ function seedWhy(): WhyContent {
       })),
     };
   }
-  const enItems = (enLocale as { why: { items: Array<{ title: string; description: string }> } }).why
-    .items;
-  const arItems = (arLocale as { why: { items: Array<{ title: string; description: string }> } }).why
-    .items;
+  const enItems = (enLocale as { why: { items: Array<{ title: string; description: string }> } })
+    .why.items;
+  const arItems = (arLocale as { why: { items: Array<{ title: string; description: string }> } })
+    .why.items;
   return {
     eyebrow: { en: enLocale.why.eyebrow, ar: arLocale.why.eyebrow },
     title: { en: enLocale.why.title, ar: arLocale.why.title },

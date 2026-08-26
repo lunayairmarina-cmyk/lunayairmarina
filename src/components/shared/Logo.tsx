@@ -12,12 +12,7 @@ interface LogoProps {
   align?: "start" | "center";
 }
 
-export function Logo({
-  tone = "dark",
-  className,
-  compact = false,
-  align = "start",
-}: LogoProps) {
+export function Logo({ tone = "dark", className, compact = false, align = "start" }: LogoProps) {
   const { t } = useLanguage();
   const centered = align === "center";
   void tone;

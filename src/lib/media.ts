@@ -99,7 +99,10 @@ function bundledAssetFor(fileName: string): string | undefined {
  * Fixes legacy `/src/assets/...` paths and stale hashed build URLs that break in the browser.
  * Never returns a raw `media:` ref (invalid as img src) — uses memory cache or fallback.
  */
-export function resolvePublicMediaSrc(src: string | undefined | null, fallback = gallery01): string {
+export function resolvePublicMediaSrc(
+  src: string | undefined | null,
+  fallback = gallery01,
+): string {
   if (!src || !src.trim()) return fallback;
   const value = src.trim();
 

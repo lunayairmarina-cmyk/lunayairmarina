@@ -192,7 +192,10 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="text-[0.6rem] tracking-[0.22em] text-navy-foreground/50 uppercase">
+      <label
+        htmlFor={id}
+        className="text-[0.6rem] tracking-[0.22em] text-navy-foreground/50 uppercase"
+      >
         {label}
       </label>
       <input

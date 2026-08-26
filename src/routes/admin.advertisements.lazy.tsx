@@ -197,9 +197,7 @@ function AdminAdvertisementsPage() {
   const setManualStatus = async (id: string, nextStatus: AdvertisementStatus) => {
     await persist(
       rows.map((row) =>
-        row.id === id
-          ? { ...row, status: nextStatus, updatedAt: new Date().toISOString() }
-          : row,
+        row.id === id ? { ...row, status: nextStatus, updatedAt: new Date().toISOString() } : row,
       ),
     );
   };
@@ -212,11 +210,7 @@ function AdminAdvertisementsPage() {
         render: (row) => (
           <div className="flex items-center gap-3">
             {row.logo ? (
-              <ResolvedImage
-                src={row.logo}
-                alt=""
-                className="size-10 rounded-full object-cover"
-              />
+              <ResolvedImage src={row.logo} alt="" className="size-10 rounded-full object-cover" />
             ) : (
               <span className="grid size-10 place-items-center rounded-full bg-navy/6 text-[0.65rem]">
                 {row.companyName[language].slice(0, 2).toUpperCase()}
@@ -338,7 +332,8 @@ function AdminAdvertisementsPage() {
                     websiteUrl: row.websiteUrl,
                     startDate: row.startDate,
                     endDate: row.endDate,
-                    status: row.status === "draft" || row.status === "paused" ? row.status : "active",
+                    status:
+                      row.status === "draft" || row.status === "paused" ? row.status : "active",
                     package: getAdvertisementPackage(row),
                     displayOrder: String(row.displayOrder ?? 1),
                   });

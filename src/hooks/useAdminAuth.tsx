@@ -156,9 +156,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
             credential = await signInWithEmailAndPassword(auth, normalized, pass);
           } catch (bootstrapError) {
             const bootstrapCode =
-              bootstrapError &&
-              typeof bootstrapError === "object" &&
-              "code" in bootstrapError
+              bootstrapError && typeof bootstrapError === "object" && "code" in bootstrapError
                 ? String((bootstrapError as { code?: string }).code)
                 : "";
             if (bootstrapCode.includes("email-already-in-use")) throw signInError;

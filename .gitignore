@@ -18,6 +18,11 @@ dist-ssr
 .env
 .env.local
 
+# Firebase / GCP service account keys (never commit)
+secrets/
+*service-account*.json
+*-firebase-adminsdk-*.json
+
 # Local image source packs (import scripts consume these)
 public/images/New folder/
 

@@ -54,13 +54,7 @@ export const staggerItem: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
 };
 
-export function StaggerGroup({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
+export function StaggerGroup({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <motion.div
       className={cn(className)}

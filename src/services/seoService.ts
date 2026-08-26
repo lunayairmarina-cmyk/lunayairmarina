@@ -1,18 +1,9 @@
 import { doc, getDoc } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
-import {
-  loadCmsStore,
-  type SeoPageId,
-  type SeoPageMeta,
-} from "@/lib/cms-store";
+import { loadCmsStore, type SeoPageId, type SeoPageMeta } from "@/lib/cms-store";
 import type { LocalizedString } from "@/types/content";
 import { SERVICE_SLUGS, type ServiceSlug } from "@/data/services";
-import {
-  absoluteUrl,
-  DEFAULT_LOGO_PATH,
-  DEFAULT_OG_IMAGE_PATH,
-  getSiteUrl,
-} from "@/lib/site";
+import { absoluteUrl, DEFAULT_LOGO_PATH, DEFAULT_OG_IMAGE_PATH, getSiteUrl } from "@/lib/site";
 
 const DEFAULT_SEO: Record<SeoPageId, SeoPageMeta> = {
   home: {
@@ -230,7 +221,10 @@ export function getServiceSeoFromCms(slug: string): SeoPageMeta {
   const fallback =
     DEFAULT_SERVICE_SEO[slug as ServiceSlug] ??
     ({
-      title: { en: "Yacht Management Service | lunayairmarina", ar: "خدمة إدارة يخوت | lunayairmarina" },
+      title: {
+        en: "Yacht Management Service | lunayairmarina",
+        ar: "خدمة إدارة يخوت | lunayairmarina",
+      },
       description: {
         en: "Premium yacht management service by lunayairmarina.",
         ar: "خدمة إدارة يخوت مميزة من lunayairmarina.",
@@ -284,7 +278,11 @@ export function scoreSeo(meta: SeoPageMeta, language: "en" | "ar" = "en"): SeoSc
   const descOk = description.length >= 120 && description.length <= 160;
   const focusInTitle = focus ? title.toLowerCase().includes(focus) : false;
   const focusInDesc = focus ? description.toLowerCase().includes(focus) : false;
-  const hasKeywords = keywords.split(",").map((k) => k.trim()).filter(Boolean).length >= 2;
+  const hasKeywords =
+    keywords
+      .split(",")
+      .map((k) => k.trim())
+      .filter(Boolean).length >= 2;
   const hasOg = Boolean(meta.ogImage);
   const hasCanonical = Boolean(meta.canonicalPath);
   const checks: SeoScore["checks"] = [
@@ -300,10 +298,7 @@ export function scoreSeo(meta: SeoPageMeta, language: "en" | "ar" = "en"): SeoSc
   return { score: Math.round((passed / checks.length) * 100), checks };
 }
 
-export async function getSeoForPage(
-  pageId: SeoPageId,
-  language: "en" | "ar" = "en",
-) {
+export async function getSeoForPage(pageId: SeoPageId, language: "en" | "ar" = "en") {
   const local = getSeoFromCms(pageId);
   try {
     const snap = await getDoc(doc(getDb(), "seo", pageId));
@@ -338,9 +333,7 @@ export function buildSeoHeadFromMeta(
 
   const site = getSiteUrl();
   const path = picked.canonicalPath || fallbackPath;
-  const url = path.startsWith("http")
-    ? path
-    : `${site}${path.startsWith("/") ? path : `/${path}`}`;
+  const url = path.startsWith("http") ? path : `${site}${path.startsWith("/") ? path : `/${path}`}`;
   const ogImage = absoluteUrl(picked.ogImage || DEFAULT_OG_IMAGE_PATH, site);
   const logoUrl = absoluteUrl(DEFAULT_LOGO_PATH, site);
 
@@ -374,11 +367,7 @@ export function buildSeoHeadFromMeta(
   };
 }
 
-export function buildSeoHead(
-  pageId: SeoPageId,
-  path: string,
-  language: "en" | "ar" = "en",
-) {
+export function buildSeoHead(pageId: SeoPageId, path: string, language: "en" | "ar" = "en") {
   return buildSeoHeadFromMeta(getSeoFromCms(pageId), path, language);
 }
 

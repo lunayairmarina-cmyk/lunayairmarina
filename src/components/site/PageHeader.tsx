@@ -42,11 +42,7 @@ function webpSiblingFor(image: string): string | null {
 }
 
 function isMediaLike(src: string) {
-  return (
-    src.startsWith("media:") ||
-    src.startsWith("data:") ||
-    src.startsWith("blob:")
-  );
+  return src.startsWith("media:") || src.startsWith("data:") || src.startsWith("blob:");
 }
 
 /** Above-the-fold header: always visible on first paint (no opacity:0 Motion gate). */

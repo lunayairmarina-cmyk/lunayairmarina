@@ -82,9 +82,7 @@ function AdminTestimonialsPage() {
     const text = pairLocalized(draft.reviewEn, draft.reviewAr);
 
     const next = editingId
-      ? rows.map((row) =>
-          row.id === editingId ? { ...row, clientName, role, text } : row,
-        )
+      ? rows.map((row) => (row.id === editingId ? { ...row, clientName, role, text } : row))
       : [
           ...rows,
           {
@@ -127,9 +125,7 @@ function AdminTestimonialsPage() {
       {
         key: "position",
         header: t("admin.table.position"),
-        render: (row) => (
-          <span dir="auto">{adminDisplayLocalized(row.role, language)}</span>
-        ),
+        render: (row) => <span dir="auto">{adminDisplayLocalized(row.role, language)}</span>,
       },
       {
         key: "review",

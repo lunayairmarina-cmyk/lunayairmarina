@@ -18,18 +18,19 @@ export function FaqSection({ variant = "default" }: { variant?: "default" | "hom
   const items: FaqItem[] =
     remote.length > 0
       ? remote.map((item, index) => ({
-          question: localizeOrFallback(
-            item.question,
-            language,
-            localeItems[index]?.question ?? "",
-          ),
+          question: localizeOrFallback(item.question, language, localeItems[index]?.question ?? ""),
           answer: localizeOrFallback(item.answer, language, localeItems[index]?.answer ?? ""),
         }))
       : localeItems;
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section className={cn("py-16 sm:py-20 lg:py-24", variant === "home" ? "bg-[#fbfaf7]" : "bg-background")}>
+    <section
+      className={cn(
+        "py-16 sm:py-20 lg:py-24",
+        variant === "home" ? "bg-[#fbfaf7]" : "bg-background",
+      )}
+    >
       <div className="container-luxe grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16 xl:gap-20">
         <SectionHeading eyebrow={t("faq.eyebrow")} title={t("faq.title")} align="start" />
 

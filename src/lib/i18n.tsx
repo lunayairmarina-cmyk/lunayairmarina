@@ -100,12 +100,7 @@ function repairString(
   return found;
 }
 
-function repairTree(
-  node: unknown,
-  language: Language,
-  enNode: unknown,
-  arNode: unknown,
-): unknown {
+function repairTree(node: unknown, language: Language, enNode: unknown, arNode: unknown): unknown {
   if (typeof node === "string") {
     return repairString(node, language, enNode, arNode);
   }
@@ -187,12 +182,7 @@ function LanguageProviderInner({ children }: { children: ReactNode }) {
         const found = resolve(dict, key);
         const bundled = resolve(fallbackDict, key);
         const value = found !== undefined ? found : bundled;
-        const repaired = repairTree(
-          value,
-          language,
-          resolve(enDict, key),
-          resolve(arDict, key),
-        );
+        const repaired = repairTree(value, language, resolve(enDict, key), resolve(arDict, key));
         return repaired as T;
       },
     };

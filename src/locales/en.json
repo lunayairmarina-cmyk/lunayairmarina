@@ -126,31 +126,19 @@
       {
         "title": "Agency Services for Visiting Yachts",
         "description": "Support for international yachts arriving in Saudi waters, including permits and logistics.",
-        "features": [
-          "Clearance & permits",
-          "Berth reservation",
-          "Provisioning and concierge"
-        ],
+        "features": ["Clearance & permits", "Berth reservation", "Provisioning and concierge"],
         "slug": "visiting-yacht-agency"
       },
       {
         "title": "Marina & Yacht Club Operations",
         "description": "World-class marina and yacht-club operations for safe, luxury berthing.",
-        "features": [
-          "Berth allocation",
-          "Facility operations",
-          "Safety and security"
-        ],
+        "features": ["Berth allocation", "Facility operations", "Safety and security"],
         "slug": "marina-management"
       },
       {
         "title": "Crew Recruitment Services",
         "description": "Carefully selected, qualified crew matched to your requirements and service standards.",
-        "features": [
-          "Vetted crew placement",
-          "Payroll & contracts",
-          "Training and certification"
-        ],
+        "features": ["Vetted crew placement", "Payroll & contracts", "Training and certification"],
         "slug": "crew-management"
       }
     ],
@@ -854,53 +842,95 @@
       "blog": "Blog",
       "gallery": "Gallery",
       "testimonials": "Testimonials",
-    "faq": "FAQ",
-    "advertisements": "Advertising",
-    "messages": "Messages",
-    "seo": "SEO",
-    "users": "Users & Roles",
-    "settings": "Settings",
-    "logout": "Logout",
-    "groups": {
-      "content": "Content",
-      "system": "System"
-    }
-  },
-  "advertisements": {
-    "company": "Company",
-    "category": "Category",
-    "websiteUrl": "Website URL",
-    "ctaLabel": "CTA label",
-    "logo": "Company logo",
-    "image": "Advertisement image",
-    "start": "Start",
-    "end": "End",
-    "featured": "Featured",
-    "package": "Package",
-    "packages": {
-      "standard": "Standard",
+      "faq": "FAQ",
+      "advertisements": "Advertising",
+      "messages": "Messages",
+      "ai": "AI Agent",
+      "seo": "SEO",
+      "users": "Users & Roles",
+      "settings": "Settings",
+      "logout": "Logout",
+      "groups": {
+        "content": "Content",
+        "system": "System"
+      }
+    },
+    "ai": {
+      "subtitle": "Review AI conversations, leads, unanswered questions, and sync website knowledge.",
+      "refresh": "Refresh",
+      "syncNow": "Sync knowledge",
+      "syncing": "Syncing…",
+      "syncFailed": "Knowledge sync failed. Check server Firebase Admin credentials.",
+      "loadFailed": "Could not load AI data.",
+      "noPermission": "You do not have permission to manage the AI agent.",
+      "loading": "Loading…",
+      "knowledgeDocs": "Knowledge docs",
+      "conversations": "Conversations",
+      "pendingCandidates": "Pending questions",
+      "syncStatus": "Knowledge sync",
+      "syncNeeded": "Needs sync",
+      "syncOk": "Up to date",
+      "popularIntents": "Popular intents",
+      "leads": "AI leads",
+      "candidates": "Unanswered / candidates",
+      "approvedKnowledge": "Approved learning",
+      "session": "Session",
+      "language": "Lang",
+      "intent": "Intent",
+      "leadStatus": "Lead",
+      "updated": "Updated",
+      "question": "Question",
+      "name": "Name",
+      "phone": "Phone",
+      "email": "Email",
+      "interest": "Interest",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approvePrompt": "Approved answer to publish into knowledge:",
+      "approved": "Candidate approved and added to knowledge.",
+      "rejected": "Candidate rejected.",
+      "approveFailed": "Could not update candidate.",
+      "closeLead": "Close",
+      "emptyConversations": "No conversations yet.",
+      "emptyLeads": "No AI leads yet.",
+      "emptyCandidates": "No pending candidates.",
+      "emptyApproved": "No approved candidates yet."
+    },
+    "advertisements": {
+      "company": "Company",
+      "category": "Category",
+      "websiteUrl": "Website URL",
+      "ctaLabel": "CTA label",
+      "logo": "Company logo",
+      "image": "Advertisement image",
+      "start": "Start",
+      "end": "End",
       "featured": "Featured",
-      "vip": "VIP"
+      "package": "Package",
+      "packages": {
+        "standard": "Standard",
+        "featured": "Featured",
+        "vip": "VIP"
+      },
+      "packageHints": {
+        "standard": "Appears on the Advertising page only.",
+        "featured": "Advertising page + homepage ticker.",
+        "vip": "Large Advertising showcase + homepage ticker + side notice every 30 minutes."
+      },
+      "order": "Order",
+      "preview": "Preview",
+      "pause": "Pause",
+      "resume": "Resume",
+      "invalidDates": "End date must be on or after the start date.",
+      "status": {
+        "draft": "Draft",
+        "scheduled": "Scheduled",
+        "active": "Active",
+        "expired": "Expired",
+        "paused": "Paused"
+      }
     },
-    "packageHints": {
-      "standard": "Appears on the Advertising page only.",
-      "featured": "Advertising page + homepage ticker.",
-      "vip": "Large Advertising showcase + homepage ticker + side notice every 30 minutes."
-    },
-    "order": "Order",
-    "preview": "Preview",
-    "pause": "Pause",
-    "resume": "Resume",
-    "invalidDates": "End date must be on or after the start date.",
-    "status": {
-      "draft": "Draft",
-      "scheduled": "Scheduled",
-      "active": "Active",
-      "expired": "Expired",
-      "paused": "Paused"
-    }
-  },
-  "cms": {
+    "cms": {
       "savedLocal": "Saved locally. Live on this browser.",
       "savedSynced": "Saved and synced to Firebase.",
       "uploadFailed": "Upload failed. Check you are signed in as admin and try again.",
@@ -1213,6 +1243,7 @@
         "faq": "FAQ",
         "advertisements": "Advertising",
         "messages": "Messages",
+        "ai": "AI Agent",
         "seo": "SEO",
         "settings": "Settings",
         "users": "Users & Roles"
@@ -1237,6 +1268,29 @@
       "hierarchyDenied": "You can only manage accounts below your own level, and only grant permissions you hold yourself.",
       "permissionDenied": "You do not have permission to make this change."
     }
+  },
+  "chatbot": {
+    "fabLabel": "AI Assistant",
+    "title": "Lunayair AI Assistant",
+    "welcome": "Welcome to Lunayair Marina 👋\nHow can we help you today?",
+    "placeholder": "Type your message…",
+    "send": "Send",
+    "typing": "Assistant is typing",
+    "retry": "Try again",
+    "error": "Something went wrong temporarily. Please try again or reach us via the contact page.",
+    "rateLimit": "Too many messages. Please wait a moment and try again.",
+    "teaserAria": "AI assistant greeting messages",
+    "statusOnline": "Online now",
+    "teasers": [
+      "Hi there 👋 I'm Lunayair's AI assistant",
+      "I can help you pick the right service for your yacht"
+    ],
+    "quickReplies": [
+      { "label": "Our Services", "message": "What services do you provide?" },
+      { "label": "Yacht Management", "message": "Tell me about your yacht management services." },
+      { "label": "Visiting Yachts", "message": "Do you support visiting international yachts?" },
+      { "label": "Contact Us", "message": "How can I contact your team?" }
+    ]
   },
   "common": {
     "language": "Language",

@@ -205,10 +205,12 @@ async function main() {
       gallery: (serviceGalleries[i] ?? []).map((src, gi) => ({
         src,
         caption: L(
-          ((detailsEn as { gallery?: Record<string, string> })?.gallery?.[`g${gi + 1}`] as string) ??
-            `Gallery ${gi + 1}`,
-          ((detailsAr as { gallery?: Record<string, string> })?.gallery?.[`g${gi + 1}`] as string) ??
-            `معرض ${gi + 1}`,
+          ((detailsEn as { gallery?: Record<string, string> })?.gallery?.[
+            `g${gi + 1}`
+          ] as string) ?? `Gallery ${gi + 1}`,
+          ((detailsAr as { gallery?: Record<string, string> })?.gallery?.[
+            `g${gi + 1}`
+          ] as string) ?? `معرض ${gi + 1}`,
         ),
       })),
       details: { en: detailsEn, ar: detailsAr },
@@ -310,14 +312,54 @@ async function main() {
   console.log("✓ faq/*");
 
   const gallerySeed = [
-    { id: "g1", src: media.gallery1, caption: L("Illuminated stern at night", "مؤخرة اليخت المضيئة ليلًا"), span: "tall" },
-    { id: "g2", src: media.gallery3, caption: L("Transom branding at golden hour", "شعار الترانزم عند الغروب"), span: "normal" },
-    { id: "g3", src: media.gallery2, caption: L("Brand mark on the hull", "شعار المارينا على الهيكل"), span: "normal" },
-    { id: "g4", src: media.gallery4, caption: L("Owner briefing on the bridge", "اجتماع المالك في غرفة القيادة"), span: "normal" },
-    { id: "g5", src: media.heroImage, caption: L("Bow cutting open water", "مقدمة اليخت في المياه المفتوحة"), span: "normal" },
-    { id: "g6", src: media.yacht2, caption: L("Visiting yacht at the pier", "يخت زائر عند الرصيف"), span: "normal" },
-    { id: "g7", src: media.about, caption: L("Crew on deck briefing", "إحاطة الطاقم على السطح"), span: "normal" },
-    { id: "g8", src: media.yacht3, caption: L("Fleet convoy from the air", "قافلة اليخوت من الجو"), span: "normal" },
+    {
+      id: "g1",
+      src: media.gallery1,
+      caption: L("Illuminated stern at night", "مؤخرة اليخت المضيئة ليلًا"),
+      span: "tall",
+    },
+    {
+      id: "g2",
+      src: media.gallery3,
+      caption: L("Transom branding at golden hour", "شعار الترانزم عند الغروب"),
+      span: "normal",
+    },
+    {
+      id: "g3",
+      src: media.gallery2,
+      caption: L("Brand mark on the hull", "شعار المارينا على الهيكل"),
+      span: "normal",
+    },
+    {
+      id: "g4",
+      src: media.gallery4,
+      caption: L("Owner briefing on the bridge", "اجتماع المالك في غرفة القيادة"),
+      span: "normal",
+    },
+    {
+      id: "g5",
+      src: media.heroImage,
+      caption: L("Bow cutting open water", "مقدمة اليخت في المياه المفتوحة"),
+      span: "normal",
+    },
+    {
+      id: "g6",
+      src: media.yacht2,
+      caption: L("Visiting yacht at the pier", "يخت زائر عند الرصيف"),
+      span: "normal",
+    },
+    {
+      id: "g7",
+      src: media.about,
+      caption: L("Crew on deck briefing", "إحاطة الطاقم على السطح"),
+      span: "normal",
+    },
+    {
+      id: "g8",
+      src: media.yacht3,
+      caption: L("Fleet convoy from the air", "قافلة اليخوت من الجو"),
+      span: "normal",
+    },
   ];
   for (let i = 0; i < gallerySeed.length; i++) {
     const item = gallerySeed[i]!;

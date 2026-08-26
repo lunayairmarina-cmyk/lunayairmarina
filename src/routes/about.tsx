@@ -60,9 +60,7 @@ function AboutPage() {
               delay={index * 0.1}
               className="group relative text-center sm:px-4"
             >
-              <p className="text-[0.6rem] tracking-[0.28em] text-gold/70 uppercase">
-                0{index + 1}
-              </p>
+              <p className="text-[0.6rem] tracking-[0.28em] text-gold/70 uppercase">0{index + 1}</p>
               <p className="mt-3 font-display text-5xl leading-none text-gold sm:text-6xl lg:text-7xl">
                 <Counter value={stat.value} suffix={stat.suffix} />
               </p>
@@ -106,16 +104,10 @@ function AboutPage() {
           </Reveal>
 
           <Reveal direction="right">
-            <p className="eyebrow">
-              {t("about.story.eyebrow")}
-            </p>
-            <h2 className="type-display-m mt-3 text-navy sm:mt-4">
-              {t("about.story.title")}
-            </h2>
+            <p className="eyebrow">{t("about.story.eyebrow")}</p>
+            <h2 className="type-display-m mt-3 text-navy sm:mt-4">{t("about.story.title")}</h2>
             <span className="gold-rule mt-5 sm:mt-6" />
-            <p className="type-body mt-6 text-navy/75 sm:mt-7">
-              {t("about.story.body")}
-            </p>
+            <p className="type-body mt-6 text-navy/75 sm:mt-7">{t("about.story.body")}</p>
           </Reveal>
         </div>
       </section>
@@ -124,17 +116,13 @@ function AboutPage() {
       <section className="bg-sand py-16 sm:py-20 lg:py-24">
         <div className="container-luxe grid gap-10 lg:grid-cols-2 lg:gap-14">
           <Reveal className="border-s-2 border-gold ps-7 sm:ps-10">
-            <p className="eyebrow">
-              {t("about.mission.eyebrow")}
-            </p>
+            <p className="eyebrow">{t("about.mission.eyebrow")}</p>
             <p className="type-display-s mt-4 text-navy sm:mt-5 sm:text-2xl lg:text-3xl">
               {t("about.mission.body")}
             </p>
           </Reveal>
           <Reveal delay={0.1} className="border-s-2 border-navy/25 ps-7 sm:ps-10">
-            <p className="eyebrow">
-              {t("about.vision.eyebrow")}
-            </p>
+            <p className="eyebrow">{t("about.vision.eyebrow")}</p>
             <p className="type-display-s mt-4 text-navy sm:mt-5 sm:text-2xl lg:text-3xl">
               {t("about.vision.body")}
             </p>
@@ -148,9 +136,7 @@ function AboutPage() {
           <Reveal className="max-w-2xl">
             <p className="eyebrow">{t("about.eyebrow")}</p>
             <h2 className="type-display-m mt-3 text-navy sm:mt-4">{t("about.valuesTitle")}</h2>
-            <p className="type-body mt-4 text-muted-foreground sm:mt-5">
-              {t("about.valuesLead")}
-            </p>
+            <p className="type-body mt-4 text-muted-foreground sm:mt-5">{t("about.valuesLead")}</p>
           </Reveal>
 
           <div className="mt-12 grid gap-x-10 gap-y-10 sm:mt-14 sm:grid-cols-2 sm:gap-y-12 lg:gap-x-14">
@@ -179,13 +165,9 @@ function AboutPage() {
         />
         <div className="container-luxe relative max-w-3xl text-center text-white">
           <Reveal>
-            <p className="eyebrow">
-              {t("about.clients.eyebrow")}
-            </p>
+            <p className="eyebrow">{t("about.clients.eyebrow")}</p>
             <h2 className="type-display-m mt-3 sm:mt-4">{t("about.clients.title")}</h2>
-            <p className="type-body mt-5 text-white/65 sm:mt-6">
-              {t("about.clients.body")}
-            </p>
+            <p className="type-body mt-5 text-white/65 sm:mt-6">{t("about.clients.body")}</p>
             <p className="type-display-s mt-10 text-gold sm:mt-12 sm:text-2xl lg:text-3xl">
               “{t("about.clients.quote")}”
             </p>
@@ -205,9 +187,7 @@ function AboutPage() {
         />
         <div className="container-luxe relative flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-end lg:gap-12">
           <Reveal>
-            <p className="eyebrow">
-              {t("about.ctaBand.eyebrow")}
-            </p>
+            <p className="eyebrow">{t("about.ctaBand.eyebrow")}</p>
             <h2 className="type-display-m mt-3 max-w-xl text-navy sm:mt-4">
               {t("about.ctaBand.title")}
             </h2>

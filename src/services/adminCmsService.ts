@@ -79,10 +79,7 @@ export function isGalleryManaged(): boolean {
   return isCollectionManaged("gallery");
 }
 
-export function describeSaveResult(
-  result: SaveResult,
-  labels: { synced: string; local: string },
-) {
+export function describeSaveResult(result: SaveResult, labels: { synced: string; local: string }) {
   return result.ok && result.sync === "synced" ? labels.synced : labels.local;
 }
 
@@ -97,6 +94,18 @@ function notifySiteReload() {
   } catch {
     // Older browsers / restricted contexts
   }
+  // Soft flag for AI knowledge re-ingest (Admin SDK runs sync later — never on every chat blindly).
+  void setDoc(
+    doc(getDb(), "knowledgeSync", "status"),
+    {
+      needsReingest: true,
+      reason: "cms_content_updated",
+      requestedAt: new Date().toISOString(),
+    },
+    { merge: true },
+  ).catch(() => {
+    // Best-effort; admin may lack rules until published.
+  });
 }
 
 async function mirrorFullCmsStore() {
@@ -225,10 +234,7 @@ export async function loadTeam(): Promise<TeamMember[]> {
     const snap = await getDocs(collection(getDb(), "team"));
     const team = snap.docs
       .map((d) => ({ id: d.id, ...(d.data() as Omit<TeamMember, "id">) }))
-      .sort(
-        (a, b) =>
-          (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER),
-      );
+      .sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER));
     patchCmsStore({ team });
     return team;
   } catch {
@@ -289,8 +295,7 @@ export async function loadAdvertisements(): Promise<AdvertisementContent[]> {
       .filter((ad) => !String(ad.id).startsWith("sample-ad-"))
       .sort(
         (a, b) =>
-          (a.displayOrder ?? Number.MAX_SAFE_INTEGER) -
-          (b.displayOrder ?? Number.MAX_SAFE_INTEGER),
+          (a.displayOrder ?? Number.MAX_SAFE_INTEGER) - (b.displayOrder ?? Number.MAX_SAFE_INTEGER),
       );
     if (advertisements.length === 0 && !isCollectionManaged("advertisements")) {
       return (loadCmsStore().advertisements ?? []).map(normalizeAdvertisement);
@@ -483,10 +488,7 @@ export async function loadTestimonials(): Promise<TestimonialContent[]> {
     const snap = await getDocs(collection(getDb(), "testimonials"));
     let remote = snap.docs
       .map((d) => ({ id: d.id, ...(d.data() as Omit<TestimonialContent, "id">) }))
-      .sort(
-        (a, b) =>
-          (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER),
-      );
+      .sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER));
 
     if (remote.length) {
       remote = remote.map((row, index) => {
@@ -553,10 +555,7 @@ export async function loadFaq(): Promise<FaqContent[]> {
     const snap = await getDocs(collection(getDb(), "faq"));
     const remote = snap.docs
       .map((d) => ({ id: d.id, ...(d.data() as Omit<FaqContent, "id">) }))
-      .sort(
-        (a, b) =>
-          (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER),
-      );
+      .sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER));
     if (remote.length) {
       patchCmsStore({ faq: remote, firebaseSync: "synced" });
       return remote;
@@ -567,8 +566,8 @@ export async function loadFaq(): Promise<FaqContent[]> {
   const local = loadCmsStore().faq;
   // Drop English-only mock contamination (ar identical to en / missing Arabic script).
   const usableLocal = local.filter((row) => {
-    const q = typeof row.question === "string" ? row.question : row.question?.ar ?? "";
-    const a = typeof row.answer === "string" ? row.answer : row.answer?.ar ?? "";
+    const q = typeof row.question === "string" ? row.question : (row.question?.ar ?? "");
+    const a = typeof row.answer === "string" ? row.answer : (row.answer?.ar ?? "");
     return /[\u0600-\u06FF]/.test(q) || /[\u0600-\u06FF]/.test(a);
   });
   if (usableLocal.length) return usableLocal;
@@ -610,9 +609,7 @@ export async function saveFaq(faq: FaqContent[]): Promise<SaveResult> {
 
 export async function saveBlogPosts(blog: BlogContent[]): Promise<SaveResult> {
   markCollectionManaged("blog");
-  const keepIds = new Set(
-    blog.map((post) => post.slug || post.id).filter(Boolean) as string[],
-  );
+  const keepIds = new Set(blog.map((post) => post.slug || post.id).filter(Boolean) as string[]);
   const sync = await tryFirebaseWrite(async () => {
     const db = getDb();
     const existing = await getDocs(collection(db, "blog"));
@@ -651,10 +648,7 @@ export async function saveServiceSeo(slug: string, meta: SeoPageMeta): Promise<S
   return { ok: true, sync };
 }
 
-export async function savePageHeader(
-  pageId: PageHeaderId,
-  imageUrl: string,
-): Promise<SaveResult> {
+export async function savePageHeader(pageId: PageHeaderId, imageUrl: string): Promise<SaveResult> {
   const normalized = normalizePageHeaderUrl(pageId, imageUrl);
   const sync = await tryFirebaseWrite(async () => {
     await setDoc(doc(getDb(), "pageHeaders", pageId), { imageUrl: normalized }, { merge: true });
@@ -680,12 +674,17 @@ export async function saveAllPageHeaders(
     });
     await batch.commit();
   });
-  patchCmsStore({ pageHeaders: { ...loadCmsStore().pageHeaders, ...normalized }, firebaseSync: sync });
+  patchCmsStore({
+    pageHeaders: { ...loadCmsStore().pageHeaders, ...normalized },
+    firebaseSync: sync,
+  });
   notifySiteReload();
   return { ok: true, sync };
 }
 
-export async function saveAllSeo(seo: Partial<Record<SeoPageId, SeoPageMeta>>): Promise<SaveResult> {
+export async function saveAllSeo(
+  seo: Partial<Record<SeoPageId, SeoPageMeta>>,
+): Promise<SaveResult> {
   const sync = await tryFirebaseWrite(async () => {
     const batch = writeBatch(getDb());
     Object.entries(seo).forEach(([id, meta]) => {
@@ -874,7 +873,9 @@ async function fileToUploadBlob(
   return { blob, contentType };
 }
 
-async function fileToCompressedDataUrl(file: File): Promise<{ dataUrl: string; contentType: string }> {
+async function fileToCompressedDataUrl(
+  file: File,
+): Promise<{ dataUrl: string; contentType: string }> {
   const attempts: Array<{ quality: number; maxEdge: number }> = [
     { quality: 0.82, maxEdge: 1920 },
     { quality: 0.72, maxEdge: 1600 },
@@ -992,7 +993,9 @@ export async function uploadMediaFile(
   options.onProgress?.(8);
 
   const preferStorage =
-    String((import.meta.env as Record<string, string | undefined>).VITE_FIREBASE_STORAGE_UPLOADS || "")
+    String(
+      (import.meta.env as Record<string, string | undefined>).VITE_FIREBASE_STORAGE_UPLOADS || "",
+    )
       .trim()
       .toLowerCase() === "1" && !isStorageBlocked();
 

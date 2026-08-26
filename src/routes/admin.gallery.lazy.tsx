@@ -71,7 +71,8 @@ function AdminGalleryPage() {
           setItems(next);
           // Rewrite fragile Vite `/assets/hash` paths to stable `/images/...` once.
           const needsHeal = remote.some(
-            (item) => isFragileGallerySrc(item.src) && healGallerySrc(item.id, item.src) !== item.src,
+            (item) =>
+              isFragileGallerySrc(item.src) && healGallerySrc(item.id, item.src) !== item.src,
           );
           if (needsHeal && !healedOnce.current) {
             healedOnce.current = true;
@@ -175,8 +176,7 @@ function AdminGalleryPage() {
   };
 
   const previewSrc = useMemo(
-    () => (item: GalleryContent) =>
-      resolved[item.id] || pickGallerySrc(item.src, item.id),
+    () => (item: GalleryContent) => resolved[item.id] || pickGallerySrc(item.src, item.id),
     [resolved],
   );
 
@@ -266,11 +266,7 @@ function AdminGalleryPage() {
         onSubmit={() => {
           if (!editingId) return;
           const caption = pairLocalized(captionEn, captionAr);
-          void persist(
-            items.map((item) =>
-              item.id === editingId ? { ...item, caption } : item,
-            ),
-          );
+          void persist(items.map((item) => (item.id === editingId ? { ...item, caption } : item)));
           setEditingId(null);
         }}
       >

@@ -70,26 +70,21 @@ export function Navbar() {
 
   return (
     <>
-      <header
-        className="fixed inset-x-0 top-0 z-50 h-[calc(5rem+env(safe-area-inset-top))] overflow-visible border-b border-navy/10 bg-white pt-[env(safe-area-inset-top)] shadow-card"
-      >
-        <div className="container-luxe relative flex h-full items-center justify-between gap-3">
+      <header className="fixed inset-x-0 top-0 z-50 h-[calc(5rem+env(safe-area-inset-top))] overflow-visible border-b border-navy/10 bg-white pt-[env(safe-area-inset-top)] shadow-card">
+        <div className="container-luxe grid h-full grid-cols-[1fr_auto_1fr] items-center gap-3 lg:gap-4">
           <Link
             to="/"
-            className="relative z-10 min-w-0 shrink-0 max-w-[70%] sm:max-w-none"
+            className="min-w-0 shrink-0 justify-self-start max-w-[70%] sm:max-w-none"
             aria-label={t("brand.name")}
           >
             <Logo tone="dark" className="h-14 w-36 sm:h-[4.25rem] sm:w-44" />
           </Link>
 
-          {/* Geometrically centered for EN + AR so left/right stay symmetric. */}
-          <nav
-            aria-label="Primary"
-            className="pointer-events-none absolute inset-x-0 top-1/2 hidden -translate-y-1/2 justify-center lg:flex"
-          >
+          {/* Symmetric center column — same balance for EN and AR. */}
+          <nav aria-label="Primary" className="hidden min-w-0 justify-self-center lg:block">
             <div
               className={cn(
-                "pointer-events-auto flex max-w-[min(100%,52rem)] flex-wrap items-center justify-center gap-x-4 gap-y-1 xl:gap-x-6",
+                "flex max-w-[min(100vw-22rem,52rem)] flex-wrap items-center justify-center gap-x-4 gap-y-1 xl:gap-x-6",
                 isRTL && "tracking-normal",
               )}
             >
@@ -99,7 +94,7 @@ export function Navbar() {
                   to={link.to}
                   activeOptions={{ exact: link.to === "/" }}
                   className={cn(
-                    "nav-link shrink-0 text-navy/75 transition-colors hover:text-navy",
+                    "nav-link shrink-0 whitespace-nowrap text-navy/75 transition-colors hover:text-navy",
                     isRTL && "tracking-[0.04em]",
                   )}
                 >
@@ -109,23 +104,19 @@ export function Navbar() {
             </div>
           </nav>
 
-          <div className="relative z-10 hidden shrink-0 items-center gap-3 lg:flex">
+          <div className="flex shrink-0 items-center justify-self-end gap-3">
             <LanguageSwitcher tone="dark" />
             <Link
               to="/contact"
-              className="type-cta border border-navy bg-navy px-5 py-2.5 text-navy-foreground transition-all duration-500 hover:border-gold hover:bg-gold hover:text-navy"
+              className="type-cta hidden border border-navy bg-navy px-5 py-2.5 text-navy-foreground transition-all duration-500 hover:border-gold hover:bg-gold hover:text-navy lg:inline-flex"
             >
               {t("nav.contactUs")}
             </Link>
-          </div>
-
-          <div className="relative z-10 ms-auto flex items-center gap-1.5 lg:hidden">
-            <LanguageSwitcher tone="dark" />
             <button
               type="button"
               onClick={() => setOpen(true)}
               aria-label="Open menu"
-              className="grid size-11 place-items-center rounded-lg text-navy transition-colors hover:bg-navy/5"
+              className="grid size-11 place-items-center rounded-lg text-navy transition-colors hover:bg-navy/5 lg:hidden"
             >
               <Menu className="size-6" strokeWidth={1.5} />
             </button>
@@ -177,7 +168,11 @@ export function Navbar() {
                     key={link.to}
                     initial={{ opacity: 0, x: isRTL ? -18 : 18 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.06 * index + 0.08, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{
+                      delay: 0.06 * index + 0.08,
+                      duration: 0.45,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
                   >
                     <Link
                       to={link.to}

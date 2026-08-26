@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   UserRound,
   Megaphone,
+  Bot,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -31,7 +32,12 @@ const navItems: {
   icon: typeof LayoutDashboard;
   permission: AdminPermission;
 }[] = [
-  { to: "/admin/dashboard", key: "admin.nav.dashboard", icon: LayoutDashboard, permission: "dashboard" },
+  {
+    to: "/admin/dashboard",
+    key: "admin.nav.dashboard",
+    icon: LayoutDashboard,
+    permission: "dashboard",
+  },
   { to: "/admin/content", key: "admin.nav.content", icon: FileText, permission: "content" },
   { to: "/admin/services", key: "admin.nav.services", icon: Anchor, permission: "services" },
   { to: "/admin/why", key: "admin.nav.why", icon: Award, permission: "why" },
@@ -39,10 +45,21 @@ const navItems: {
   { to: "/admin/team", key: "admin.nav.team", icon: UserRound, permission: "team" },
   { to: "/admin/blog", key: "admin.nav.blog", icon: Newspaper, permission: "blog" },
   { to: "/admin/gallery", key: "admin.nav.gallery", icon: ImageIcon, permission: "gallery" },
-  { to: "/admin/testimonials", key: "admin.nav.testimonials", icon: Quote, permission: "testimonials" },
+  {
+    to: "/admin/testimonials",
+    key: "admin.nav.testimonials",
+    icon: Quote,
+    permission: "testimonials",
+  },
   { to: "/admin/faq", key: "admin.nav.faq", icon: HelpCircle, permission: "faq" },
-  { to: "/admin/advertisements", key: "admin.nav.advertisements", icon: Megaphone, permission: "advertisements" },
+  {
+    to: "/admin/advertisements",
+    key: "admin.nav.advertisements",
+    icon: Megaphone,
+    permission: "advertisements",
+  },
   { to: "/admin/messages", key: "admin.nav.messages", icon: MessageSquare, permission: "messages" },
+  { to: "/admin/ai", key: "admin.nav.ai", icon: Bot, permission: "ai" },
   { to: "/admin/seo", key: "admin.nav.seo", icon: Search, permission: "seo" },
   { to: "/admin/users", key: "admin.nav.users", icon: Users, permission: "users" },
   { to: "/admin/settings", key: "admin.nav.settings", icon: Settings, permission: "settings" },
@@ -134,13 +151,7 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-export function AdminSidebar({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+export function AdminSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { isRTL } = useLanguage();
   const slideFrom = isRTL ? "100%" : "-100%";
 

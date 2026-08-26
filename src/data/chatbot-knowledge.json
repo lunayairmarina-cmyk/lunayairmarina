@@ -1,0 +1,142 @@
+{
+  "version": "1.0.0",
+  "updatedAt": "2026-08-26",
+  "company": {
+    "en": {
+      "name": "Lunayair Marina",
+      "tagline": "Yacht Management",
+      "description": "Lunay Air Marina provides professional yacht management solutions for yacht owners — operations, crew, compliance and OPEX clarity from one desk.",
+      "location": "Based in Jeddah, serving yacht owners across Saudi Arabia and the Gulf.",
+      "regions": ["Jeddah", "Red Sea", "Arabian Gulf", "Saudi Arabia", "Gulf region"]
+    },
+    "ar": {
+      "name": "Lunayair Marina",
+      "tagline": "إدارة اليخوت",
+      "description": "توفر lunayairmarina حلول إدارة يخوت متخصصة لملاك اليخوت — التشغيل والطاقم والامتثال ووضوح التكاليف من مكتب واحد.",
+      "location": "مقرنا في جدة، وندعم ملاك اليخوت في المملكة العربية السعودية ومنطقة الخليج.",
+      "regions": [
+        "جدة",
+        "البحر الأحمر",
+        "الخليج العربي",
+        "المملكة العربية السعودية",
+        "منطقة الخليج"
+      ]
+    }
+  },
+  "services": [
+    {
+      "id": "yacht-management-360",
+      "title": {
+        "en": "Complete Yacht & Boat Management (360°)",
+        "ar": "إدارة يخوت ٣٦٠ درجة"
+      },
+      "summary": {
+        "en": "Integrated operational, technical and financial management for yachts and boats, including crew supervision, planned maintenance, budgeting and maritime compliance.",
+        "ar": "إدارة تشغيلية وفنية ومالية متكاملة لليخوت، تشمل إشراف الطاقم والصيانة المخططة والميزانية والامتثال البحري."
+      }
+    },
+    {
+      "id": "visiting-yacht-agency",
+      "title": {
+        "en": "Agency Services for Visiting Yachts",
+        "ar": "وكالة اليخوت الزائرة"
+      },
+      "summary": {
+        "en": "Support for international yachts arriving in Saudi waters, including clearance, permits, berthing, provisioning, logistics and concierge.",
+        "ar": "دعم اليخوت الدولية القادمة إلى المياه السعودية بالتخليص والتصاريح والرسو والتموين والخدمات اللوجستية والكونسيرج."
+      }
+    },
+    {
+      "id": "marina-management",
+      "title": {
+        "en": "Marina & Yacht Club Operations",
+        "ar": "إدارة المارينا"
+      },
+      "summary": {
+        "en": "Professional marina and yacht-club operations for safe, luxury berthing, facility operations, and safety.",
+        "ar": "تشغيل احترافي للمارينا ونوادي اليخوت مع حلول رسو آمنة وتشغيل المرافق والسلامة."
+      }
+    },
+    {
+      "id": "crew-management",
+      "title": {
+        "en": "Crew Recruitment Services",
+        "ar": "إدارة الطواقم"
+      },
+      "summary": {
+        "en": "Recruitment, vetting and management of certified marine professionals including captains, engineers and hospitality crew, with contracts, payroll and training.",
+        "ar": "توظيف وتدقيق وإدارة كوادر بحرية معتمدة من قباطنة ومهندسين وطاقم ضيافة، مع العقود والرواتب والتدريب."
+      }
+    }
+  ],
+  "faq": [
+    {
+      "question": {
+        "en": "What yacht management services do you provide?",
+        "ar": "ما هي خدمات إدارة اليخوت التي تقدمونها؟"
+      },
+      "answer": {
+        "en": "We provide full 360° management: technical supervision, planned maintenance, refit management, crew recruitment and payroll, insurance and class compliance, operational planning, and transparent financial reporting.",
+        "ar": "نقدم إدارة شاملة ٣٦٠ درجة: الإشراف الفني، الصيانة المخططة، إدارة التجديد، توظيف الطواقم والرواتب، التأمين والامتثال، التخطيط التشغيلي، والتقارير المالية الشفافة."
+      }
+    },
+    {
+      "question": {
+        "en": "Do you manage international yachts?",
+        "ar": "هل تديرون يخوتاً دولية؟"
+      },
+      "answer": {
+        "en": "Yes. Our visiting yacht agency supports international vessels arriving to Saudi waters with clearance, permits, berthing, provisioning, logistics and concierge services.",
+        "ar": "نعم. تدعم وكالتنا اليخوت الدولية القادمة إلى المياه السعودية بالتخليص والتصاريح والرسو والتموين والخدمات اللوجستية والكونسيرج."
+      }
+    },
+    {
+      "question": {
+        "en": "Do you provide crew recruitment?",
+        "ar": "هل توفرون خدمات توظيف الطواقم؟"
+      },
+      "answer": {
+        "en": "We recruit, vet and manage certified marine professionals from captains and engineers to interior and service crew, including contracts, payroll and ongoing training.",
+        "ar": "نقوم بتوظيف وتدقيق وإدارة كوادر بحرية معتمدة من القباطنة والمهندسين إلى طاقم الضيافة، بما يشمل العقود والرواتب والتدريب المستمر."
+      }
+    },
+    {
+      "question": {
+        "en": "How can I request consultation?",
+        "ar": "كيف يمكنني طلب استشارة؟"
+      },
+      "answer": {
+        "en": "Send us a message through the contact form or call our operations desk. A dedicated manager will respond within one business day to arrange a private consultation.",
+        "ar": "أرسل لنا رسالة عبر نموذج التواصل أو اتصل بمكتب العمليات. سيتواصل معك مدير مخصص خلال يوم عمل واحد لترتيب استشارة خاصة."
+      }
+    }
+  ],
+  "contact": {
+    "phoneDisplay": "+966 53 156 1212",
+    "email": "info@lunayairmarina.com",
+    "address": {
+      "en": "Al Murjan Tower, Prince Sultan Road, Al Rawdah, Jeddah",
+      "ar": "برج المرجان، طريق الأمير سلطان، حي الروضة، جدة"
+    },
+    "hours": {
+      "en": "Daily 7:00 AM – 11:00 PM Saudi time",
+      "ar": "يومياً 7 صباحاً – 11 مساءً بتوقيت السعودية"
+    },
+    "websitePaths": {
+      "services": "/services",
+      "contact": "/contact",
+      "about": "/about",
+      "application": "/application"
+    },
+    "socialLinks": {
+      "instagram": "https://www.instagram.com/lunayairmarina",
+      "linkedin": "https://www.linkedin.com/company/lunayairmarina",
+      "tiktok": "https://vt.tiktok.com/ZSHVceVcD/",
+      "x": "https://x.com/lunayairmarina"
+    }
+  },
+  "limitations": {
+    "en": "Public pricing, berth availability, legal permits, and vessel-specific guarantees are not published on the website. Direct visitors to the Lunayair team for confirmed details.",
+    "ar": "الأسعار العامة وتوفر الأرصفة والتصاريح القانونية والضمانات الخاصة بكل يخت غير منشورة على الموقع. وجّه الزائر لفريق Lunayair للحصول على تفاصيل مؤكدة."
+  }
+}

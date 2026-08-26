@@ -26,14 +26,10 @@ export function AboutSection({ variant = "home" }: { variant?: "home" | "page" }
   const lead = about
     ? localizeOrFallback(about.lead || about.description, language, t("about.lead"))
     : t("about.lead");
-  const body = about
-    ? localizeOrFallback(about.body, language, t("about.body"))
-    : t("about.body");
+  const body = about ? localizeOrFallback(about.body, language, t("about.body")) : t("about.body");
   const cta = t("about.cta");
   const points = about
-    ? about.points
-        .map((p) => localizeOrFallback(p, language, ""))
-        .filter(Boolean)
+    ? about.points.map((p) => localizeOrFallback(p, language, "")).filter(Boolean)
     : (tv<string[]>("about.points") ?? []);
   const stats = about
     ? about.stats.map((s) => ({
@@ -63,9 +59,7 @@ export function AboutSection({ variant = "home" }: { variant?: "home" | "page" }
           <div className="flex flex-col">
             <Reveal direction="right">
               <span className="eyebrow">{eyebrow}</span>
-              <h2 className="type-display-m mt-3 text-balance text-navy sm:mt-4">
-                {title}
-              </h2>
+              <h2 className="type-display-m mt-3 text-balance text-navy sm:mt-4">{title}</h2>
               <span className="gold-rule mt-5 sm:mt-6" />
               <p className="type-body mt-5 text-navy/80 sm:mt-6">{lead}</p>
               <p className="type-body-sm mt-3 text-muted-foreground sm:mt-4">{body}</p>
@@ -100,9 +94,7 @@ export function AboutSection({ variant = "home" }: { variant?: "home" | "page" }
           <div className="flex flex-col justify-center gap-8">
             <Reveal direction="right">
               <span className="eyebrow">{eyebrow}</span>
-              <h2 className="type-display-m mt-3 text-balance text-navy sm:mt-4">
-                {title}
-              </h2>
+              <h2 className="type-display-m mt-3 text-balance text-navy sm:mt-4">{title}</h2>
               <span className="gold-rule mt-5 sm:mt-6" />
             </Reveal>
 
@@ -114,7 +106,10 @@ export function AboutSection({ variant = "home" }: { variant?: "home" | "page" }
             <Reveal direction="right" delay={0.2}>
               <ul className="grid gap-4 sm:grid-cols-2">
                 {points.map((point) => (
-                  <li key={point} className="type-body-sm flex items-start gap-3 border-s-2 border-gold/50 ps-4 text-navy/75">
+                  <li
+                    key={point}
+                    className="type-body-sm flex items-start gap-3 border-s-2 border-gold/50 ps-4 text-navy/75"
+                  >
                     <Check className="mt-0.5 size-4 shrink-0 text-gold" strokeWidth={2} />
                     {point}
                   </li>
@@ -131,9 +126,7 @@ export function AboutSection({ variant = "home" }: { variant?: "home" | "page" }
                 <p className="type-display-l text-navy">
                   <Counter value={stat.value} suffix={stat.suffix} />
                 </p>
-                <p className="type-meta mt-3 text-muted-foreground">
-                  {stat.label}
-                </p>
+                <p className="type-meta mt-3 text-muted-foreground">{stat.label}</p>
               </div>
             ))}
           </div>

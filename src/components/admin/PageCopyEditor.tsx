@@ -353,7 +353,9 @@ export function PageCopyEditor() {
   const visibleSections = SECTIONS.filter((item) => {
     if (!filter.trim()) return true;
     const label = t(item.labelKey).toLowerCase();
-    return label.includes(filter.trim().toLowerCase()) || item.id.includes(filter.trim().toLowerCase());
+    return (
+      label.includes(filter.trim().toLowerCase()) || item.id.includes(filter.trim().toLowerCase())
+    );
   });
 
   const setField = (lang: "en" | "ar", path: string, value: string) => {

@@ -24,10 +24,7 @@ interface SiteContentContextValue {
 
 const SiteContentContext = createContext<SiteContentContextValue | null>(null);
 
-export function localizeValue(
-  value: LocalizedString | string | undefined,
-  language: Lang,
-): string {
+export function localizeValue(value: LocalizedString | string | undefined, language: Lang): string {
   if (!value) return "";
   if (typeof value === "string") return value;
   const preferred = value[language];

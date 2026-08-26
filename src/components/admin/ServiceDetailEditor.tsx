@@ -159,7 +159,9 @@ export function ServiceDetailEditor() {
   };
 
   const cmsSlugs = useMemo(() => {
-    const fromCms = loadCmsStore().services.map((item) => item.slug).filter(Boolean);
+    const fromCms = loadCmsStore()
+      .services.map((item) => item.slug)
+      .filter(Boolean);
     return Array.from(new Set([...SERVICE_SLUGS, ...fromCms]));
   }, [slug, status]);
 

@@ -261,7 +261,11 @@ function AdminServicesPage() {
                 label={active ? t("admin.actions.setDraft") : t("admin.actions.setActive")}
                 onClick={() => void toggleStatus(row)}
               />
-              <RowAction icon={Pencil} label={t("admin.actions.edit")} onClick={() => openEdit(row)} />
+              <RowAction
+                icon={Pencil}
+                label={t("admin.actions.edit")}
+                onClick={() => openEdit(row)}
+              />
               <RowAction
                 icon={Trash2}
                 tone="danger"
@@ -303,11 +307,11 @@ function AdminServicesPage() {
           value={draft.descriptionAr}
           onChange={(value) => setDraft({ ...draft, descriptionAr: value })}
         />
-          <ModalField
-            label={t("admin.blog.slug")}
-            value={draft.slug}
-            onChange={(value) => setDraft({ ...draft, slug: slugifyService(value) })}
-          />
+        <ModalField
+          label={t("admin.blog.slug")}
+          value={draft.slug}
+          onChange={(value) => setDraft({ ...draft, slug: slugifyService(value) })}
+        />
         <ModalField
           textarea
           label="Features (EN, one per line)"

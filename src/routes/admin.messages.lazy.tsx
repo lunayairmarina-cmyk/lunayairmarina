@@ -392,7 +392,10 @@ function AdminMessagesPage() {
       key: "phone",
       header: t("admin.table.phone"),
       render: (row) => (
-        <span dir="ltr" className="inline-block whitespace-nowrap tabular-nums [unicode-bidi:isolate]">
+        <span
+          dir="ltr"
+          className="inline-block whitespace-nowrap tabular-nums [unicode-bidi:isolate]"
+        >
           {row.phone?.trim() || "—"}
         </span>
       ),
@@ -413,7 +416,10 @@ function AdminMessagesPage() {
       key: "date",
       header: t("admin.table.date"),
       render: (row) => (
-        <span dir="ltr" className="inline-block whitespace-nowrap tabular-nums [unicode-bidi:isolate]">
+        <span
+          dir="ltr"
+          className="inline-block whitespace-nowrap tabular-nums [unicode-bidi:isolate]"
+        >
           {row.date || "—"}
         </span>
       ),
@@ -433,9 +439,7 @@ function AdminMessagesPage() {
   return (
     <AdminLayout title={t("admin.nav.messages")}>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <span className="text-xs text-navy/55">
-          {loading ? t("admin.messages.loading") : null}
-        </span>
+        <span className="text-xs text-navy/55">{loading ? t("admin.messages.loading") : null}</span>
         <button
           type="button"
           onClick={() =>

@@ -6,10 +6,7 @@ import { ResolvedImage } from "@/components/shared/ResolvedImage";
 import type { LocalizedString } from "@/types/content";
 
 /** Names may be Latin in both languages — prefer active lang, then the other side. */
-function localizeName(
-  value: LocalizedString | string | undefined,
-  language: "en" | "ar",
-): string {
+function localizeName(value: LocalizedString | string | undefined, language: "en" | "ar"): string {
   if (!value) return "";
   if (typeof value === "string") return value;
   return value[language]?.trim() || value.en?.trim() || value.ar?.trim() || "";

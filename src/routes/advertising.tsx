@@ -25,9 +25,11 @@ export const Route = createFileRoute("/advertising")({
 
 function trackAdClick(ad: AdvertisementContent) {
   try {
-    const gtag = (window as Window & {
-      gtag?: (...args: unknown[]) => void;
-    }).gtag;
+    const gtag = (
+      window as Window & {
+        gtag?: (...args: unknown[]) => void;
+      }
+    ).gtag;
     gtag?.("event", "ad_click", {
       event_category: "advertising",
       ad_id: ad.id,
@@ -42,88 +44,79 @@ function trackAdClick(ad: AdvertisementContent) {
 
 function VipAdvertisementCard({
   ad,
-  fullWidth = false,
 }: {
   ad: AdvertisementContent;
-  fullWidth?: boolean;
 }) {
   const { language, t } = useLanguage();
   const companyName = localizeOrFallback(ad.companyName, language, "");
   const description = localizeOrFallback(ad.description, language, "");
   const category = localizeOrFallback(ad.category, language, "");
-  const ctaLabel = localizeOrFallback(
-    ad.ctaLabel,
-    language,
-    t("advertising.visitWebsite"),
-  );
+  const ctaLabel = localizeOrFallback(ad.ctaLabel, language, t("advertising.visitWebsite"));
   const websiteUrl = normalizeAdvertisementWebsiteUrl(ad.websiteUrl);
+  const initials = companyName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 
   return (
-    <article
-      className={cn(
-        "ad-featured group relative overflow-hidden border border-gold/55 bg-gradient-to-br from-[#fffdf8] via-white to-[#f7f1e4] shadow-[0_16px_40px_rgba(11,31,51,0.08)]",
-        fullWidth ? "lg:grid lg:grid-cols-[1.2fr_0.8fr]" : "flex flex-col",
-      )}
-    >
-      <div aria-hidden className="absolute inset-x-0 top-0 z-[2] h-[3px] bg-gradient-to-r from-transparent via-gold to-transparent" />
+    <article className="ad-featured group relative flex h-full flex-col overflow-hidden rounded-xl border border-gold/50 bg-gradient-to-br from-[#fffdf8] via-white to-[#f7f1e4] shadow-[0_14px_36px_rgba(11,31,51,0.08)]">
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 z-[2] h-[2px] bg-gradient-to-r from-transparent via-gold to-transparent"
+      />
 
-      <div className="relative z-[1]">
+      {/* Media: contain so logos/photos don't get cropped into a giant mess */}
+      <div className="relative z-[1] aspect-[16/10] overflow-hidden bg-[linear-gradient(165deg,var(--navy),color-mix(in_oklab,var(--navy)_78%,var(--ocean)))]">
         {ad.image ? (
           <ResolvedImage
             src={ad.image}
             alt={companyName}
-            className={cn(
-              "w-full object-cover",
-              fullWidth
-                ? "aspect-[16/10] lg:aspect-auto lg:h-full lg:min-h-[22rem]"
-                : "aspect-[16/10]",
-            )}
+            className="h-full w-full object-contain object-center p-5 sm:p-6"
             loading="lazy"
           />
-        ) : (
-          <div
-            className={cn(
-              "bg-navy/5",
-              fullWidth
-                ? "aspect-[16/10] lg:aspect-auto lg:h-full lg:min-h-[22rem]"
-                : "aspect-[16/10]",
-            )}
-          />
-        )}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy/35 via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-transparent lg:to-navy/10" />
-        <span className="ad-featured-badge absolute start-4 top-4 z-[3] inline-flex items-center gap-1.5 border border-gold/60 bg-navy/85 px-3 py-1.5 text-[0.62rem] tracking-[0.16em] text-gold uppercase backdrop-blur-sm">
-          <Crown className="size-3.5 text-gold" strokeWidth={1.75} aria-hidden />
+        ) : null}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent"
+        />
+        <span className="ad-featured-badge absolute start-3 top-3 z-[3] inline-flex items-center gap-1.5 rounded-full border border-gold/55 bg-navy/80 px-2.5 py-1 text-[0.55rem] tracking-[0.14em] text-gold uppercase backdrop-blur-md">
+          <Crown className="size-3 text-gold" strokeWidth={1.75} aria-hidden />
           {t("advertising.package.vip")}
         </span>
       </div>
 
-      <div className="relative z-[1] flex flex-1 flex-col justify-center p-5 sm:p-6 lg:p-8">
+      <div className="relative z-[1] flex flex-1 flex-col p-4 sm:p-5">
         <div className="flex items-center gap-3">
           {ad.logo ? (
             <ResolvedImage
               src={ad.logo}
               alt=""
-              className="size-12 rounded-full border border-gold/45 object-cover ring-2 ring-gold/20 sm:size-14"
+              className="size-11 shrink-0 rounded-full border border-gold/45 object-cover ring-2 ring-gold/20 sm:size-12"
               loading="lazy"
             />
           ) : (
-            <span className="grid size-12 place-items-center rounded-full bg-gold/15 text-xs tracking-[0.12em] text-navy sm:size-14">
-              {companyName.slice(0, 2).toUpperCase()}
+            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-gold/15 text-[0.7rem] tracking-[0.12em] text-navy sm:size-12">
+              {initials || "VIP"}
             </span>
           )}
           <div className="min-w-0">
             {category ? (
-              <p className="text-[0.62rem] tracking-[0.18em] text-gold uppercase">{category}</p>
+              <p className="text-[0.55rem] tracking-[0.16em] text-gold uppercase">{category}</p>
             ) : null}
-            <h2 className="truncate font-display text-2xl text-navy sm:text-[1.85rem]">
-              {companyName}
+            <h2 className="truncate font-display text-xl leading-snug text-navy sm:text-[1.4rem]">
+              {companyName || t("advertising.package.vip")}
             </h2>
           </div>
         </div>
 
-        <p className="mt-4 line-clamp-4 text-sm leading-relaxed text-navy/65 sm:text-base">
-          {description}
-        </p>
+        {description ? (
+          <p className="mt-3 line-clamp-3 flex-1 text-[0.9rem] leading-relaxed text-navy/60">
+            {description}
+          </p>
+        ) : null}
 
         {websiteUrl ? (
           <a
@@ -131,7 +124,7 @@ function VipAdvertisementCard({
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackAdClick({ ...ad, websiteUrl })}
-            className="mt-6 inline-flex w-fit items-center gap-2 border border-gold bg-gold px-6 py-3 text-[0.68rem] tracking-[0.18em] text-navy uppercase transition hover:border-navy hover:bg-navy hover:text-navy-foreground"
+            className="mt-4 inline-flex w-fit items-center gap-2 border border-gold bg-gold px-4 py-2.5 text-[0.62rem] tracking-[0.14em] text-navy uppercase transition hover:border-navy hover:bg-navy hover:text-navy-foreground"
           >
             {ctaLabel}
             <span aria-hidden>→</span>
@@ -154,11 +147,7 @@ function AdvertisementCard({
   const companyName = localizeOrFallback(ad.companyName, language, "");
   const description = localizeOrFallback(ad.description, language, "");
   const category = localizeOrFallback(ad.category, language, "");
-  const ctaLabel = localizeOrFallback(
-    ad.ctaLabel,
-    language,
-    t("advertising.visitWebsite"),
-  );
+  const ctaLabel = localizeOrFallback(ad.ctaLabel, language, t("advertising.visitWebsite"));
   const websiteUrl = normalizeAdvertisementWebsiteUrl(ad.websiteUrl);
 
   return (
@@ -175,10 +164,7 @@ function AdvertisementCard({
           <ResolvedImage
             src={ad.image}
             alt={companyName}
-            className={cn(
-              "w-full object-cover",
-              isFeatured ? "aspect-[16/10]" : "aspect-[16/11]",
-            )}
+            className={cn("w-full object-cover", isFeatured ? "aspect-[16/10]" : "aspect-[16/11]")}
             loading="lazy"
           />
         ) : (
@@ -193,10 +179,7 @@ function AdvertisementCard({
       </div>
 
       <div
-        className={cn(
-          "relative z-[1] flex flex-1 flex-col",
-          isFeatured ? "p-3.5 sm:p-4" : "p-4",
-        )}
+        className={cn("relative z-[1] flex flex-1 flex-col", isFeatured ? "p-3.5 sm:p-4" : "p-4")}
       >
         <div className="flex items-center gap-2.5">
           {ad.logo ? (
@@ -289,9 +272,7 @@ function AdSection({
 function AdvertisingPage() {
   const { t } = useLanguage();
   const headerImage = usePageHeaderImage("advertising", advertisingHeader);
-  const ads = listVisibleAdvertisements(
-    useOptionalSiteContent()?.bundle?.advertisements ?? [],
-  );
+  const ads = listVisibleAdvertisements(useOptionalSiteContent()?.bundle?.advertisements ?? []);
   const vipAds = ads.filter((ad) => getAdvertisementPackage(ad) === "vip");
   const featuredAds = ads.filter((ad) => getAdvertisementPackage(ad) === "featured");
   const standardAds = ads.filter((ad) => getAdvertisementPackage(ad) === "standard");
@@ -319,13 +300,15 @@ function AdvertisingPage() {
                 <AdSection title={t("advertising.sections.vip")} tone="vip">
                   <div
                     className={cn(
-                      "grid gap-6",
-                      vipAds.length === 1 ? "grid-cols-1" : "sm:grid-cols-2",
+                      "mx-auto grid gap-4 sm:gap-5",
+                      vipAds.length === 1
+                        ? "max-w-xl grid-cols-1"
+                        : "max-w-5xl grid-cols-1 sm:grid-cols-2",
                     )}
                   >
-                    {vipAds.slice(0, 2).map((ad, index) => (
-                      <Reveal key={ad.id} delay={index * 0.04}>
-                        <VipAdvertisementCard ad={ad} fullWidth={vipAds.length === 1} />
+                    {vipAds.map((ad, index) => (
+                      <Reveal key={ad.id} delay={index * 0.04} className="min-w-0 h-full">
+                        <VipAdvertisementCard ad={ad} />
                       </Reveal>
                     ))}
                   </div>
@@ -334,9 +317,13 @@ function AdvertisingPage() {
 
               {featuredAds.length > 0 ? (
                 <AdSection title={t("advertising.sections.featured")} tone="featured">
-                  <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2 sm:gap-5">
+                  <div className="mx-auto flex max-w-4xl flex-wrap justify-center gap-4 sm:gap-5">
                     {featuredAds.map((ad, index) => (
-                      <Reveal key={ad.id} delay={index * 0.04}>
+                      <Reveal
+                        key={ad.id}
+                        delay={index * 0.04}
+                        className="w-full min-w-0 sm:w-[calc(50%-0.625rem)]"
+                      >
                         <AdvertisementCard ad={ad} size="featured" />
                       </Reveal>
                     ))}
@@ -346,9 +333,13 @@ function AdvertisingPage() {
 
               {standardAds.length > 0 ? (
                 <AdSection title={t("advertising.sections.standard")} tone="standard">
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="mx-auto flex flex-wrap justify-center gap-4">
                     {standardAds.map((ad, index) => (
-                      <Reveal key={ad.id} delay={index * 0.04}>
+                      <Reveal
+                        key={ad.id}
+                        delay={index * 0.04}
+                        className="w-full min-w-0 sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.7rem)] lg:max-w-sm"
+                      >
                         <AdvertisementCard ad={ad} size="standard" />
                       </Reveal>
                     ))}

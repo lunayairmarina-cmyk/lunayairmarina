@@ -12,11 +12,7 @@ import { FaqSection } from "@/components/site/FaqSection";
 import { FleetSection } from "@/components/site/FleetSection";
 import { TeamSection } from "@/components/site/TeamSection";
 import { buildSeoHead } from "@/services/seoService";
-import {
-  buildVideoObjectSchema,
-  buildVideoOgMeta,
-  SITE_VIDEOS,
-} from "@/lib/videos";
+import { buildVideoObjectSchema, buildVideoOgMeta, SITE_VIDEOS } from "@/lib/videos";
 import { SITE_ORIGIN } from "@/lib/site";
 
 export const Route = createFileRoute("/")({

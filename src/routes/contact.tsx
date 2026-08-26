@@ -72,15 +72,12 @@ function ContactPage() {
   const CtaArrow = isRTL ? ArrowLeft : ArrowRight;
 
   const pathways = useMemo(() => {
-    return (
-      [
-        tv<Pathway>("contact.pathways.visit"),
-        tv<Pathway>("contact.pathways.emergency"),
-        tv<Pathway>("contact.pathways.charter"),
-      ].filter(
-        (item): item is Pathway =>
-          Boolean(item && typeof item === "object" && "title" in item && item.title),
-      )
+    return [
+      tv<Pathway>("contact.pathways.visit"),
+      tv<Pathway>("contact.pathways.emergency"),
+      tv<Pathway>("contact.pathways.charter"),
+    ].filter((item): item is Pathway =>
+      Boolean(item && typeof item === "object" && "title" in item && item.title),
     );
   }, [tv]);
 
@@ -112,16 +109,7 @@ function ContactPage() {
   const yachtLocationOptions = useMemo(
     () =>
       (
-        [
-          "jeddah",
-          "redSea",
-          "neom",
-          "dubai",
-          "abuDhabi",
-          "bahrain",
-          "otherGulf",
-          "other",
-        ] as const
+        ["jeddah", "redSea", "neom", "dubai", "abuDhabi", "bahrain", "otherGulf", "other"] as const
       ).map((key) => ({
         key,
         label: t(`contact.form.yachtLocationOptions.${key}`),
@@ -338,9 +326,7 @@ function ContactPage() {
                         id="page-contact-yacht-type"
                         required
                         value={form.yachtType}
-                        onChange={(event) =>
-                          setForm({ ...form, yachtType: event.target.value })
-                        }
+                        onChange={(event) => setForm({ ...form, yachtType: event.target.value })}
                         className="mt-2 w-full appearance-none border-b border-navy/20 bg-transparent py-3 text-sm text-navy outline-none transition-colors focus:border-gold"
                       >
                         <option value="">{t("contact.form.yachtTypePlaceholder")}</option>
@@ -398,9 +384,7 @@ function ContactPage() {
                       id="page-contact-service"
                       required
                       value={form.serviceNeeded}
-                      onChange={(event) =>
-                        setForm({ ...form, serviceNeeded: event.target.value })
-                      }
+                      onChange={(event) => setForm({ ...form, serviceNeeded: event.target.value })}
                       className="mt-2 w-full appearance-none border-b border-navy/20 bg-transparent py-3 text-sm text-navy outline-none transition-colors focus:border-gold"
                     >
                       <option value="">{t("contact.form.serviceNeededPlaceholder")}</option>
@@ -460,16 +444,16 @@ function ContactPage() {
           <div className="container-luxe">
             <Reveal className="mx-auto max-w-2xl text-center">
               <p className="eyebrow">{t("contact.pathwaysSection.eyebrow")}</p>
-              <h2 className="type-display-m mt-3 text-navy">{t("contact.pathwaysSection.title")}</h2>
+              <h2 className="type-display-m mt-3 text-navy">
+                {t("contact.pathwaysSection.title")}
+              </h2>
             </Reveal>
             <div className="mt-12 grid gap-4 md:grid-cols-3 md:gap-5">
               {pathways.map((pathway, index) => (
                 <Reveal key={pathway.title} delay={index * 0.06}>
                   <article className="flex h-full flex-col rounded-3xl border border-navy/10 bg-sand/60 p-6 transition hover:border-gold/35 hover:bg-white hover:shadow-card sm:p-7">
                     <span className="font-latin-display text-sm text-gold">0{index + 1}</span>
-                    <h3 className="type-display-s mt-4 text-navy">
-                      {pathway.title}
-                    </h3>
+                    <h3 className="type-display-s mt-4 text-navy">{pathway.title}</h3>
                     <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
                       {pathway.body}
                     </p>
@@ -559,7 +543,10 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="text-[0.6rem] tracking-[0.22em] text-muted-foreground uppercase">
+      <label
+        htmlFor={id}
+        className="text-[0.6rem] tracking-[0.22em] text-muted-foreground uppercase"
+      >
         {label}
         {required ? <span className="ms-1 text-gold">*</span> : null}
       </label>

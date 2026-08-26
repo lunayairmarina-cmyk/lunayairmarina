@@ -37,7 +37,11 @@ export function TrustPlaceholders() {
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {slots.map((slot, index) => (
-            <Reveal key={`${slot.title}-${index}`} delay={index * 0.05} className="border border-navy/10 p-6">
+            <Reveal
+              key={`${slot.title}-${index}`}
+              delay={index * 0.05}
+              className="border border-navy/10 p-6"
+            >
               <p className="text-[0.65rem] tracking-[0.2em] text-gold uppercase">{slot.title}</p>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{slot.body}</p>
             </Reveal>

@@ -1,13 +1,7 @@
 import { SITE_ORIGIN } from "./site";
 
 export type SitemapChangefreq =
-  | "always"
-  | "hourly"
-  | "daily"
-  | "weekly"
-  | "monthly"
-  | "yearly"
-  | "never";
+  "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
 
 export interface SitemapEntry {
   path: string;
@@ -55,9 +49,7 @@ export function isAdminPath(path: string): boolean {
 export function isPrivatePath(path: string): boolean {
   const normalized = path.startsWith("/") ? path : `/${path}`;
   return (
-    isAdminPath(normalized) ||
-    normalized === API_PREFIX ||
-    normalized.startsWith(`${API_PREFIX}/`)
+    isAdminPath(normalized) || normalized === API_PREFIX || normalized.startsWith(`${API_PREFIX}/`)
   );
 }
 

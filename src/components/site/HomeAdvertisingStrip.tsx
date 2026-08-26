@@ -4,21 +4,47 @@ import { useOptionalSiteContent, localizeOrFallback } from "@/providers/SiteCont
 import { listTickerAdvertisements } from "@/lib/advertisements";
 import { cn } from "@/lib/utils";
 
+/**
+ * Build two identical halves for a seamless `translateX(-50%)` loop.
+ * Few short VIP/featured lines must be repeated or the track is narrower
+ * than the viewport and the animation jumps / looks broken.
+ */
+function buildSeamlessTickerItems(
+  items: Array<{ id: string; text: string }>,
+): Array<{ key: string; text: string }> {
+  if (items.length === 0) return [];
+  // Aim for ~6+ segments in one half so the strip stays visually full on desktop.
+  const repeats = Math.max(3, Math.ceil(6 / items.length));
+  const half = Array.from({ length: repeats }, (_, copy) =>
+    items.map((item) => ({
+      key: `${item.id}-c${copy}`,
+      text: item.text,
+    })),
+  ).flat();
+  return [
+    ...half.map((item) => ({ ...item, key: `${item.key}-a` })),
+    ...half.map((item) => ({ ...item, key: `${item.key}-b` })),
+  ];
+}
+
 /** Slim text-only ad ticker — used at the bottom of the homepage hero. */
 export function HomeAdvertisingStrip({ className }: { className?: string }) {
   const { language, t, isRTL } = useLanguage();
-  const ads = listTickerAdvertisements(
-    useOptionalSiteContent()?.bundle?.advertisements ?? [],
-  );
+  const ads = listTickerAdvertisements(useOptionalSiteContent()?.bundle?.advertisements ?? []);
   if (ads.length === 0) return null;
 
   const lines = ads.map((ad) => {
     const companyName = localizeOrFallback(ad.companyName, language, "");
     const description = localizeOrFallback(ad.description, language, "");
-    return description ? `${companyName} — ${description}` : companyName;
+    return {
+      id: ad.id,
+      text: description ? `${companyName} — ${description}` : companyName,
+    };
   });
 
-  const sequence = [...lines, ...lines];
+  const sequence = buildSeamlessTickerItems(lines);
+  // Slower pace so VIP/featured lines stay readable.
+  const durationSec = Math.max(78, lines.length * 42);
 
   return (
     <aside
@@ -34,14 +60,20 @@ export function HomeAdvertisingStrip({ className }: { className?: string }) {
         </span>
         <span aria-hidden className="hidden h-4 w-px shrink-0 bg-gold/35 sm:block" />
 
-        <div className="ad-ticker min-w-0 flex-1 overflow-hidden" dir={isRTL ? "rtl" : "ltr"}>
-          <div
-            className="ad-ticker-track"
-            style={{ animationDuration: `${Math.max(18, lines.length * 14)}s` }}
-          >
-            {sequence.map((line, index) => (
-              <span key={`${line}-${index}`} className="ad-ticker-item">
-                <span className="text-base text-white/90 sm:text-lg">{line}</span>
+        {/*
+          Keep the marquee track in LTR so translateX(-50%) stays seamless.
+          Arabic/English text direction is set per item (bidirectional content).
+        */}
+        <div className="ad-ticker min-w-0 flex-1 overflow-hidden" dir="ltr">
+          <div className="ad-ticker-track" style={{ animationDuration: `${durationSec}s` }}>
+            {sequence.map((item) => (
+              <span key={item.key} className="ad-ticker-item">
+                <span
+                  dir={isRTL ? "rtl" : "ltr"}
+                  className="text-base text-white/90 sm:text-lg"
+                >
+                  {item.text}
+                </span>
                 <span aria-hidden className="ad-ticker-dot" />
               </span>
             ))}

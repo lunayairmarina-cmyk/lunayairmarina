@@ -128,18 +128,13 @@ export function MediaUploader({
               />
             </div>
           ) : null}
-          {busy && progress > 0 ? (
-            <p className="text-[0.65rem] text-navy/45">{progress}%</p>
-          ) : null}
+          {busy && progress > 0 ? <p className="text-[0.65rem] text-navy/45">{progress}%</p> : null}
           {error ? <p className="text-xs text-red-500">{error}</p> : null}
           <p className="text-[0.65rem] text-navy/40">{t("admin.cms.uploadHint")}</p>
         </div>
       </div>
       {allowGallery ? (
-        <GalleryPicker
-          value={value}
-          onSelect={(src, caption) => onChange(src, { caption })}
-        />
+        <GalleryPicker value={value} onSelect={(src, caption) => onChange(src, { caption })} />
       ) : null}
       <input
         ref={inputRef}
