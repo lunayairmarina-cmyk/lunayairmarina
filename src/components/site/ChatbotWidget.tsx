@@ -486,15 +486,17 @@ export function ChatbotWidget() {
             exit={{ opacity: 0, y: 12, scale: 0.98 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
             className={cn(
-              "flex w-[min(100vw-2rem,24.5rem)] flex-col overflow-hidden rounded-[1.35rem] border border-navy/10 bg-[#f7f5f1] shadow-luxe sm:w-[min(100vw-2rem,26.5rem)]",
-              // Mobile: fill between safe top and FAB; desktop: fixed height card
-              "max-sm:fixed max-sm:inset-x-3 max-sm:top-[calc(5rem+env(safe-area-inset-top))] max-sm:h-auto max-sm:w-auto",
+              "flex flex-col overflow-hidden rounded-[1.5rem] border border-navy/10 bg-[#f7f5f1] shadow-luxe",
+              // Desktop: slender tall card beside the FAB
+              "sm:w-[min(100vw-2.5rem,22.5rem)]",
+              // Mobile: narrower centered column, stretch tall between nav and FAB
+              "max-sm:fixed max-sm:left-1/2 max-sm:z-50 max-sm:w-[min(20rem,calc(100vw-3.5rem))] max-sm:-translate-x-1/2 max-sm:h-auto",
               isHome
-                ? "max-sm:bottom-[calc(5.75rem+env(safe-area-inset-bottom))] sm:h-[min(36rem,calc(100dvh-9rem))]"
-                : "max-sm:bottom-[calc(4.5rem+env(safe-area-inset-bottom))] sm:h-[min(36rem,calc(100dvh-7.5rem))]",
+                ? "max-sm:top-[calc(3.35rem+env(safe-area-inset-top))] max-sm:bottom-[calc(4.35rem+env(safe-area-inset-bottom))] sm:h-[min(40rem,calc(100dvh-8.5rem))]"
+                : "max-sm:top-[calc(3.35rem+env(safe-area-inset-top))] max-sm:bottom-[calc(3.65rem+env(safe-area-inset-bottom))] sm:h-[min(40rem,calc(100dvh-7rem))]",
             )}
           >
-            <header className="relative shrink-0 overflow-hidden bg-navy px-4 pb-3.5 pt-3.5 text-navy-foreground">
+            <header className="relative shrink-0 overflow-hidden bg-navy px-3.5 pb-3 pt-3 text-navy-foreground sm:px-4 sm:pb-3.5 sm:pt-3.5">
               <div
                 className="pointer-events-none absolute inset-0 opacity-40"
                 style={{
@@ -503,8 +505,8 @@ export function ChatbotWidget() {
                 }}
                 aria-hidden
               />
-              <div className={cn("relative flex items-center gap-3", isRTL && "pe-12")}>
-                <div className="relative size-11 shrink-0 overflow-hidden rounded-full border-2 border-gold/50 bg-[#f4f1ea] shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
+              <div className={cn("relative flex items-center gap-2.5 sm:gap-3", isRTL && "pe-11 sm:pe-12")}>
+                <div className="relative size-10 shrink-0 overflow-hidden rounded-full border-2 border-gold/50 bg-[#f4f1ea] shadow-[0_0_0_1px_rgba(255,255,255,0.08)] sm:size-11">
                   <img
                     src="/images/brand/chatbot-robot-avatar.png"
                     alt=""
@@ -519,10 +521,10 @@ export function ChatbotWidget() {
                   />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h2 id={titleId} className="truncate font-display text-[1.05rem] leading-tight tracking-wide">
+                  <h2 id={titleId} className="truncate font-display text-[0.98rem] leading-tight tracking-wide sm:text-[1.05rem]">
                     {t("chatbot.title")}
                   </h2>
-                  <p className="mt-0.5 flex items-center gap-1.5 text-[0.7rem] text-gold/90">
+                  <p className="mt-0.5 flex items-center gap-1.5 text-[0.68rem] text-gold/90 sm:text-[0.7rem]">
                     <span className="size-1.5 rounded-full bg-emerald-400" aria-hidden />
                     {t("chatbot.statusOnline")}
                   </p>
@@ -535,7 +537,7 @@ export function ChatbotWidget() {
                   }}
                   aria-label={t("common.close")}
                   className={cn(
-                    "grid size-9 shrink-0 place-items-center rounded-full border border-white/12 bg-white/5 text-white/90 transition hover:border-gold/50 hover:bg-white/10 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold",
+                    "grid size-8 shrink-0 place-items-center rounded-full border border-white/12 bg-white/5 text-white/90 transition hover:border-gold/50 hover:bg-white/10 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold sm:size-9",
                     isRTL && "absolute end-0 top-1/2 -translate-y-1/2",
                   )}
                 >
@@ -548,7 +550,7 @@ export function ChatbotWidget() {
             <div
               ref={scrollContainerRef}
               onScroll={handleScroll}
-              className="min-h-0 flex-1 space-y-3.5 overflow-y-auto px-3.5 py-4"
+              className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-3.5 sm:space-y-3.5 sm:px-3.5 sm:py-4"
               style={{
                 background:
                   "linear-gradient(180deg, color-mix(in oklab, var(--sand) 88%, white), color-mix(in oklab, var(--sand) 55%, #eef2f6))",
@@ -558,13 +560,13 @@ export function ChatbotWidget() {
             >
               <div
                 className={cn(
-                  "max-w-[90%] rounded-2xl border border-navy/6 bg-white/95 px-3.5 py-3 text-sm leading-relaxed text-navy shadow-[0_8px_24px_rgba(15,23,42,0.06)]",
+                  "max-w-[92%] rounded-2xl border border-navy/6 bg-white/95 px-3 py-2.5 text-[0.8125rem] leading-relaxed text-navy shadow-[0_8px_24px_rgba(15,23,42,0.06)] sm:px-3.5 sm:py-3 sm:text-sm",
                   isRTL ? "ms-auto me-0 rounded-ee-md" : "me-auto ms-0 rounded-es-md",
                 )}
               >
                 <p className="whitespace-pre-line">{t("chatbot.welcome")}</p>
                 <time
-                  className="mt-2 block text-[0.65rem] text-navy/40"
+                  className="mt-1.5 block text-[0.62rem] text-navy/40 sm:mt-2 sm:text-[0.65rem]"
                   dateTime={new Date().toISOString()}
                 >
                   {formatTime(new Date(), language)}
@@ -574,7 +576,7 @@ export function ChatbotWidget() {
               {showQuickReplies ? (
                 <div
                   className={cn(
-                    "flex max-w-[95%] flex-wrap gap-2",
+                    "flex max-w-full flex-wrap gap-1.5 sm:max-w-[95%] sm:gap-2",
                     isRTL ? "ms-auto me-0 justify-end" : "me-auto ms-0 justify-start",
                   )}
                 >
@@ -583,7 +585,7 @@ export function ChatbotWidget() {
                       key={reply.label}
                       type="button"
                       onClick={() => void submitMessage(reply.message)}
-                      className="rounded-full border border-navy/10 bg-white/80 px-3 py-1.5 text-xs text-navy/85 shadow-sm backdrop-blur-sm transition hover:border-gold/55 hover:bg-gold/10 hover:text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+                      className="rounded-full border border-navy/10 bg-white/80 px-2.5 py-1.5 text-[0.7rem] text-navy/85 shadow-sm backdrop-blur-sm transition hover:border-gold/55 hover:bg-gold/10 hover:text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold sm:px-3 sm:text-xs"
                     >
                       {reply.label}
                     </button>
@@ -595,7 +597,7 @@ export function ChatbotWidget() {
                 <div
                   key={message.id}
                   className={cn(
-                    "flex max-w-[90%] flex-col gap-1",
+                    "flex max-w-[92%] flex-col gap-1",
                     message.role === "user"
                       ? isRTL
                         ? "ms-0 me-auto items-start"
@@ -607,7 +609,7 @@ export function ChatbotWidget() {
                 >
                   <div
                     className={cn(
-                      "rounded-2xl px-3.5 py-3 text-sm leading-relaxed",
+                      "rounded-2xl px-3 py-2.5 text-[0.8125rem] leading-relaxed sm:px-3.5 sm:py-3 sm:text-sm",
                       message.role === "user"
                         ? "rounded-es-md bg-navy text-navy-foreground shadow-[0_10px_28px_rgba(15,23,42,0.18)]"
                         : message.error
@@ -666,9 +668,9 @@ export function ChatbotWidget() {
 
             <form
               onSubmit={handleSubmit}
-              className="shrink-0 border-t border-navy/8 bg-white/90 px-3 py-3 backdrop-blur-md"
+              className="shrink-0 border-t border-navy/8 bg-white/90 px-2.5 py-2.5 backdrop-blur-md sm:px-3 sm:py-3"
             >
-              <div className="flex items-end gap-2 rounded-2xl border border-navy/10 bg-[#f7f5f1] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] focus-within:border-gold/45 focus-within:ring-2 focus-within:ring-gold/15">
+              <div className="flex items-end gap-1.5 rounded-2xl border border-navy/10 bg-[#f7f5f1] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] focus-within:border-gold/45 focus-within:ring-2 focus-within:ring-gold/15 sm:gap-2 sm:p-1.5">
                 <Textarea
                   ref={inputRef}
                   value={input}
@@ -681,14 +683,14 @@ export function ChatbotWidget() {
                   disabled={sending}
                   dir={isRTL ? "rtl" : "ltr"}
                   aria-label={t("chatbot.placeholder")}
-                  className="min-h-10 max-h-28 flex-1 resize-none border-0 bg-transparent px-2.5 py-2.5 text-base shadow-none focus-visible:ring-0 sm:text-sm"
+                  className="min-h-9 max-h-28 flex-1 resize-none border-0 bg-transparent px-2 py-2 text-base shadow-none focus-visible:ring-0 sm:min-h-10 sm:px-2.5 sm:py-2.5 sm:text-sm"
                 />
                 <Button
                   type="submit"
                   size="icon"
                   disabled={sending || !input.trim()}
                   aria-label={t("chatbot.send")}
-                  className="size-10 shrink-0 rounded-xl border border-navy/80 bg-navy text-navy-foreground transition hover:border-gold hover:bg-gold hover:text-navy disabled:opacity-40"
+                  className="size-9 shrink-0 rounded-xl border border-navy/80 bg-navy text-navy-foreground transition hover:border-gold hover:bg-gold hover:text-navy disabled:opacity-40 sm:size-10"
                 >
                   {sending ? (
                     <Loader2 className="size-4 animate-spin" aria-hidden />
