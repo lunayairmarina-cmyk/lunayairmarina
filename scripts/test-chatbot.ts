@@ -14,7 +14,12 @@ import {
   trimHistory,
   validateChatRequest,
 } from "../src/server/chatbot/chat";
-import { prepareGeminiHistory } from "../src/server/chatbot/contextManagement";
+import {
+  estimateHistoryTokens,
+  prepareGeminiHistory,
+  shrinkGeminiHistoryForRetry,
+} from "../src/server/chatbot/contextManagement";
+import { messagesToHistory } from "../src/server/chatbot/conversationHistory";
 import { checkRateLimit, resetRateLimitStoreForTests } from "../src/server/chatbot/rateLimit";
 import { getChatbotConfig, CHATBOT_DEFAULTS } from "../src/server/chatbot/config";
 import type { KnowledgeDocument } from "../src/lib/agent/types";
@@ -125,6 +130,40 @@ for (let turn = 1; turn <= 100; turn += 1) {
   ];
 }
 assert(simHistory.length === 200, "100-turn simulation produced 200 history items");
+
+// Empty client history is valid (server resolves from Firestore)
+const emptyHistoryValidated = validateChatRequest({ ...baseRequest(), history: [] });
+assert(emptyHistoryValidated.ok === true, "empty client history accepted");
+
+// messagesToHistory maps persisted records
+const mapped = messagesToHistory([
+  { id: "1", role: "user", content: "hello", timestamp: "2026-01-01T00:00:00.000Z" },
+  { id: "2", role: "assistant", content: "hi", timestamp: "2026-01-01T00:00:01.000Z" },
+  { id: "3", role: "system", content: "ignored", timestamp: "2026-01-01T00:00:02.000Z" },
+]);
+assert(mapped.length === 2, "messagesToHistory keeps user/assistant only");
+
+// Gemini emergency shrink keeps conversation going
+const bulkyHistory = Array.from({ length: 20 }, (_, index) => ({
+  role: index % 2 === 0 ? "user" : "assistant",
+  content: `long message ${index} `.repeat(40),
+})) as Array<{ role: "user" | "assistant"; content: string }>;
+const shrunk = shrinkGeminiHistoryForRetry(bulkyHistory);
+assert(shrunk.length < bulkyHistory.length && shrunk.length >= 2, "shrinkGeminiHistoryForRetry reduces bulk");
+
+// Context trimming never empties gemini history for large threads
+for (const count of [10, 50, 100, 200, 500, 1000]) {
+  const thread = Array.from({ length: count }, (_, index) => ({
+    role: index % 2 === 0 ? "user" : "assistant",
+    content: `turn ${index}`,
+  })) as Array<{ role: "user" | "assistant"; content: string }>;
+  const prepared = prepareGeminiHistory(thread, getChatbotConfig());
+  assert(prepared.length >= 2, `prepareGeminiHistory keeps turns for count=${count}`);
+  assert(
+    estimateHistoryTokens(prepared) <= getChatbotConfig().geminiHistoryTokenBudget + 500,
+    `token budget respected for count=${count}`,
+  );
+}
 
 // Prompt injection guardrails present
 const enPrompt = buildSystemPrompt("en", "Sample retrieved knowledge about services.");

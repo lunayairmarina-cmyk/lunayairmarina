@@ -2,6 +2,7 @@ import type { ChatHistoryItem, ChatLanguage } from "@/lib/chatbot/types";
 import type { CustomerContext } from "@/lib/agent/context";
 import type { ChatbotConfig } from "./config";
 import { buildSystemPrompt } from "./prompt";
+import { shrinkGeminiHistoryForRetry } from "./contextManagement";
 
 interface GeminiContent {
   role: "user" | "model";
@@ -95,11 +96,13 @@ async function callGeminiOnce(
     const payload = (await response.json()) as GeminiResponse;
 
     if (!response.ok) {
-      const retryable = response.status === 429 || response.status >= 500;
-      throw new GeminiServiceError(
-        payload.error?.message ?? `Gemini request failed (${response.status})`,
-        { retryable, status: response.status },
-      );
+      const message = payload.error?.message ?? `Gemini request failed (${response.status})`;
+      const contextOverflow =
+        response.status === 400 &&
+        /context|token|length|too large|exceed/i.test(message);
+      const retryable =
+        response.status === 429 || response.status >= 500 || contextOverflow;
+      throw new GeminiServiceError(message, { retryable, status: response.status });
     }
 
     const text = payload.candidates?.[0]?.content?.parts
@@ -148,7 +151,16 @@ export async function generateChatReply(
     );
   } catch (error) {
     if (error instanceof GeminiServiceError && error.retryable) {
-      return callGeminiOnce(config, language, message, history, retrievedKnowledge, agentContext);
+      const trimmedHistory =
+        error.status === 400 ? shrinkGeminiHistoryForRetry(history) : history;
+      return callGeminiOnce(
+        config,
+        language,
+        message,
+        trimmedHistory,
+        retrievedKnowledge,
+        agentContext,
+      );
     }
     throw error;
   }

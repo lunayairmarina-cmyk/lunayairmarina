@@ -1,4 +1,14 @@
-import { collection, doc, getDoc, setDoc, type Firestore } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  setDoc,
+  type Firestore,
+} from "firebase/firestore";
 import type { CustomerContext } from "@/lib/agent/context";
 import { stripUndefinedDeep } from "@/lib/agent/firestoreSanitize";
 import type { AgentIntent } from "@/lib/agent/query";
@@ -29,6 +39,25 @@ export async function loadConversation(
 
 export async function saveConversation(db: Firestore, record: AiConversationRecord): Promise<void> {
   await setDoc(conversationRef(db, record.sessionId), stripUndefinedDeep(record), { merge: true });
+}
+
+export async function listConversationMessages(
+  db: Firestore,
+  sessionId: string,
+  max = 1000,
+): Promise<AiMessageRecord[]> {
+  try {
+    const snap = await getDocs(
+      query(
+        collection(db, AI_CONVERSATIONS_COLLECTION, sessionId, AI_MESSAGES_SUBCOLLECTION),
+        orderBy("timestamp", "asc"),
+        limit(max),
+      ),
+    );
+    return snap.docs.map((item) => item.data() as AiMessageRecord);
+  } catch {
+    return [];
+  }
 }
 
 export async function appendConversationMessage(

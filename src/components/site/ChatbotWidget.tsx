@@ -4,7 +4,7 @@ import { Bot, Loader2, SendHorizontal, X } from "lucide-react";
 import { useRouterState } from "@tanstack/react-router";
 import { sendChatbotMessage, submitChatbotContact } from "@/functions/chatbot";
 import { useLanguage } from "@/lib/i18n";
-import type { ChatErrorCode, ChatHistoryItem } from "@/lib/chatbot/types";
+import type { ChatErrorCode } from "@/lib/chatbot/types";
 import { CHATBOT_MAX_MESSAGE_LENGTH, getOrCreateChatSessionId } from "@/lib/chatbot/session";
 import { AssistantMessageContent } from "@/lib/chatbot/renderAssistantMessage";
 import { cn } from "@/lib/utils";
@@ -49,15 +49,6 @@ function createMessageId(): string {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : `msg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function toHistory(messages: ChatMessage[]): ChatHistoryItem[] {
-  return messages
-    .filter((message) => !message.error)
-    .map((message) => ({
-      role: message.role,
-      content: message.content,
-    }));
 }
 
 function formatTime(date: Date, language: "en" | "ar"): string {
@@ -328,7 +319,6 @@ export function ChatbotWidget() {
         timestamp: new Date(),
       };
 
-      const historyBeforeSend = toHistory(messages);
       setMessages((prev) => [...prev, userMessage]);
       setInput("");
       setSending(true);
@@ -339,7 +329,8 @@ export function ChatbotWidget() {
             message,
             language,
             sessionId,
-            history: historyBeforeSend,
+            // Server resolves full thread from Firestore — avoids client history caps/payload growth.
+            history: [],
           },
         });
 
@@ -380,7 +371,7 @@ export function ChatbotWidget() {
         setSending(false);
       }
     },
-    [contactSaved, language, messages, resolveErrorMessage, sending, sessionId, t],
+    [contactSaved, language, resolveErrorMessage, sending, sessionId, t],
   );
 
   const handleSubmit = (event?: React.FormEvent) => {

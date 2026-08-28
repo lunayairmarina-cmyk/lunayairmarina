@@ -7,7 +7,8 @@ export const CHATBOT_DEFAULTS = {
   /** Token budget for Gemini multi-turn contents (older turns rely on conversation summary). */
   geminiHistoryTokenBudget: 6000,
   rateLimitWindowMs: 60_000,
-  rateLimitMaxRequests: 10,
+  /** Abuse protection only — not a per-conversation message cap. */
+  rateLimitMaxRequests: 30,
   maxOutputTokens: 512,
   requestTimeoutMs: 30_000,
   geminiModel: "gemini-3.5-flash-lite",

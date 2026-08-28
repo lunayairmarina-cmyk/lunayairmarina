@@ -30,6 +30,25 @@ export async function saveConversationAdmin(
     .set(stripUndefinedDeep(record), { merge: true });
 }
 
+export async function listConversationMessagesAdmin(
+  db: AdminFirestore,
+  sessionId: string,
+  max = 1000,
+): Promise<AiMessageRecord[]> {
+  try {
+    const snap = await db
+      .collection(AI_CONVERSATIONS_COLLECTION)
+      .doc(sessionId)
+      .collection(AI_MESSAGES_SUBCOLLECTION)
+      .orderBy("timestamp", "asc")
+      .limit(max)
+      .get();
+    return snap.docs.map((item) => item.data() as AiMessageRecord);
+  } catch {
+    return [];
+  }
+}
+
 export async function appendConversationMessageAdmin(
   db: AdminFirestore,
   sessionId: string,

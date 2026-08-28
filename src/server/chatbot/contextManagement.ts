@@ -7,6 +7,10 @@ export function trimHistory(history: ChatHistoryItem[], maxItems: number): ChatH
   return history.slice(-maxItems);
 }
 
+export function estimateHistoryTokens(history: ChatHistoryItem[]): number {
+  return history.reduce((sum, item) => sum + estimateTokens(item.content), 0);
+}
+
 /**
  * Select recent turns for Gemini only. Full client history remains unlimited for
  * validation and Firestore persistence; older context is covered via conversation summary.
@@ -20,13 +24,20 @@ export function prepareGeminiHistory(
   const budget = config.geminiHistoryTokenBudget;
   if (budget <= 0 || selected.length <= 2) return selected;
 
-  while (selected.length > 2 && historyTokenEstimate(selected) > budget) {
+  while (selected.length > 2 && estimateHistoryTokens(selected) > budget) {
     selected = selected.slice(1);
   }
 
   return selected;
 }
 
-function historyTokenEstimate(history: ChatHistoryItem[]): number {
-  return history.reduce((sum, item) => sum + estimateTokens(item.content), 0);
+/**
+ * Emergency trim when Gemini rejects context size — keeps at least one prior turn.
+ */
+export function shrinkGeminiHistoryForRetry(history: ChatHistoryItem[]): ChatHistoryItem[] {
+  if (history.length <= 4) {
+    return history.slice(-Math.max(1, history.length - 1));
+  }
+  const half = Math.max(2, Math.floor(history.length / 2));
+  return history.slice(-half);
 }
