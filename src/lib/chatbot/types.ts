@@ -7,6 +7,15 @@ export interface ChatHistoryItem {
   content: string;
 }
 
+/** Client payload — history is ignored; server loads from Firestore by sessionId. */
+export interface ChatClientPayload {
+  message: string;
+  language: ChatLanguage;
+  sessionId: string;
+  /** Legacy clients may still send history; server ignores it for validation and context. */
+  history?: ChatHistoryItem[];
+}
+
 export interface ChatRequest {
   message: string;
   language: ChatLanguage;
@@ -14,7 +23,15 @@ export interface ChatRequest {
   history: ChatHistoryItem[];
 }
 
-export type ChatErrorCode = "VALIDATION" | "RATE_LIMIT" | "SERVICE" | "CONFIG" | "TIMEOUT";
+export type ChatErrorCode =
+  | "VALIDATION"
+  | "RATE_LIMIT"
+  | "GEMINI"
+  | "FIRESTORE"
+  | "CONTEXT"
+  | "TIMEOUT"
+  | "CONFIG"
+  | "INTERNAL";
 
 export interface ChatSuccessResponse {
   ok: true;

@@ -26,13 +26,25 @@ interface GeminiResponse {
 export class GeminiServiceError extends Error {
   readonly retryable: boolean;
   readonly status?: number;
+  readonly kind: "quota" | "context" | "timeout" | "api" | "empty" | "network";
 
-  constructor(message: string, options: { retryable: boolean; status?: number }) {
+  constructor(
+    message: string,
+    options: { retryable: boolean; status?: number; kind?: GeminiServiceError["kind"] },
+  ) {
     super(message);
     this.name = "GeminiServiceError";
     this.retryable = options.retryable;
     this.status = options.status;
+    this.kind = options.kind ?? "api";
   }
+}
+
+function classifyGeminiFailure(status: number, message: string): GeminiServiceError["kind"] {
+  if (status === 429) return "quota";
+  if (status === 408) return "timeout";
+  if (status === 400 && /context|token|length|too large|exceed/i.test(message)) return "context";
+  return "api";
 }
 
 function toGeminiHistory(history: ChatHistoryItem[]): GeminiContent[] {
@@ -97,12 +109,11 @@ async function callGeminiOnce(
 
     if (!response.ok) {
       const message = payload.error?.message ?? `Gemini request failed (${response.status})`;
-      const contextOverflow =
-        response.status === 400 &&
-        /context|token|length|too large|exceed/i.test(message);
+      const kind = classifyGeminiFailure(response.status, message);
+      const contextOverflow = kind === "context";
       const retryable =
         response.status === 429 || response.status >= 500 || contextOverflow;
-      throw new GeminiServiceError(message, { retryable, status: response.status });
+      throw new GeminiServiceError(message, { retryable, status: response.status, kind });
     }
 
     const text = payload.candidates?.[0]?.content?.parts
@@ -111,16 +122,20 @@ async function callGeminiOnce(
       .trim();
 
     if (!text) {
-      throw new GeminiServiceError("Empty Gemini response", { retryable: true });
+      throw new GeminiServiceError("Empty Gemini response", { retryable: true, kind: "empty" });
     }
 
     return text;
   } catch (error) {
     if (error instanceof GeminiServiceError) throw error;
     if (error instanceof Error && error.name === "AbortError") {
-      throw new GeminiServiceError("Gemini request timed out", { retryable: true });
+      throw new GeminiServiceError("Gemini request timed out", {
+        retryable: true,
+        kind: "timeout",
+        status: 408,
+      });
     }
-    throw new GeminiServiceError("Gemini network error", { retryable: true });
+    throw new GeminiServiceError("Gemini network error", { retryable: true, kind: "network" });
   } finally {
     clearTimeout(timeout);
   }

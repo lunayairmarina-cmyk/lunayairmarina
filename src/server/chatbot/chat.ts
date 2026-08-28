@@ -48,15 +48,11 @@ import {
   prepareGeminiHistory,
 } from "./contextManagement";
 import { resolveConversationHistory } from "./conversationHistory";
-import { logChatTrace } from "./chatTrace";
+import { createChatRequestId, logChatTrace } from "./chatTrace";
 import { GeminiServiceError, generateChatReply } from "./gemini";
 import { checkRateLimit } from "./rateLimit";
 
-const historyItemSchema = z.object({
-  role: z.enum(["user", "assistant"]),
-  content: z.string().trim().min(1).max(4000),
-});
-
+/** Client history is ignored — only message/session/language are validated. */
 export function createChatRequestSchema(maxMessageLength: number) {
   return z.object({
     message: z.string().trim().min(1).max(maxMessageLength),
@@ -67,12 +63,17 @@ export function createChatRequestSchema(maxMessageLength: number) {
       .min(8)
       .max(64)
       .regex(/^[a-zA-Z0-9_-]+$/),
-    /** Client may send empty history — server resolves from Firestore by sessionId. */
-    history: z.array(historyItemSchema).default([]),
+    history: z.unknown().optional(),
   });
 }
 
 export { trimHistory } from "./contextManagement";
+
+function mapGeminiErrorToCode(error: GeminiServiceError): ChatErrorCode {
+  if (error.kind === "timeout" || error.status === 408) return "TIMEOUT";
+  if (error.kind === "context") return "CONTEXT";
+  return "GEMINI";
+}
 
 export function validateChatRequest(
   input: unknown,
@@ -90,9 +91,22 @@ export function validateChatRequest(
     return { ok: false, code: "VALIDATION" };
   }
 
+  const clientHistory = Array.isArray((input as { history?: unknown })?.history)
+    ? (input as { history: unknown[] }).history.length
+    : 0;
+
+  if (clientHistory > 0) {
+    logChatTrace("CLIENT_HISTORY_IGNORED", { clientHistoryCount: clientHistory });
+  }
+
   return {
     ok: true,
-    data: parsed.data,
+    data: {
+      message: parsed.data.message,
+      language: parsed.data.language,
+      sessionId: parsed.data.sessionId,
+      history: [],
+    },
   };
 }
 
@@ -183,24 +197,28 @@ async function persistConversationTurn(input: {
 
 export async function processChatMessage(input: unknown): Promise<ChatResponse> {
   const config = getChatbotConfig();
+  const requestId = createChatRequestId();
   const validated = validateChatRequest(input, config);
   const startedAt = Date.now();
 
   if (!validated.ok) {
-    logChatTrace("REQUEST_FAILED", { stage: "validation", code: validated.code });
+    logChatTrace("REQUEST_FAILED", { stage: "validation", code: validated.code }, requestId);
     logAiUsage({ event: "chat_error", errorCode: validated.code });
     return { ok: false, code: validated.code };
   }
 
-  logChatTrace("REQUEST_START", {
-    sessionId: validated.data.sessionId,
-    language: validated.data.language,
-    clientHistoryCount: validated.data.history.length,
-    messageLength: validated.data.message.length,
-  });
+  logChatTrace(
+    "REQUEST_START",
+    {
+      sessionId: validated.data.sessionId,
+      language: validated.data.language,
+      messageLength: validated.data.message.length,
+    },
+    requestId,
+  );
 
   if (!config.geminiApiKey) {
-    logChatTrace("REQUEST_FAILED", { stage: "config", code: "CONFIG" });
+    logChatTrace("REQUEST_FAILED", { stage: "config", code: "CONFIG" }, requestId);
     logAiUsage({
       event: "chat_error",
       sessionId: validated.data.sessionId,
@@ -212,11 +230,16 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
 
   const rate = checkRateLimit(validated.data.sessionId, config);
   if (!rate.allowed) {
-    logChatTrace("REQUEST_FAILED", {
-      stage: "rate_limit",
-      code: "RATE_LIMIT",
-      reason: rate.reason,
-    });
+    logChatTrace(
+      "REQUEST_FAILED",
+      {
+        stage: "rate_limit",
+        code: "RATE_LIMIT",
+        reason: rate.reason,
+        sessionId: validated.data.sessionId,
+      },
+      requestId,
+    );
     logAiUsage({
       event: "chat_error",
       sessionId: validated.data.sessionId,
@@ -225,7 +248,7 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
     });
     return { ok: false, code: "RATE_LIMIT" };
   }
-  logChatTrace("RATE_LIMIT_PASS", { sessionId: validated.data.sessionId });
+  logChatTrace("RATE_LIMIT_PASS", { sessionId: validated.data.sessionId }, requestId);
 
   try {
     void maybeRunPendingKnowledgeSync();
@@ -233,12 +256,15 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
     const { history: conversationHistory, source: historySource } =
       await resolveConversationHistory(validated.data.sessionId, validated.data.history);
 
-    logChatTrace("HISTORY_RESOLVED", {
-      sessionId: validated.data.sessionId,
-      source: historySource,
-      conversationHistoryCount: conversationHistory.length,
-      clientHistoryCount: validated.data.history.length,
-    });
+    logChatTrace(
+      "HISTORY_RESOLVED",
+      {
+        sessionId: validated.data.sessionId,
+        source: historySource,
+        conversationHistoryCount: conversationHistory.length,
+      },
+      requestId,
+    );
 
     const existing = await loadExistingConversation(validated.data.sessionId);
     let customerContext = emptyCustomerContext();
@@ -266,12 +292,16 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       historyText,
     });
 
-    logChatTrace("RETRIEVAL_PASS", {
-      sessionId: validated.data.sessionId,
-      documents: retrieval.documents.length,
-      intent: retrieval.analysis.intent,
-      fromFallback: retrieval.fromFallback,
-    });
+    logChatTrace(
+      "RETRIEVAL_PASS",
+      {
+        sessionId: validated.data.sessionId,
+        documents: retrieval.documents.length,
+        intent: retrieval.analysis.intent,
+        fromFallback: retrieval.fromFallback,
+      },
+      requestId,
+    );
 
     if (retrieval.fromFallback) {
       logAiUsage({
@@ -320,14 +350,18 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
 
     const geminiHistory = prepareGeminiHistory(conversationHistory, config);
 
-    logChatTrace("CONTEXT_PREPARED", {
-      sessionId: validated.data.sessionId,
-      inputHistoryCount: conversationHistory.length,
-      geminiHistoryCount: geminiHistory.length,
-      estimatedHistoryTokens: estimateHistoryTokens(geminiHistory),
-    });
+    logChatTrace(
+      "CONTEXT_PREPARED",
+      {
+        sessionId: validated.data.sessionId,
+        inputHistoryCount: conversationHistory.length,
+        geminiHistoryCount: geminiHistory.length,
+        estimatedHistoryTokens: estimateHistoryTokens(geminiHistory),
+      },
+      requestId,
+    );
 
-    logChatTrace("GEMINI_START", { sessionId: validated.data.sessionId });
+    logChatTrace("GEMINI_START", { sessionId: validated.data.sessionId }, requestId);
 
     const reply = await generateChatReply(
       config,
@@ -344,10 +378,11 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       },
     );
 
-    logChatTrace("GEMINI_SUCCESS", {
-      sessionId: validated.data.sessionId,
-      replyLength: reply.length,
-    });
+    logChatTrace(
+      "GEMINI_SUCCESS",
+      { sessionId: validated.data.sessionId, replyLength: reply.length },
+      requestId,
+    );
 
     const topScore = retrieval.diagnostic.selected[0]?.score ?? 0;
     const confidence = estimateAnswerConfidence(topScore, retrieval.documents.length);
@@ -391,7 +426,7 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       }
     }
 
-    logChatTrace("FIRESTORE_PERSIST_START", { sessionId: validated.data.sessionId });
+    logChatTrace("FIRESTORE_PERSIST_START", { sessionId: validated.data.sessionId }, requestId);
 
     await persistConversationTurn({
       sessionId: validated.data.sessionId,
@@ -407,7 +442,7 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       leadId,
     });
 
-    logChatTrace("FIRESTORE_PERSIST_SUCCESS", { sessionId: validated.data.sessionId });
+    logChatTrace("FIRESTORE_PERSIST_SUCCESS", { sessionId: validated.data.sessionId }, requestId);
 
     let candidateCreated = false;
     if (
@@ -470,33 +505,31 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       latencyMs: Date.now() - startedAt,
     });
 
-    logChatTrace("REQUEST_SUCCESS", {
-      sessionId: validated.data.sessionId,
-      latencyMs: Date.now() - startedAt,
-    });
+    logChatTrace(
+      "REQUEST_SUCCESS",
+      { sessionId: validated.data.sessionId, latencyMs: Date.now() - startedAt },
+      requestId,
+    );
 
     return { ok: true, reply };
   } catch (error) {
-    const errorCode =
-      error instanceof GeminiServiceError && error.status === 408
-        ? "TIMEOUT"
-        : error instanceof GeminiServiceError && !error.retryable
-          ? "SERVICE"
-          : "SERVICE";
-    logChatTrace("REQUEST_FAILED", {
-      stage:
-        error instanceof GeminiServiceError
-          ? "gemini"
-          : error instanceof Error
-            ? error.name
-            : "unknown",
-      code: errorCode,
-      sessionId: validated.data.sessionId,
-      conversationHistoryCount: validated.data.history.length,
-      errorType: error instanceof Error ? error.name : "unknown",
-      geminiStatus:
-        error instanceof GeminiServiceError ? error.status ?? "" : "",
-    });
+    const errorCode: ChatErrorCode =
+      error instanceof GeminiServiceError
+        ? mapGeminiErrorToCode(error)
+        : "INTERNAL";
+    logChatTrace(
+      "REQUEST_FAILED",
+      {
+        stage: error instanceof GeminiServiceError ? "gemini" : "internal",
+        code: errorCode,
+        sessionId: validated.data.sessionId,
+        conversationHistoryCount: validated.data.history.length,
+        errorType: error instanceof Error ? error.name : "unknown",
+        geminiStatus: error instanceof GeminiServiceError ? error.status ?? "" : "",
+        geminiKind: error instanceof GeminiServiceError ? error.kind : "",
+      },
+      requestId,
+    );
     logAiUsage({
       event: "chat_error",
       sessionId: validated.data.sessionId,
@@ -504,12 +537,6 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       errorCode,
       latencyMs: Date.now() - startedAt,
     });
-    if (error instanceof GeminiServiceError && error.status === 408) {
-      return { ok: false, code: "TIMEOUT" };
-    }
-    if (error instanceof GeminiServiceError && !error.retryable) {
-      return { ok: false, code: "SERVICE" };
-    }
-    return { ok: false, code: "SERVICE" };
+    return { ok: false, code: errorCode };
   }
 }

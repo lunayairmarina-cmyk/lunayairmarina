@@ -3,10 +3,13 @@ import type { ChatbotConfig } from "./config";
 interface SessionBucket {
   windowStart: number;
   requestCount: number;
-  messageCount: number;
 }
 
-/** In-memory store — upgradeable to Redis/KV for distributed deployments. */
+/**
+ * In-memory per-session abuse limiter (per serverless instance).
+ * Not a conversation message cap — only blocks rapid automated abuse.
+ * On Vercel, each instance has its own map; limits are approximate but sufficient for abuse.
+ */
 const sessionBuckets = new Map<string, SessionBucket>();
 
 const MAX_TRACKED_SESSIONS = 10_000;
@@ -26,7 +29,6 @@ export function checkRateLimit(sessionId: string, config: ChatbotConfig): RateLi
   const bucket = sessionBuckets.get(sessionId) ?? {
     windowStart: now,
     requestCount: 0,
-    messageCount: 0,
   };
 
   if (now - bucket.windowStart >= config.rateLimitWindowMs) {
@@ -35,7 +37,6 @@ export function checkRateLimit(sessionId: string, config: ChatbotConfig): RateLi
   }
 
   bucket.requestCount += 1;
-  bucket.messageCount += 1;
   sessionBuckets.set(sessionId, bucket);
   pruneIfNeeded();
 

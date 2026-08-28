@@ -20,12 +20,20 @@ function sanitizeValue(key: string, value: unknown): unknown {
   return value;
 }
 
-export function logChatTrace(stage: string, data?: Record<string, unknown>): void {
-  const payload =
-    data
-      ? Object.fromEntries(
-          Object.entries(data).map(([key, value]) => [key, sanitizeValue(key, value)]),
-        )
-      : {};
-  console.info(`CHAT_${stage}`, JSON.stringify(payload));
+export function createChatRequestId(): string {
+  return `req-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+export function logChatTrace(
+  stage: string,
+  data?: Record<string, unknown>,
+  requestId?: string,
+): void {
+  const payload: Record<string, unknown> = requestId ? { requestId, ...data } : { ...data };
+  const safe = payload
+    ? Object.fromEntries(
+        Object.entries(payload).map(([key, value]) => [key, sanitizeValue(key, value)]),
+      )
+    : {};
+  console.info(`CHAT_${stage}`, JSON.stringify(safe));
 }

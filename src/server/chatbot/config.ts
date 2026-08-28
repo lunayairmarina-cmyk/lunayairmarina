@@ -7,8 +7,12 @@ export const CHATBOT_DEFAULTS = {
   /** Token budget for Gemini multi-turn contents (older turns rely on conversation summary). */
   geminiHistoryTokenBudget: 6000,
   rateLimitWindowMs: 60_000,
-  /** Abuse protection only — not a per-conversation message cap. */
-  rateLimitMaxRequests: 30,
+  /**
+   * Abuse protection only — NOT a conversation message cap.
+   * Default allows ~2 msgs/sec sustained; normal chat should never hit this.
+   * Override via CHATBOT_RATE_LIMIT_PER_MINUTE on Vercel (avoid legacy value 10).
+   */
+  rateLimitMaxRequests: 120,
   maxOutputTokens: 512,
   requestTimeoutMs: 30_000,
   geminiModel: "gemini-3.5-flash-lite",
@@ -53,8 +57,8 @@ export function getChatbotConfig() {
     rateLimitMaxRequests: readInt(
       "CHATBOT_RATE_LIMIT_PER_MINUTE",
       CHATBOT_DEFAULTS.rateLimitMaxRequests,
-      3,
-      60,
+      30,
+      600,
     ),
     maxOutputTokens: readInt(
       "CHATBOT_MAX_OUTPUT_TOKENS",

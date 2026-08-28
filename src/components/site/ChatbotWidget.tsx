@@ -299,6 +299,9 @@ export function ChatbotWidget() {
   const resolveErrorMessage = useCallback(
     (code: ChatErrorCode): string => {
       if (code === "RATE_LIMIT") return t("chatbot.rateLimit");
+      if (code === "TIMEOUT") return t("chatbot.timeout");
+      if (code === "GEMINI" || code === "CONTEXT") return t("chatbot.aiUnavailable");
+      if (code === "VALIDATION") return t("chatbot.validation");
       return t("chatbot.error");
     },
     [t],
@@ -329,8 +332,6 @@ export function ChatbotWidget() {
             message,
             language,
             sessionId,
-            // Server resolves full thread from Firestore — avoids client history caps/payload growth.
-            history: [],
           },
         });
 

@@ -89,10 +89,27 @@ assert(trimmed.length === 8, "gemini context trim keeps most recent items");
 assert(trimmed[0]?.content === "message 12", "gemini context keeps most recent items");
 
 const validatedHistory = validateChatRequest({ ...baseRequest(), history: longHistory });
-assert(validatedHistory.ok === true, "long history accepted for unlimited conversation");
+assert(validatedHistory.ok === true, "legacy client history does not fail validation");
 if (validatedHistory.ok) {
-  assert(validatedHistory.data.history.length === 20, "full history preserved after validation");
+  assert(validatedHistory.data.history.length === 0, "client history ignored after validation");
 }
+
+const noHistoryField = validateChatRequest({
+  message: "hello",
+  language: "en",
+  sessionId: "test-session-001",
+});
+assert(noHistoryField.ok === true, "request without history field validates");
+
+const oversizedClientHistory = Array.from({ length: 50 }, (_, index) => ({
+  role: index % 2 === 0 ? "user" : "assistant",
+  content: `x`.repeat(5000),
+}));
+const oversizedValidated = validateChatRequest({
+  ...baseRequest(),
+  history: oversizedClientHistory,
+});
+assert(oversizedValidated.ok === true, "oversized legacy client history items do not fail validation");
 
 const geminiSlice = prepareGeminiHistory(longHistory, getChatbotConfig());
 assert(geminiSlice.length <= getChatbotConfig().geminiMaxHistoryItems, "gemini history internally capped");
@@ -450,7 +467,10 @@ assert(checkRateLimit("rate-test", config).allowed === true, "first rate-limit r
 assert(checkRateLimit("rate-test", config).allowed === true, "second rate-limit request allowed");
 assert(checkRateLimit("rate-test", config).allowed === false, "third rate-limit request blocked");
 
-// Session schema accepts expected session id format
+assert(
+  CHATBOT_DEFAULTS.rateLimitMaxRequests >= 120,
+  "default abuse limit allows sustained conversation",
+);
 const schema = createChatRequestSchema(CHATBOT_DEFAULTS.maxMessageLength);
 assert(schema.safeParse(baseRequest()).success === true, "valid request schema passes");
 
