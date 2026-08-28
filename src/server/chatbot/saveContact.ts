@@ -5,10 +5,7 @@ import {
 } from "@/lib/agent/context";
 import {
   buildConversationRecord,
-  loadConversation,
   makeMessageId,
-  appendConversationMessage,
-  saveConversation,
 } from "@/server/agent/conversationStore";
 import { pairedMessageTimestamps } from "@/lib/agent/messageOrder";
 import { stripUndefinedDeep } from "@/lib/agent/firestoreSanitize";
@@ -19,8 +16,11 @@ import {
 } from "@/server/agent/conversationStoreAdmin";
 import { buildAiLeadRecord } from "@/lib/agent/aiAdminClient";
 import { createAiLeadAdmin, updateAiLeadAdmin } from "@/server/agent/leadsStoreAdmin";
-import { tryGetAdminFirestore } from "@/server/agent/firebaseAdmin";
-import { getDb } from "@/lib/firebase";
+import { probeAdminFirestore, tryGetAdminFirestore } from "@/server/agent/firebaseAdmin";
+import {
+  buildEnvDiagnostics,
+  extractFirestoreError,
+} from "@/server/agent/firebaseAdminDiagnostics";
 import { logAiUsage } from "@/server/agent/usageLog";
 
 const contactSchema = z.object({
@@ -40,14 +40,10 @@ export type SaveChatContactResult =
   | { ok: true; confirmation: string }
   | { ok: false; code: "VALIDATION" | "SERVICE" };
 
-async function loadExisting(sessionId: string) {
+async function loadExistingAdmin(sessionId: string) {
   const adminDb = await tryGetAdminFirestore();
-  if (adminDb) return loadConversationAdmin(adminDb, sessionId);
-  try {
-    return await loadConversation(getDb(), sessionId);
-  } catch {
-    return null;
-  }
+  if (!adminDb) return null;
+  return loadConversationAdmin(adminDb, sessionId);
 }
 
 /** Persist visitor contact from the in-chat form (conversation + optional lead). */
@@ -61,7 +57,19 @@ export async function saveChatContact(input: unknown): Promise<SaveChatContactRe
   const now = new Date().toISOString();
 
   try {
-    const existing = await loadExisting(sessionId);
+    const adminDb = await tryGetAdminFirestore();
+    if (!adminDb) {
+      const diagnostics = await probeAdminFirestore();
+      console.error("[saveChatContact] admin unavailable", {
+        ...diagnostics,
+        SAVE_CONVERSATION_START: false,
+        SAVE_CONVERSATION_ERROR_CODE: "admin_unavailable",
+        SAVE_CONVERSATION_ERROR_MESSAGE: diagnostics.ADMIN_INIT_ERROR_MESSAGE ?? "admin_db_null",
+      });
+      return { ok: false, code: "SERVICE" };
+    }
+
+    const existing = await loadExistingAdmin(sessionId);
     let customerContext = emptyCustomerContext();
     if (existing?.customerContext && typeof existing.customerContext === "object") {
       const stored = existing.customerContext as unknown as CustomerContext;
@@ -127,64 +135,102 @@ export async function saveChatContact(input: unknown): Promise<SaveChatContactRe
       confidence: "high" as const,
     };
 
-    // 1) Persist conversation + messages first (client SDK allowed by rules).
-    const adminDb = await tryGetAdminFirestore();
-    if (adminDb) {
+    console.info("[saveChatContact]", {
+      ...buildEnvDiagnostics(),
+      ADMIN_DB: true,
+      SAVE_CONVERSATION_START: true,
+      sessionId,
+    });
+
+    try {
       await saveConversationAdmin(adminDb, record);
-      await appendConversationMessageAdmin(adminDb, sessionId, noteUser);
-      await appendConversationMessageAdmin(adminDb, sessionId, noteAssistant);
-    } else {
-      // Client rules currently allow customerContext; denormalized visitor* fields
-      // may be rejected until firestore.rules are deployed — keep contact in context.
-      const clientRecord = { ...record };
-      delete clientRecord.visitorName;
-      delete clientRecord.visitorPhone;
-      delete clientRecord.visitorEmail;
-      const db = getDb();
-      await saveConversation(db, clientRecord);
-      await appendConversationMessage(db, sessionId, noteUser);
-      await appendConversationMessage(db, sessionId, noteAssistant);
+      console.info("[saveChatContact]", {
+        SAVE_CONVERSATION_SUCCESS: true,
+        sessionId,
+      });
+    } catch (error) {
+      const firestoreError = extractFirestoreError(error);
+      console.error("[saveChatContact]", {
+        ...buildEnvDiagnostics(),
+        ADMIN_DB: true,
+        SAVE_CONVERSATION_START: true,
+        SAVE_CONVERSATION_SUCCESS: false,
+        SAVE_CONVERSATION_ERROR_CODE: firestoreError.code ?? "conversation_write_failed",
+        SAVE_CONVERSATION_ERROR_MESSAGE: firestoreError.message,
+        sessionId,
+      });
+      throw error;
     }
 
-    // 2) Leads require Admin SDK (rules block client create) — best-effort only.
     try {
-      if (adminDb) {
-        if (record.leadId) {
-          await updateAiLeadAdmin(adminDb, record.leadId, {
-            name,
-            phone,
-            email: resolvedEmail || "",
-            yachtType: (customerContext.yachtType ?? customerContext.customerType ?? "").slice(0, 80),
-            yachtLength: (customerContext.yachtLength ?? "").slice(0, 40),
-            location: (customerContext.location ?? "").slice(0, 80),
-            serviceInterest: (customerContext.interests ?? []).slice(0, 12),
-          });
-        } else {
-          const lead = buildAiLeadRecord({
-            conversationId: sessionId,
-            context: customerContext,
-            name,
-            phone,
-            email: resolvedEmail || undefined,
-          });
-          await createAiLeadAdmin(adminDb, lead);
-          record.leadId = lead.id;
-          await saveConversationAdmin(adminDb, record);
-        }
-        logAiUsage({
-          event: "lead_created",
-          sessionId,
-          language,
-          intent: "contact_form",
+      await appendConversationMessageAdmin(adminDb, sessionId, noteUser);
+      await appendConversationMessageAdmin(adminDb, sessionId, noteAssistant);
+      console.info("[saveChatContact]", {
+        SAVE_MESSAGE_SUCCESS: true,
+        sessionId,
+      });
+    } catch (error) {
+      const firestoreError = extractFirestoreError(error);
+      console.error("[saveChatContact]", {
+        ...buildEnvDiagnostics(),
+        ADMIN_DB: true,
+        SAVE_MESSAGE_SUCCESS: false,
+        SAVE_CONVERSATION_ERROR_CODE: firestoreError.code ?? "message_write_failed",
+        SAVE_CONVERSATION_ERROR_MESSAGE: firestoreError.message,
+        sessionId,
+      });
+      throw error;
+    }
+
+    // Leads require Admin SDK — best-effort only.
+    try {
+      if (record.leadId) {
+        await updateAiLeadAdmin(adminDb, record.leadId, {
+          name,
+          phone,
+          email: resolvedEmail || "",
+          yachtType: (customerContext.yachtType ?? customerContext.customerType ?? "").slice(0, 80),
+          yachtLength: (customerContext.yachtLength ?? "").slice(0, 40),
+          location: (customerContext.location ?? "").slice(0, 80),
+          serviceInterest: (customerContext.interests ?? []).slice(0, 12),
         });
+      } else {
+        const lead = buildAiLeadRecord({
+          conversationId: sessionId,
+          context: customerContext,
+          name,
+          phone,
+          email: resolvedEmail || undefined,
+        });
+        await createAiLeadAdmin(adminDb, lead);
+        record.leadId = lead.id;
+        await saveConversationAdmin(adminDb, record);
       }
-    } catch {
-      // Conversation already saved; lead can wait for Admin credentials.
+      console.info("[saveChatContact]", { SAVE_LEAD_SUCCESS: true, sessionId });
+      logAiUsage({
+        event: "lead_created",
+        sessionId,
+        language,
+        intent: "contact_form",
+      });
+    } catch (error) {
+      const firestoreError = extractFirestoreError(error);
+      console.error("[saveChatContact]", {
+        SAVE_LEAD_SUCCESS: false,
+        SAVE_LEAD_ERROR_CODE: firestoreError.code,
+        SAVE_LEAD_ERROR_MESSAGE: firestoreError.message,
+        sessionId,
+      });
     }
 
     return { ok: true, confirmation: noteAssistant.content };
   } catch (error) {
-    console.error("[saveChatContact]", error);
+    const firestoreError = extractFirestoreError(error);
+    console.error("[saveChatContact]", {
+      ...buildEnvDiagnostics(),
+      SAVE_CONVERSATION_ERROR_CODE: firestoreError.code ?? "service_error",
+      SAVE_CONVERSATION_ERROR_MESSAGE: firestoreError.message,
+    });
     return { ok: false, code: "SERVICE" };
   }
 }

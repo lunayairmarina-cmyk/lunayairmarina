@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite dev",
     "sitemap": "tsx scripts/generateSitemap.ts",
-    "build": "tsx scripts/generateSitemap.ts && vite build",
+    "build": "tsx scripts/generateSitemap.ts && vite build && tsx scripts/vercel-install-server-deps.ts",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",

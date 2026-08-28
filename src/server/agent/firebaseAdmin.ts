@@ -12,6 +12,12 @@
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import {
+  buildEnvDiagnostics,
+  parseJsonEnvValue,
+  safeErrorMessage,
+  type SafeAdminDiagnostics,
+} from "./firebaseAdminDiagnostics";
 
 type ServiceAccountJson = {
   project_id?: string;
@@ -80,7 +86,10 @@ function loadServiceAccountFromJsonEnv(): ServiceAccountJson | null {
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim();
   if (!raw) return null;
   try {
-    return parseServiceAccountObject(JSON.parse(raw), "FIREBASE_SERVICE_ACCOUNT_JSON");
+    return parseServiceAccountObject(
+      parseJsonEnvValue(raw),
+      "FIREBASE_SERVICE_ACCOUNT_JSON",
+    );
   } catch (error) {
     if (error instanceof Error && error.message.startsWith("[firebase-admin]")) throw error;
     throw new Error(
@@ -158,16 +167,49 @@ export function hasFirebaseAdminCredentials(): boolean {
   );
 }
 
+/** Safe runtime probe — no secrets logged. */
+export async function probeAdminFirestore(): Promise<SafeAdminDiagnostics> {
+  const base = buildEnvDiagnostics();
+  if (!hasFirebaseAdminCredentials()) {
+    return {
+      ...base,
+      ADMIN_INIT: false,
+      ADMIN_DB: false,
+      ADMIN_INIT_ERROR_MESSAGE: "missing credentials env",
+    };
+  }
+  try {
+    const db = await getAdminFirestore();
+    const projectId = (await getFirebaseAdminApp()).options.projectId ?? base.ADMIN_PROJECT_ID;
+    return {
+      ...base,
+      ADMIN_PROJECT_ID: projectId ?? base.ADMIN_PROJECT_ID,
+      ADMIN_INIT: true,
+      ADMIN_DB: Boolean(db),
+      ADMIN_INIT_ERROR_MESSAGE: null,
+    };
+  } catch (error) {
+    return {
+      ...base,
+      ADMIN_INIT: false,
+      ADMIN_DB: false,
+      ADMIN_INIT_ERROR_MESSAGE: safeErrorMessage(error),
+    };
+  }
+}
+
 /** Soft init — returns null when credentials are missing or invalid (no secrets logged). */
 export async function tryGetAdminFirestore(): Promise<AdminFirestore | null> {
   if (!hasFirebaseAdminCredentials()) return null;
   try {
     return await getAdminFirestore();
   } catch (error) {
-    console.error(
-      "[firebase-admin] init failed:",
-      error instanceof Error ? error.message : "unknown error",
-    );
+    console.error("[firebase-admin] init failed:", {
+      ...buildEnvDiagnostics(),
+      ADMIN_INIT: false,
+      ADMIN_DB: false,
+      ADMIN_INIT_ERROR_MESSAGE: safeErrorMessage(error),
+    });
     return null;
   }
 }

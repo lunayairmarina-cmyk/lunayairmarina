@@ -70,7 +70,7 @@ export default defineConfig(({ command, mode }) => {
       ...(command === "build"
         ? [
             nitro({
-              // firebase-admin must stay external — bundling it breaks server fns on Vercel.
+              ...(process.env.VERCEL ? { preset: "vercel" } : {}),
               rollupConfig: {
                 external: (id: string) =>
                   id === "firebase-admin" || id.startsWith("firebase-admin/"),
