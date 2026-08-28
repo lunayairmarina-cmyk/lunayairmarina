@@ -43,6 +43,7 @@ import { logAiUsage } from "@/server/agent/usageLog";
 import { getDb } from "@/lib/firebase";
 import type { AiConversationRecord } from "@/lib/agent/types";
 import { getChatbotConfig } from "./config";
+import { prepareGeminiHistory } from "./contextManagement";
 import { GeminiServiceError, generateChatReply } from "./gemini";
 import { checkRateLimit } from "./rateLimit";
 
@@ -51,7 +52,7 @@ const historyItemSchema = z.object({
   content: z.string().trim().min(1).max(4000),
 });
 
-export function createChatRequestSchema(maxMessageLength: number, maxHistoryItems: number) {
+export function createChatRequestSchema(maxMessageLength: number) {
   return z.object({
     message: z.string().trim().min(1).max(maxMessageLength),
     language: z.enum(["ar", "en"]),
@@ -61,20 +62,18 @@ export function createChatRequestSchema(maxMessageLength: number, maxHistoryItem
       .min(8)
       .max(64)
       .regex(/^[a-zA-Z0-9_-]+$/),
-    history: z.array(historyItemSchema).max(maxHistoryItems),
+    /** Unlimited turn count — Gemini context is trimmed separately in prepareGeminiHistory. */
+    history: z.array(historyItemSchema),
   });
 }
 
-export function trimHistory(history: ChatHistoryItem[], maxItems: number): ChatHistoryItem[] {
-  if (history.length <= maxItems) return history;
-  return history.slice(-maxItems);
-}
+export { trimHistory } from "./contextManagement";
 
 export function validateChatRequest(
   input: unknown,
   config = getChatbotConfig(),
 ): { ok: true; data: ChatRequest } | { ok: false; code: ChatErrorCode } {
-  const schema = createChatRequestSchema(config.maxMessageLength, config.maxHistoryItems);
+  const schema = createChatRequestSchema(config.maxMessageLength);
   const parsed = schema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, code: "VALIDATION" };
@@ -82,10 +81,7 @@ export function validateChatRequest(
 
   return {
     ok: true,
-    data: {
-      ...parsed.data,
-      history: trimHistory(parsed.data.history, config.maxHistoryItems),
-    },
+    data: parsed.data,
   };
 }
 
@@ -280,11 +276,13 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       customerContext = { ...customerContext, name: lead.name };
     }
 
+    const geminiHistory = prepareGeminiHistory(validated.data.history, config);
+
     const reply = await generateChatReply(
       config,
       validated.data.language,
       validated.data.message,
-      validated.data.history,
+      geminiHistory,
       retrieval.formatted,
       {
         conversationSummary: summary,

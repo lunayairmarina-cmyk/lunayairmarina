@@ -40,3 +40,6 @@ public/images/New folder/
 *.njsproj
 *.sln
 *.sw?
+
+.vercel
+.env*

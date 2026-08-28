@@ -2,8 +2,10 @@
 
 export const CHATBOT_DEFAULTS = {
   maxMessageLength: 1000,
-  maxHistoryItems: 8,
-  maxMessagesPerSession: 50,
+  /** Recent messages sent to Gemini (not a user-facing conversation cap). */
+  geminiMaxHistoryItems: 12,
+  /** Token budget for Gemini multi-turn contents (older turns rely on conversation summary). */
+  geminiHistoryTokenBudget: 6000,
   rateLimitWindowMs: 60_000,
   rateLimitMaxRequests: 10,
   maxOutputTokens: 512,
@@ -29,12 +31,17 @@ export function getChatbotConfig() {
       100,
       4000,
     ),
-    maxHistoryItems: readInt("CHATBOT_MAX_HISTORY", CHATBOT_DEFAULTS.maxHistoryItems, 2, 10),
-    maxMessagesPerSession: readInt(
-      "CHATBOT_MAX_MESSAGES_PER_SESSION",
-      CHATBOT_DEFAULTS.maxMessagesPerSession,
-      5,
-      200,
+    geminiMaxHistoryItems: readInt(
+      "CHATBOT_GEMINI_HISTORY_ITEMS",
+      CHATBOT_DEFAULTS.geminiMaxHistoryItems,
+      2,
+      32,
+    ),
+    geminiHistoryTokenBudget: readInt(
+      "CHATBOT_GEMINI_HISTORY_TOKENS",
+      CHATBOT_DEFAULTS.geminiHistoryTokenBudget,
+      1000,
+      24_000,
     ),
     rateLimitWindowMs: readInt(
       "CHATBOT_RATE_LIMIT_WINDOW_MS",

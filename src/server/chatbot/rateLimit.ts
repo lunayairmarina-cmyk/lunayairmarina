@@ -19,8 +19,7 @@ function pruneIfNeeded() {
   for (const [key] of oldest) sessionBuckets.delete(key);
 }
 
-export type RateLimitResult =
-  { allowed: true } | { allowed: false; reason: "frequency" | "session_quota" };
+export type RateLimitResult = { allowed: true } | { allowed: false; reason: "frequency" };
 
 export function checkRateLimit(sessionId: string, config: ChatbotConfig): RateLimitResult {
   const now = Date.now();
@@ -39,10 +38,6 @@ export function checkRateLimit(sessionId: string, config: ChatbotConfig): RateLi
   bucket.messageCount += 1;
   sessionBuckets.set(sessionId, bucket);
   pruneIfNeeded();
-
-  if (bucket.messageCount > config.maxMessagesPerSession) {
-    return { allowed: false, reason: "session_quota" };
-  }
 
   if (bucket.requestCount > config.rateLimitMaxRequests) {
     return { allowed: false, reason: "frequency" };

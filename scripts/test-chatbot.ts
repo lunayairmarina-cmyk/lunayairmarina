@@ -8,11 +8,13 @@ import {
   normalizeAssistantText,
   stripHtmlTags,
 } from "../src/lib/chatbot/renderAssistantMessage";
+// History limit — user conversation unlimited; Gemini context trimmed internally
 import {
   createChatRequestSchema,
   trimHistory,
   validateChatRequest,
 } from "../src/server/chatbot/chat";
+import { prepareGeminiHistory } from "../src/server/chatbot/contextManagement";
 import { checkRateLimit, resetRateLimitStoreForTests } from "../src/server/chatbot/rateLimit";
 import { getChatbotConfig, CHATBOT_DEFAULTS } from "../src/server/chatbot/config";
 import type { KnowledgeDocument } from "../src/lib/agent/types";
@@ -71,18 +73,58 @@ assert(
   "oversized input rejected",
 );
 
-// History limit enforced
+// Long history accepted (no user-facing turn cap)
 const longHistory = Array.from({ length: 20 }, (_, index) => ({
   role: index % 2 === 0 ? "user" : "assistant",
   content: `message ${index}`,
 })) as Array<{ role: "user" | "assistant"; content: string }>;
 
 const trimmed = trimHistory(longHistory, 8);
-assert(trimmed.length === 8, "history trimmed to max items");
-assert(trimmed[0]?.content === "message 12", "history keeps most recent items");
+assert(trimmed.length === 8, "gemini context trim keeps most recent items");
+assert(trimmed[0]?.content === "message 12", "gemini context keeps most recent items");
 
 const validatedHistory = validateChatRequest({ ...baseRequest(), history: longHistory });
-assert(validatedHistory.ok === false, "oversized history array rejected by schema max");
+assert(validatedHistory.ok === true, "long history accepted for unlimited conversation");
+if (validatedHistory.ok) {
+  assert(validatedHistory.data.history.length === 20, "full history preserved after validation");
+}
+
+const geminiSlice = prepareGeminiHistory(longHistory, getChatbotConfig());
+assert(geminiSlice.length <= getChatbotConfig().geminiMaxHistoryItems, "gemini history internally capped");
+
+const centuryHistory = Array.from({ length: 200 }, (_, index) => ({
+  role: index % 2 === 0 ? "user" : "assistant",
+  content: `turn ${index}`,
+})) as Array<{ role: "user" | "assistant"; content: string }>;
+const centuryValidated = validateChatRequest({
+  ...baseRequest(),
+  message: "still going",
+  history: centuryHistory,
+});
+assert(centuryValidated.ok === true, "200-item history validates without rejection");
+assert(
+  prepareGeminiHistory(centuryHistory, getChatbotConfig()).length <=
+    getChatbotConfig().geminiMaxHistoryItems,
+  "200-item history trims for gemini only",
+);
+
+// Simulate 100 sequential turns — each validates with growing history
+let simHistory: Array<{ role: "user" | "assistant"; content: string }> = [];
+for (let turn = 1; turn <= 100; turn += 1) {
+  const result = validateChatRequest({
+    ...baseRequest(),
+    sessionId: "long-session-sim",
+    message: `message number ${turn}`,
+    history: simHistory,
+  });
+  assert(result.ok === true, `turn ${turn} validates with history length ${simHistory.length}`);
+  simHistory = [
+    ...simHistory,
+    { role: "user", content: `user ${turn}` },
+    { role: "assistant", content: `assistant ${turn}` },
+  ];
+}
+assert(simHistory.length === 200, "100-turn simulation produced 200 history items");
 
 // Prompt injection guardrails present
 const enPrompt = buildSystemPrompt("en", "Sample retrieved knowledge about services.");
@@ -363,7 +405,6 @@ const config = {
   ...getChatbotConfig(),
   rateLimitMaxRequests: 2,
   rateLimitWindowMs: 60_000,
-  maxMessagesPerSession: 5,
 };
 
 assert(checkRateLimit("rate-test", config).allowed === true, "first rate-limit request allowed");
@@ -371,10 +412,7 @@ assert(checkRateLimit("rate-test", config).allowed === true, "second rate-limit 
 assert(checkRateLimit("rate-test", config).allowed === false, "third rate-limit request blocked");
 
 // Session schema accepts expected session id format
-const schema = createChatRequestSchema(
-  CHATBOT_DEFAULTS.maxMessageLength,
-  CHATBOT_DEFAULTS.maxHistoryItems,
-);
+const schema = createChatRequestSchema(CHATBOT_DEFAULTS.maxMessageLength);
 assert(schema.safeParse(baseRequest()).success === true, "valid request schema passes");
 
 // API key must not appear in client-facing modules
