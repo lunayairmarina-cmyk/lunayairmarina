@@ -5,7 +5,18 @@ import { useRouterState } from "@tanstack/react-router";
 import { sendChatbotMessage, submitChatbotContact } from "@/functions/chatbot";
 import { useLanguage } from "@/lib/i18n";
 import type { ChatErrorCode } from "@/lib/chatbot/types";
-import { CHATBOT_MAX_MESSAGE_LENGTH, getOrCreateChatSessionId } from "@/lib/chatbot/session";
+import {
+  buildIdentity,
+  loadChatbotIdentity,
+  saveChatbotIdentity,
+  touchChatbotIdentity,
+} from "@/lib/chatbot/identity";
+import { validatePhone, validateVisitorName } from "@/lib/chatbot/phone";
+import {
+  CHATBOT_MAX_MESSAGE_LENGTH,
+  getOrCreateChatSessionId,
+  persistSessionId,
+} from "@/lib/chatbot/session";
 import { AssistantMessageContent } from "@/lib/chatbot/renderAssistantMessage";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -25,24 +36,19 @@ interface QuickReply {
   message: string;
 }
 
-const CHATBOT_CONTACT_SAVED_KEY = "lunayair.chatbot.contactSaved";
+type OnboardingStep = "welcome" | "form";
 
-function hasSavedChatContact(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return window.sessionStorage.getItem(CHATBOT_CONTACT_SAVED_KEY) === "1";
-  } catch {
-    return false;
-  }
+function firstName(fullName: string): string {
+  return fullName.trim().split(/\s+/)[0] ?? fullName.trim();
 }
 
-function markChatContactSaved() {
-  if (typeof window === "undefined") return;
-  try {
-    window.sessionStorage.setItem(CHATBOT_CONTACT_SAVED_KEY, "1");
-  } catch {
-    // ignore
-  }
+function formatPersonalWelcome(
+  t: (key: string) => string,
+  visitorName: string,
+  isReturning: boolean,
+): string {
+  const key = isReturning ? "chatbot.returningWelcome" : "chatbot.registeredWelcome";
+  return t(key).replace("{{name}}", firstName(visitorName));
 }
 
 function createMessageId(): string {
@@ -152,13 +158,23 @@ export function ChatbotWidget() {
   const [teaserDismissed, setTeaserDismissed] = useState(false);
   const [badgeCleared, setBadgeCleared] = useState(false);
   const [contactSaved, setContactSaved] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>("welcome");
+  const [visitorName, setVisitorName] = useState("");
+  const [isReturningUser, setIsReturningUser] = useState(false);
   const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [contactSaving, setContactSaving] = useState(false);
   const [contactError, setContactError] = useState("");
+  const [contactWarning, setContactWarning] = useState("");
 
   useEffect(() => {
-    setContactSaved(hasSavedChatContact());
+    const identity = loadChatbotIdentity();
+    if (identity) {
+      setContactSaved(true);
+      setVisitorName(identity.name);
+      setIsReturningUser(true);
+      touchChatbotIdentity();
+    }
   }, []);
 
   const quickReplies = tv<QuickReply[]>("chatbot.quickReplies");
@@ -384,10 +400,16 @@ export function ChatbotWidget() {
     event.preventDefault();
     const name = contactName.trim();
     const phone = contactPhone.trim();
-    if (name.length < 2 || phone.length < 7 || contactSaving) return;
+    if (!validateVisitorName(name) || !validatePhone(phone) || contactSaving) return;
 
     setContactSaving(true);
     setContactError("");
+    setContactWarning("");
+
+    const identity = buildIdentity({ sessionId, name, phone, language });
+    saveChatbotIdentity(identity);
+    persistSessionId(sessionId, name, phone, language);
+
     try {
       const result = await submitChatbotContact({
         data: {
@@ -398,33 +420,36 @@ export function ChatbotWidget() {
         },
       });
       if (!result.ok) {
-        setContactError(t("chatbot.contactError"));
-        return;
+        setContactWarning(t("chatbot.contactSyncPending"));
       }
-      markChatContactSaved();
       setContactSaved(true);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: createMessageId(),
-          role: "user",
-          content:
-            language === "ar"
-              ? `بيانات التواصل:\nالاسم: ${name}\nالجوال: ${phone}`
-              : `Contact details:\nName: ${name}\nMobile: ${phone}`,
-          timestamp: new Date(),
-        },
+      setVisitorName(name);
+      setIsReturningUser(false);
+      setMessages([
         {
           id: createMessageId(),
           role: "assistant",
-          content: result.confirmation,
+          content: result.ok
+            ? result.confirmation
+            : formatPersonalWelcome(t, name, false),
           timestamp: new Date(),
         },
       ]);
       setContactName("");
       setContactPhone("");
     } catch {
-      setContactError(t("chatbot.contactError"));
+      setContactWarning(t("chatbot.contactSyncPending"));
+      setContactSaved(true);
+      setVisitorName(name);
+      setIsReturningUser(false);
+      setMessages([
+        {
+          id: createMessageId(),
+          role: "assistant",
+          content: formatPersonalWelcome(t, name, false),
+          timestamp: new Date(),
+        },
+      ]);
     } finally {
       setContactSaving(false);
     }
@@ -577,6 +602,26 @@ export function ChatbotWidget() {
             </header>
 
             {!contactSaved ? (
+              onboardingStep === "welcome" ? (
+                <div className="flex min-h-0 flex-1 flex-col justify-center px-4 py-5">
+                  <p className="text-center text-sm leading-relaxed text-navy/80 whitespace-pre-line">
+                    {t("chatbot.welcome")}
+                  </p>
+                  <p className="mt-4 text-center text-[0.75rem] leading-snug text-navy/55">
+                    {t("chatbot.contactHint")}
+                  </p>
+                  <p className="mt-2 text-center text-[0.7rem] leading-snug text-navy/45">
+                    {t("chatbot.contactGate")}
+                  </p>
+                  <Button
+                    type="button"
+                    onClick={() => setOnboardingStep("form")}
+                    className="mt-5 h-10 w-full rounded-xl border border-gold bg-gold text-navy hover:bg-gold-soft"
+                  >
+                    {t("chatbot.startChatButton")}
+                  </Button>
+                </div>
+              ) : (
               <div className="flex min-h-0 flex-1 flex-col justify-center px-4 py-5">
                 <p className="text-center text-sm leading-relaxed text-navy/80">
                   {t("chatbot.welcome")}
@@ -624,8 +669,8 @@ export function ChatbotWidget() {
                     type="submit"
                     disabled={
                       contactSaving ||
-                      contactName.trim().length < 2 ||
-                      contactPhone.trim().length < 7
+                      !validateVisitorName(contactName.trim()) ||
+                      !validatePhone(contactPhone.trim())
                     }
                     className="mt-3 h-10 w-full rounded-xl border border-gold bg-gold text-navy hover:bg-gold-soft disabled:opacity-40"
                   >
@@ -637,6 +682,7 @@ export function ChatbotWidget() {
                   </Button>
                 </form>
               </div>
+              )
             ) : (
               <>
             <div
@@ -656,7 +702,11 @@ export function ChatbotWidget() {
                   isRTL ? "ms-auto me-0 rounded-ee-md" : "me-auto ms-0 rounded-es-md",
                 )}
               >
-                <p className="whitespace-pre-line break-words [overflow-wrap:anywhere]">{t("chatbot.welcome")}</p>
+                <p className="whitespace-pre-line break-words [overflow-wrap:anywhere]">
+                  {visitorName
+                    ? formatPersonalWelcome(t, visitorName, isReturningUser && messages.length === 0)
+                    : t("chatbot.welcome")}
+                </p>
                 <time
                   className="mt-1.5 block text-[0.62rem] text-navy/40 sm:mt-2 sm:text-[0.65rem]"
                   dateTime={new Date().toISOString()}
@@ -762,6 +812,9 @@ export function ChatbotWidget() {
               onSubmit={handleSubmit}
               className="shrink-0 border-t border-navy/8 bg-white/90 px-2.5 py-2.5 backdrop-blur-md sm:px-3 sm:py-3"
             >
+              {contactWarning ? (
+                <p className="mb-2 text-center text-[0.65rem] text-amber-700">{contactWarning}</p>
+              ) : null}
               <div className="flex items-end gap-1.5 rounded-2xl border border-navy/10 bg-[#f7f5f1] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] focus-within:border-gold/45 focus-within:ring-2 focus-within:ring-gold/15 sm:gap-2 sm:p-1.5">
                 <Textarea
                   ref={inputRef}

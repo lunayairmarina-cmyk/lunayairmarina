@@ -1,0 +1,515 @@
+{
+  "responses": {
+    "GREETING": {
+      "ar": [
+        "وعليكم السلام 👋 أنا Assistant Captain من Lunayair Marina. كيف أقدر أساعدك اليوم؟",
+        "أهلاً وسهلاً! أنا هنا لمساعدتك في إدارة اليخوت والخدمات البحرية.",
+        "مرحباً بك في Lunayair Marina — تفضل، وش حاب تعرف؟",
+        "هلا والله 👋 كيف أقدر أخدمك؟"
+      ],
+      "en": [
+        "Hello! I'm Assistant Captain from Lunayair Marina. How can I help you today?",
+        "Welcome — I'm here for yacht management, agency, marina and crew questions.",
+        "Hi there! What would you like to know about our services?"
+      ]
+    },
+    "THANKS": {
+      "ar": [
+        "العفو، في خدمتك دائماً.",
+        "تسلم — إذا احتجت أي شيء آخر أنا هنا.",
+        "شكراً لتواصلك معنا!"
+      ],
+      "en": [
+        "You're welcome — happy to help anytime.",
+        "Glad I could assist!",
+        "Thank you for reaching out to Lunayair Marina."
+      ]
+    },
+    "GOODBYE": {
+      "ar": [
+        "مع السلامة، ونتمنى لك رحلة سعيدة.",
+        "في أمان الله — تواصل معنا وقت ما تحتاج.",
+        "إلى اللقاء!"
+      ],
+      "en": [
+        "Goodbye — fair winds!",
+        "Take care, and reach out anytime.",
+        "See you soon."
+      ]
+    },
+    "HOW_ARE_YOU": {
+      "ar": [
+        "بخير والحمد لله — جاهز أساعدك في أي استفسار عن خدماتنا.",
+        "تمام، شكراً للسؤال! وش حاب تعرف عن Lunayair Marina؟",
+        "الأمور طيبة — كيف أقدر أخدمك؟"
+      ],
+      "en": [
+        "I'm doing well — ready to help with yacht services or contact details.",
+        "All good, thanks! What would you like to know?",
+        "Great — how can I assist you today?"
+      ]
+    },
+    "IMPLEMENTATION_SECURITY": {
+      "ar": [
+        "أنا Assistant Captain من Lunayair Marina — هنا لمساعدتك في خدماتنا وتفاصيل التواصل.",
+        "أقدر أساعدك في إدارة اليخوت، الوكالة، المارينا، والطاقم — تفضل بسؤالك."
+      ],
+      "en": [
+        "I'm Assistant Captain from Lunayair Marina — here to help with our services and contact details.",
+        "I can help with yacht management, agency, marina and crew questions."
+      ]
+    },
+    "PRICE_OBJECTION": {
+      "ar": [
+        "تفهم منطقي تماماً. أسعار إدارة وتجهيز اليخوت تعتمد كلياً على احتياج اليخت الفعلي ونطاق التشغيل بدون تكاليف إضافية غير مبررة. هدفنا هو تحسين مصاريف التشغيل (OPEX) وتقديم شفافية كاملة في الفواتير بدون مبالغة. إذا حاب، نقدر نناقش خطة مخصصة تناسب ميزانيتك."
+      ],
+      "en": [
+        "Completely understand your perspective. Yacht management and operational costs depend directly on actual vessel requirements and scope, avoiding unneeded markups. Our focus is OPEX transparency and tailored efficiency."
+      ]
+    },
+    "HESITATION": {
+      "ar": [
+        "خذ وقتك بالكامل. التخطيط لإدارة اليخت أو خدمات المارينا يحتاج دراسة دقيقة. نحن متواجدون بأي وقت لمساعدتك بأي استفسار أو تزويدك بالمعلومات بدون أي التزام."
+      ],
+      "en": [
+        "Take all the time you need. Planning yacht management or marine operations requires careful thought. We remain at your service whenever you wish to ask questions without obligation."
+      ]
+    },
+    "COMPARISON": {
+      "ar": [
+        "مقارنة الخيارات خطوة ممتازة لضمان أفضل قيمة. تميزنا يرتكز على الإدارة الشاملة 360° والشفافية التامة في تقارير المصاريف والالتزام بالمعايير التنظيمية والملاحية. يسعدنا تقديم مقارنة تفصيلية لنطاق خدماتنا متى ما رغبت."
+      ],
+      "en": [
+        "Comparing options is a great practice to ensure the best value. Our strength lies in 360° management, full transparency in operational reporting, and strict regulatory compliance."
+      ]
+    },
+    "NO_CONTACT_OBJECTION": {
+      "ar": [
+        "لا قلق إطلاقاً. يمكنك استكشاف جميع خدماتنا ومراجعة تفاصيل الموقع براحتك. متى ما احتجت أي توضيح، سنكون سعداء بالإجابة هنا."
+      ],
+      "en": [
+        "No worries at all. Feel free to explore our website and service details at your own pace. Whenever you need assistance, we're glad to answer right here."
+      ]
+    },
+    "SERVICES_LIST": {
+      "ar": [
+        "خدماتنا الأساسية:\n• إدارة يخوت 360°\n• وكالة اليخوت الزائرة\n• إدارة المارينا ونوادي اليخوت\n• إدارة وتوظيف الطواقم\n\nتفاصيل أكثر: {{servicesUrl}}",
+        "نقدم أربع خدمات رئيسية: إدارة يخوت شاملة، وكالة لليخوت الزائرة، تشغيل مارينا، وإدارة طاقم. أي خدمة تحب تعرف عنها؟"
+      ],
+      "en": [
+        "Our core services:\n• 360° Yacht Management\n• Visiting Yacht Agency\n• Marina & Yacht Club Operations\n• Crew Recruitment & Management\n\nDetails: {{servicesUrl}}",
+        "We offer four main services: full yacht management, visiting yacht agency, marina operations, and crew management. Which one interests you?"
+      ]
+    },
+    "YACHT_MANAGEMENT": {
+      "ar": [
+        "إدارة اليخوت 360° لدينا تغطي التشغيل والصيانة والطاقم والامتثال والتقارير المالية — مع مدير يخت مخصص من مكتب واحد في جدة.\n\nالتفاصيل: {{yachtMgmtUrl}}",
+        "نقدم إدارة متكاملة لليخت: إشراف فني، صيانة مخططة، تجديد، توظيف طاقم ورواتب، تأمين وامتثال، وتقارير تشغيل شفافة.",
+        "إذا عندك يخت وتبحث عن إدارة شاملة، فريقنا في جدة يدير التفاصيل التقنية والتشغيلية ويبقيك على اطلاع بوضوح.",
+        "إدارة 360° تعني كل شيء من الصيانة والطاقم إلى الميزانية والامتثال — باقة مخصصة حسب يختك.",
+        "تشمل الإدارة: مدير مخصص، صيانة مخططة، رواتب طاقم، تأمين، امتثال class/flag، وتقارير OPEX."
+      ],
+      "en": [
+        "Our 360° yacht management covers operations, maintenance, crew, compliance and financial reporting — with a dedicated manager from our Jeddah desk.\n\nDetails: {{yachtMgmtUrl}}",
+        "We provide integrated management: technical supervision, planned maintenance, refit, crew payroll, insurance, class compliance, and transparent OPEX reporting.",
+        "If you own a yacht, our team handles technical and operational details so you keep clear control.",
+        "360° management means maintenance, crew, budgeting and compliance — customized to your vessel.",
+        "Includes: dedicated manager, planned maintenance, crew payroll, insurance, class/flag compliance, and OPEX reports."
+      ]
+    },
+    "YACHT_MANAGEMENT_360": {
+      "ar": [
+        "360° تعني إدارة شاملة: تشغيل، صيانة، طاقم، مالية، وامتثال — كلها من مكتب واحد.",
+        "الإدارة 360° تشمل كل ما يحتاج اليخت من إشراف فني وتشغيلي ومالي."
+      ],
+      "en": [
+        "360° means full-spectrum management: operations, maintenance, crew, finance and compliance from one desk.",
+        "360° covers everything your yacht needs — technical, operational and financial oversight."
+      ]
+    },
+    "YACHT_MANAGEMENT_PRICING": {
+      "ar": [
+        "سعر إدارة اليخت غير منشور رقمياً على الموقع — الباقة مخصصة (Custom package) حسب طول اليخت والخدمات المطلوبة. نرتب لك استشارة خاصة:\n📞 {{phone}}\n💬 واتساب: {{whatsappUrl}}\n📋 {{contactUrl}}",
+        "إدارة 360° تُسعَّر حسب متطلبات اليخت — لا يوجد سعر عام منشور. تواصل معنا لباقة مخصصة:\n{{phone}} | {{whatsappUrl}}",
+        "التكلفة تعتمد على الخدمات التي تختارها (صيانة، طاقم، تقارير...). الأسعار غير منشورة — نرتب استشارة لتحديد الباقة."
+      ],
+      "en": [
+        "Yacht management pricing is not published online — packages are customized to your vessel and services.\n📞 {{phone}}\n💬 WhatsApp: {{whatsappUrl}}\n📋 {{contactUrl}}",
+        "360° management is quoted per yacht requirements — no public price list. Contact us for a private consultation.",
+        "Cost depends on selected services (maintenance, crew, reporting, etc.). Prices are not published — we'll arrange a tailored quote."
+      ]
+    },
+    "VISITING_YACHT_AGENCY": {
+      "ar": [
+        "وكالة اليخوت الزائرة تدعم اليخوت الدولية في المياه السعودية: تصاريح دخول، تخليص جمركي، رسو، تموين، لوجستيات وكونسيرج.\n\n{{visitingAgencyUrl}}",
+        "نرحب باليخوت الزائرة ونتولى التصاريح والتخليص والرسو والتموين — لتستمتع بموسم البحر الأحمر بسلاسة.",
+        "خدمة الوكالة تشمل: تصاريح، تخليص، حجز رصيف، تموين، نقل VIP، ودعم كونسيرج."
+      ],
+      "en": [
+        "Our visiting yacht agency supports international yachts in Saudi waters: permits, customs clearance, berthing, provisioning, logistics and concierge.\n\n{{visitingAgencyUrl}}",
+        "We welcome visiting yachts and handle permits, clearance, berthing and provisioning for a smooth Red Sea season.",
+        "Agency services include: entry permits, clearance, berth booking, provisioning, VIP transfers and concierge."
+      ]
+    },
+    "VISITING_YACHT_PROVISIONING": {
+      "ar": [
+        "تموين اليخوت الزائرة جزء من خدمة الوكالة — نوفر التموين واللوجستيات ضمن دعم اليخوت الدولية في المياه السعودية.\n\n{{visitingAgencyUrl}}",
+        "نرتب تموين وإمدادات لليخوت الزائرة ضمن خدمات الوكالة: تصاريح، تخليص، رسو وتموين.",
+        "التموين لليخت الزائر متاح عبر وكالة اليخوت الزائرة — تواصل معنا لترتيب احتياجاتك."
+      ],
+      "en": [
+        "Provisioning for visiting yachts is part of our agency service — supplies and logistics for international yachts in Saudi waters.\n\n{{visitingAgencyUrl}}",
+        "We arrange provisioning and supplies for visiting yachts alongside permits, clearance and berthing.",
+        "Yacht provisioning is available through our visiting yacht agency — contact us to arrange your requirements."
+      ]
+    },
+    "MARINA_MANAGEMENT": {
+      "ar": [
+        "إدارة المارينا ونوادي اليخوت: تشغيل احترافي، حجز أرصفة، ضيافة، سلامة وأمن، وفعاليات للأعضاء.\n\n{{marinaMgmtUrl}}",
+        "ندير عمليات المارينا وفق معايير عالمية — رسو آمن، تشغيل مرافق، وبرامج نادي للملاك.",
+        "خدمة المارينا تشمل حجز أرصفة رقمي، تدريب فرق الضيافة، وإجراءات سلامة أسبوعية."
+      ],
+      "en": [
+        "Marina & yacht club operations: professional berthing, facility management, hospitality, safety and member events.\n\n{{marinaMgmtUrl}}",
+        "We operate marinas to international standards — safe berthing, facility ops and club programmes.",
+        "Marina services include digital berth booking, hospitality teams, and weekly safety routines."
+      ]
+    },
+    "CREW_MANAGEMENT": {
+      "ar": [
+        "إدارة الطواقم: توظيف وتدقيق قباطنة ومهندسين وطاقم ضيافة، عقود، رواتب، وتدريب مستمر.\n\n{{crewMgmtUrl}}",
+        "نختار الطاقم المناسب ليختك — من القبطان إلى طاقم الضيافة — مع عقود ورواتب ومتابعة أداء.",
+        "خدمة الطاقم تشمل: توظيف مدقق، عقود ورواتب، تدريب وشهادات، ومتابعة 90 يوم."
+      ],
+      "en": [
+        "Crew management: recruitment and vetting of captains, engineers and hospitality crew — contracts, payroll and ongoing training.\n\n{{crewMgmtUrl}}",
+        "We match qualified crew to your yacht — from captain to interior team — with contracts, payroll and performance follow-up.",
+        "Crew services include: vetted placement, contracts & payroll, training credentials, and 90-day monitoring."
+      ]
+    },
+    "CREW_PRICING": {
+      "ar": [
+        "سعر إدارة الطاقم غير منشور رقمياً على الموقع — يُحدَّد حسب حجم الطاقم والخدمات المطلوبة. نرتب لك استشارة:\n📞 {{phone}}\n💬 {{whatsappUrl}}",
+        "تكلفة خدمات الطاقم مخصصة (Custom) حسب اليخت والطاقم — لا يوجد سعر عام منشور. تواصل معنا لباقة مناسبة.",
+        "رواتب وتوظيف الطاقم تُسعَّر حسب متطلباتك — الأسعار غير منشورة. {{contactUrl}}"
+      ],
+      "en": [
+        "Crew management pricing is not published online — it depends on crew size and services required.\n📞 {{phone}}\n💬 {{whatsappUrl}}",
+        "Crew services are quoted per yacht and team requirements — no public price list. Contact us for a tailored package.",
+        "Payroll and recruitment costs are customized — prices are not published. {{contactUrl}}"
+      ]
+    },
+    "CREW_TRAINING": {
+      "ar": [
+        "نوفر تدريب مستمر وشهادات ضمن إدارة الطاقم — ليس برنامج تدريب مستقل، بل جزء من خدمة توظيف وإدارة الكوادر البحرية.",
+        "التدريب جزء من خدمة الطاقم: شهادات، تدريب محاكاة، وخطط تدوير للطاقم."
+      ],
+      "en": [
+        "We provide ongoing training and certifications as part of crew management — not a standalone training school.",
+        "Training is included in crew services: certifications, simulation training, and crew rotation plans."
+      ]
+    },
+    "MAINTENANCE": {
+      "ar": [
+        "الصيانة المخططة جزء أساسي من إدارة اليخوت 360° — إشراف فني، جداول صيانة، ومتطلبات التصنيف.",
+        "ندير الصيانة والتجديد ضمن الإدارة الشاملة — مع تخطيط تنبؤي ومتطلبات class surveys."
+      ],
+      "en": [
+        "Planned maintenance is core to 360° yacht management — technical supervision, schedules and class requirements.",
+        "We manage maintenance and refit within full management — with predictive planning and survey alignment."
+      ]
+    },
+    "INSURANCE": {
+      "ar": [
+        "متابعة التأمين وتجديد الوثائق جزء من إدارة اليخوت — ضمن الامتثال والتخطيط التشغيلي.",
+        "إدارة 360° تشمل متابعة التأمين ومتطلبات التصنيف قبل انتهاء المواعيد."
+      ],
+      "en": [
+        "Insurance tracking and renewals are part of yacht management — within compliance and operational planning.",
+        "360° management includes insurance and class document reviews before deadlines."
+      ]
+    },
+    "COMPLIANCE": {
+      "ar": [
+        "نراجع امتثال ISM/ISPS والتصنيف والعلم — جزء من الإدارة الشاملة لليخت.",
+        "الامتثال البحري والتصنيف يُدار ضمن إدارة 360° مع تقارير واضحة للمالك."
+      ],
+      "en": [
+        "We manage ISM/ISPS, class and flag compliance as part of full yacht management.",
+        "Maritime compliance and class requirements are handled within 360° management with clear owner reporting."
+      ]
+    },
+    "OPERATIONS": {
+      "ar": [
+        "غرفة عملياتنا في جدة تتابع التنبيهات الميكانيكية وتبديل الطاقم واللوجستيات — مع استجابة سريعة.",
+        "نوفر مكتب عمليات مع تقارير تشغيلية واستجابة على مدار الساعة للتنبيهات والطوارئ."
+      ],
+      "en": [
+        "Our Jeddah operations desk monitors mechanical alerts, crew changes and logistics with fast response.",
+        "We provide an operations room with reporting and around-the-clock monitoring for alerts and emergencies."
+      ]
+    },
+    "PHONE": {
+      "ar": [
+        "رقمنا: {{phone}}\nمتاح يومياً 7 صباحاً – 11 مساءً بتوقيت السعودية.",
+        "اتصل على {{phone}} — مكتب العمليات في جدة."
+      ],
+      "en": [
+        "Call us: {{phone}}\nDaily 7:00 AM – 11:00 PM Saudi time.",
+        "Our operations desk: {{phone}}"
+      ]
+    },
+    "WHATSAPP": {
+      "ar": [
+        "واتساب: {{phone}}\n{{whatsappUrl}}",
+        "تواصل معنا على واتساب بنفس الرقم: {{phone}}"
+      ],
+      "en": [
+        "WhatsApp: {{phone}}\n{{whatsappUrl}}",
+        "Message us on WhatsApp at {{phone}}"
+      ]
+    },
+    "EMAIL": {
+      "ar": [
+        "البريد: {{email}}\nنرد خلال 24 ساعة.",
+        "راسلنا على {{email}}"
+      ],
+      "en": [
+        "Email: {{email}}\nWe reply within 24 hours.",
+        "Reach us at {{email}}"
+      ]
+    },
+    "ADDRESS": {
+      "ar": [
+        "العنوان: {{addressAr}}\nالزيارة بموعد مسبق.",
+        "مقرنا: {{addressAr}} — برج المرجان، جدة."
+      ],
+      "en": [
+        "Address: {{addressEn}}\nVisits by appointment.",
+        "Head office: {{addressEn}}"
+      ]
+    },
+    "LOCATION": {
+      "ar": [
+        "مقرنا في جدة — نخدم ملاك اليخوت في السعودية والبحر الأحمر والخليج.",
+        "نعمل من جدة ونغطي البحر الأحمر والخليج العربي ومناطق خليجية أخرى حسب الطلب."
+      ],
+      "en": [
+        "We're based in Jeddah — serving owners across Saudi Arabia, the Red Sea and the Gulf.",
+        "Headquartered in Jeddah with coverage across the Red Sea, Arabian Gulf and GCC waters."
+      ]
+    },
+    "WORKING_HOURS": {
+      "ar": [
+        "ساعات الكونسيرج: يومياً 7 صباحاً – 11 مساءً بتوقيت السعودية.\nالصالة التنفيذية: إثنين–خميس 08–20، جمعة 09–18، سبت 10–16، أحد حسب الموعد.",
+        "مكتب العمليات: 7 ص – 11 م (توقيت السعودية). الصالة في برج المرجان بمواعيد مختلفة — احجز مسبقاً."
+      ],
+      "en": [
+        "Concierge line: Daily 7:00 AM – 11:00 PM Saudi time.\nExecutive lounge: Mon–Thu 08–20, Fri 09–18, Sat 10–16, Sun by appointment.",
+        "Operations desk: 7 AM – 11 PM Saudi time. Lounge at Al Murjan Tower has separate hours — book ahead."
+      ]
+    },
+    "CONTACT": {
+      "ar": [
+        "تواصل معنا:\n📞 {{phone}}\n💬 {{whatsappUrl}}\n📧 {{email}}\n📍 {{addressAr}}\n📋 {{contactUrl}}",
+        "يمكنك الاتصال أو الواتساب أو نموذج التواصل على الموقع: {{contactUrl}}"
+      ],
+      "en": [
+        "Contact us:\n📞 {{phone}}\n💬 {{whatsappUrl}}\n📧 {{email}}\n📍 {{addressEn}}\n📋 {{contactUrl}}",
+        "Call, WhatsApp or use our contact form: {{contactUrl}}"
+      ]
+    },
+    "ABOUT_COMPANY": {
+      "ar": [
+        "Lunayair Marina — إدارة يخوت احترافية من جدة لملاك السعودية والخليج. تأسسنا عام 2014. ندير التشغيل والطاقم والامتثال بتقارير شفافة.\n{{aboutUrl}}",
+        "من جدة نقدم إدارة متكاملة: صيانة، طاقم، وكالة زائرة، ومارينا — فريق متعدد اللغات من مهندسين وقباطنة.",
+        "مهمتنا: إدارة يخوت دقيقة وشفافة تحمي الأصل والطاقم ووقت المالك."
+      ],
+      "en": [
+        "Lunayair Marina — professional yacht management from Jeddah for Gulf owners. Founded 2014. We handle operations, crew and compliance with transparent reporting.\n{{aboutUrl}}",
+        "From Jeddah we offer integrated management: maintenance, crew, visiting agency and marina — multilingual team of engineers and captains.",
+        "Our mission: precise, transparent yacht management that protects the asset, crew and owner's time."
+      ]
+    },
+    "FOUNDED": {
+      "ar": [
+        "تأسسنا عام 2014 — ومن جدة نخدم ملاك اليخوت في السعودية والخليج.",
+        "منذ 2014 نبني إدارة يخوت موثوقة في جدة والبحر الأحمر."
+      ],
+      "en": [
+        "Founded in 2014 — serving yacht owners from Jeddah across Saudi Arabia and the Gulf.",
+        "Since 2014 we've built trusted yacht management from our Jeddah desk."
+      ]
+    },
+    "WHY_US": {
+      "ar": [
+        "لماذا نحن: فريق بحري محترف، إدارة 360°، تغطية سعودية وخليجية، واستجابة سريعة من غرفة عمليات.",
+        "نختارنا الملاك للشفافية في التقارير، الخصوصية، والخبرة في البحر الأحمر والخليج."
+      ],
+      "en": [
+        "Why owners choose us: professional marine team, 360° management, Saudi & Gulf coverage, and fast operations response.",
+        "Owners value our transparent reporting, discretion, and Red Sea & Gulf expertise."
+      ]
+    },
+    "MOBILE_APP": {
+      "ar": [
+        "تطبيقنا قادم على App Store و Google Play — قريباً. حالياً تواصل معنا عبر الموقع أو الواتساب.\n{{applicationUrl}}",
+        "التطبيق في مرحلة الإطلاق — يمكنك طلب استشارة الآن عبر {{contactUrl}}"
+      ],
+      "en": [
+        "Our mobile app is coming soon on App Store and Google Play. Contact us via the website or WhatsApp for now.\n{{applicationUrl}}",
+        "The app is launching soon — request a consultation at {{contactUrl}}"
+      ]
+    },
+    "CONSULTATION": {
+      "ar": [
+        "لطلب استشارة: {{contactUrl}} أو اتصل {{phone}} أو واتساب {{whatsappUrl}}. سيتواصل معك مدير خلال يوم عمل.",
+        "أرسل طلبك عبر نموذج التواصل وسنرد خلال 24 ساعة لترتيب استشارة خاصة."
+      ],
+      "en": [
+        "Request a consultation: {{contactUrl}} or call {{phone}} / WhatsApp {{whatsappUrl}}. A manager will respond within one business day.",
+        "Send your enquiry via our contact form — we'll reply within 24 hours to arrange a private consultation."
+      ]
+    },
+    "CHARTER": {
+      "ar": [
+        "الموقع يذكر كونسييرج التأجير: تنسيق تموين، تخليص جمركي، وتجارب ضيوف — وليس قائمة تأجير يخوت منشورة. للمساعدة: {{contactUrl}}",
+        "ننسق تجارب الضيوف والتموين واللوجستيات عبر كونسييرج — تواصل معنا لمعرفة ما يمكننا ترتيبه."
+      ],
+      "en": [
+        "The site mentions charter concierge: provisioning, customs and guest experiences — not a published yacht rental fleet. Contact us: {{contactUrl}}",
+        "We coordinate guest experiences, provisioning and logistics via concierge — reach out to discuss your needs."
+      ]
+    },
+    "YACHT_RENTAL": {
+      "ar": [
+        "تأجير يخوت كخدمة قائمة غير منشور على موقعنا. نقدم كونسييرج لتنسيق التموين وتجارب الضيوف — للاستفسار: {{phone}} | {{whatsappUrl}}",
+        "لا نعرض قائمة تأجير يخوت على الموقع. إذا تحتاج مساعدة في تنسيق تجربة أو لوجستيات، تواصل معنا."
+      ],
+      "en": [
+        "Yacht rental is not listed as a published service on our website. We offer concierge for provisioning and guest experiences — enquire: {{phone}} | {{whatsappUrl}}",
+        "We don't publish a yacht rental fleet. For help coordinating experiences or logistics, contact our team."
+      ]
+    },
+    "YACHT_PURCHASE": {
+      "ar": [
+        "شراء اليخوت ليس خدمة منشورة على موقعنا. نركز على الإدارة، الوكالة، المارينا والطاقم. للاستفسارات العامة: {{contactUrl}}",
+        "لا نقدم خدمة شراء يخوت على الموقع — أقدر أساعدك في إدارة يختك إذا كان لديك واحد."
+      ],
+      "en": [
+        "Yacht purchase is not listed on our website. We focus on management, agency, marina and crew services. General enquiries: {{contactUrl}}",
+        "We don't offer yacht purchase services on the site — I can help with management if you already own a vessel."
+      ]
+    },
+    "YACHT_SALE": {
+      "ar": [
+        "بيع اليخوت ليس خدمة منشورة على موقعنا. خدماتنا: إدارة، وكالة، مارينا، طاقم.",
+        "لا ندرج بيع يخوت كخدمة — تواصل معنا إذا تحتاج إدارة أو وكالة."
+      ],
+      "en": [
+        "Yacht sale is not a published service. Our services: management, agency, marina and crew.",
+        "We don't list yacht sales — contact us for management or agency support."
+      ]
+    },
+    "PRICING": {
+      "ar": [
+        "الأسعار غير منشورة رقمياً على الموقع — الباقات مخصصة. هل تقصد إدارة اليخت، الطاقم، الوكالة، أو المارينا؟",
+        "لا يوجد سعر عام منشور. وضّح لي الخدمة المطلوبة وسأوضح كيف نرتب استشارة."
+      ],
+      "en": [
+        "Public pricing is not published — packages are customized. Which service: yacht management, crew, agency, or marina?",
+        "There's no general price list online. Tell me which service and I'll explain how to get a tailored quote."
+      ]
+    },
+    "OUT_OF_SCOPE": {
+      "ar": [
+        "هذا الموضوع خارج خدماتنا المنشورة على الموقع. أقدر أساعدك في إدارة اليخوت، الوكالة، المارينا، الطاقم، أو التواصل.",
+        "لا أملك معلومة مؤكدة عن هذا من موقعنا — تفضل اسأل عن خدماتنا أو تواصل مع الفريق."
+      ],
+      "en": [
+        "That's outside our published website services. I can help with yacht management, agency, marina, crew, or contact details.",
+        "I don't have confirmed information on that from our site — ask about our services or contact the team."
+      ]
+    },
+    "GIBBERISH": {
+      "ar": [
+        "ما قدرت أحدد طلبك 😊 اكتب لي وش تحتاج، أو تواصل معنا مباشرة عبر واتساب: {{whatsappUrl}}",
+        "لم أفهم الرسالة — جرّب سؤالاً عن خدماتنا أو تواصل مع الفريق عبر واتساب: {{whatsappUrl}}"
+      ],
+      "en": [
+        "I couldn't quite understand that 😊 Tell me what you need, or reach us on WhatsApp: {{whatsappUrl}}",
+        "I didn't catch that — try a question about our services or contact us at {{phone}}."
+      ]
+    },
+    "UNKNOWN": {
+      "ar": [
+        "ما قدرت أحدد طلبك بشكل دقيق. أقدر أساعدك في خدمات إدارة اليخوت، اليخوت الزائرة، إدارة المارينا، إدارة الطواقم، أو ترتيب تواصل مع الفريق. وش حاب تعرف؟",
+        "ما لقيت معلومات مؤكدة عن هذا الطلب في الموقع. إذا تحب، تواصل معنا مباشرة:\n💬 واتساب: {{whatsappUrl}}\n📞 {{phone}}",
+        "ممكن توضّح لي أكثر وش تقصد؟ وإذا كان الموضوع خاص باليacht أو المارينا، أقدر أوجّهك للخدمة المناسبة.",
+        "لم أفهم سؤالك بالكامل — جرّب: خدماتنا، إدارة يacht، رقم التواصل، أو العنوان.",
+        "ما قدرت أحدد طلبك — أقدر أساعدك في خدمات اليخوت والمارينا أو عبر واتساب: {{whatsappUrl}}"
+      ],
+      "en": [
+        "I couldn't pin down your request precisely. I can help with yacht management, visiting yacht agency, marina operations, crew services, or contacting our team. What would you like to know?",
+        "I don't have confirmed information on that from our website. Reach us directly:\n💬 WhatsApp: {{whatsappUrl}}\n📞 {{phone}}",
+        "Could you clarify what you mean? If it's about your yacht or marina, I can point you to the right service.",
+        "I didn't fully catch that — try: our services, yacht management, phone number, or address."
+      ]
+    }
+  },
+  "placeholders": {
+    "phone": "+966 53 156 1212",
+    "email": "info@lunayairmarina.com",
+    "whatsappUrl": "https://wa.me/966531561212",
+    "addressAr": "برج المرجان، طريق الأمير سلطان، حي الروضة، جدة",
+    "addressEn": "Al Murjan Tower, Prince Sultan Road, Al Rawdah, Jeddah",
+    "contactUrl": "https://www.lunayairmarina.com/contact",
+    "servicesUrl": "https://www.lunayairmarina.com/services",
+    "aboutUrl": "https://www.lunayairmarina.com/about",
+    "applicationUrl": "https://www.lunayairmarina.com/application",
+    "yachtMgmtUrl": "https://www.lunayairmarina.com/services/yacht-management-360",
+    "visitingAgencyUrl": "https://www.lunayairmarina.com/services/visiting-yacht-agency",
+    "marinaMgmtUrl": "https://www.lunayairmarina.com/services/marina-management",
+    "crewMgmtUrl": "https://www.lunayairmarina.com/services/crew-management"
+  },
+  "ctas": {
+    "commercial_ar": [
+      "يمكنك التواصل مع فريقنا عبر واتساب لترتيب استشارة: {{whatsappUrl}}"
+    ],
+    "commercial_en": [
+      "You can reach our team on WhatsApp to arrange a consultation: {{whatsappUrl}}"
+    ]
+  },
+  "progressive": {
+    "YACHT_MANAGEMENT": {
+      "ar": [
+        "ممتاز — نقدر نساعدك في إدارة اليخت بشكل متكامل. هل تود معرفة ما تشمل إدارة 360° أو ترتيب استشارة؟"
+      ],
+      "en": [
+        "Great — we can support full yacht management. Would you like to know what's included in 360° management or arrange a consultation?"
+      ]
+    }
+  },
+  "dialectVariants": {
+    "YACHT_MANAGEMENT": {
+      "ar_gulf": [
+        "نقدر ندير يختك بشكل متكامل — إشراف فني، صيانة، طاقم، وتقارير تشغيل.\n\n{{yachtMgmtUrl}}",
+        "أقدر أساعدك في إدارة يختك — وش تحب تعرف أول؟"
+      ],
+      "ar_egypt": [
+        "نقدر ندير اليacht بتاعك بشكل متكامل — إشراف فني وصيانة وطاقم.\n\n{{yachtMgmtUrl}}",
+        "أقدر أساعدك في إدارة اليacht — عايز تعرف إيه الأول؟"
+      ]
+    },
+    "GREETING": {
+      "ar_gulf": [
+        "هلا 👋 أنا Assistant Captain — وش حاب تعرف؟",
+        "مرحباً! كيف أقدر أخدمك اليوم؟"
+      ],
+      "ar_egypt": [
+        "أهلاً 👋 أنا Assistant Captain — عايز تعرف إيه؟",
+        "مرحباً! إزاي أقدر أساعدك النهاردة؟"
+      ]
+    }
+  }
+}

@@ -41,9 +41,19 @@ export function buildAiLeadRecord(input: {
     location: (input.context.location ?? "").slice(0, 80),
     serviceInterest: (input.context.interests ?? []).slice(0, 12),
     conversationId: input.conversationId,
-    source: "ai_agent",
+    source: "chatbot",
     status: "new",
     createdAt: new Date().toISOString(),
+    normalizedPhone: (input.context.normalizedPhone ?? input.phone ?? input.context.phone ?? "").slice(
+      0,
+      40,
+    ),
+    leadScore: input.context.leadScore ?? 0,
+    messageCount: input.context.messageCount ?? 0,
+    yachtMentioned: Boolean(input.context.yachtMentioned),
+    detectedLanguage: input.context.detectedLanguage,
+    lastSeenAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
 }
 

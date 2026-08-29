@@ -1,0 +1,132 @@
+{
+  "services": [
+    {
+      "id": "yacht-management-360",
+      "slug": "yacht-management-360",
+      "title": {
+        "en": "Complete Yacht & Boat Management (360°)",
+        "ar": "إدارة يخوت ٣٦٠ درجة"
+      },
+      "summary": {
+        "en": "Integrated operational, technical and financial management for yachts and boats, including crew supervision, planned maintenance, budgeting and maritime compliance.",
+        "ar": "إدارة تشغيلية وفنية ومالية متكاملة لليخوت، تشمل إشراف الطاقم والصيانة المخططة والميزانية والامتثال البحري."
+      },
+      "includes": {
+        "en": [
+          "Technical supervision and planned maintenance",
+          "Refit management",
+          "Crew recruitment and payroll",
+          "Insurance and class & flag compliance",
+          "Operational planning and OPEX reporting",
+          "Dedicated yacht manager"
+        ],
+        "ar": [
+          "الإشراف الفني والصيانة المخططة",
+          "إدارة التجديد",
+          "توظيف الطاقم والرواتب",
+          "التأمين والامتثال للتصنيف والعلم",
+          "التخطيط التشغيلي وتقارير التكاليف",
+          "مدير يخت مخصص"
+        ]
+      },
+      "pricingLabel": {
+        "en": "Custom package",
+        "ar": "باقة مخصصة"
+      },
+      "intentIds": ["YACHT_MANAGEMENT", "YACHT_MANAGEMENT_360"]
+    },
+    {
+      "id": "visiting-yacht-agency",
+      "slug": "visiting-yacht-agency",
+      "title": {
+        "en": "Agency Services for Visiting Yachts",
+        "ar": "وكالة اليخوت الزائرة"
+      },
+      "summary": {
+        "en": "Support for international yachts arriving in Saudi waters, including clearance, permits, berthing, provisioning, logistics and concierge.",
+        "ar": "دعم اليخوت الدولية القادمة إلى المياه السعودية بالتخليص والتصاريح والرسو والتموين والخدمات اللوجستية والكونسيرج."
+      },
+      "includes": {
+        "en": [
+          "Entry permits and customs clearance",
+          "Berth reservation and pilotage",
+          "Provisioning and logistics",
+          "VIP transfers and concierge"
+        ],
+        "ar": [
+          "تصاريح الدخول والتخليص الجمركي",
+          "حجز الرصيف والإرشاد",
+          "التموين واللوجستيات",
+          "نقل VIP والكونسيرج"
+        ]
+      },
+      "pricingLabel": {
+        "en": "Annual subscription",
+        "ar": "اشتراك سنوي"
+      },
+      "intentIds": ["VISITING_YACHT_AGENCY", "VISITING_YACHT_CLEARANCE", "VISITING_YACHT_PERMITS"]
+    },
+    {
+      "id": "marina-management",
+      "slug": "marina-management",
+      "title": {
+        "en": "Marina & Yacht Club Operations",
+        "ar": "إدارة المارينا"
+      },
+      "summary": {
+        "en": "Professional marina and yacht-club operations for safe, luxury berthing, facility operations, and safety.",
+        "ar": "تشغيل احترافي للمارينا ونوادي اليخوت مع حلول رسو آمنة وتشغيل المرافق والسلامة."
+      },
+      "includes": {
+        "en": [
+          "Digital berth bookings",
+          "Facility and club operations",
+          "Safety and security routines",
+          "Member events and hospitality"
+        ],
+        "ar": [
+          "حجز أرصفة رقمي",
+          "تشغيل المرافق والنادي",
+          "إجراءات السلامة والأمن",
+          "فعاليات الضيافة للأعضاء"
+        ]
+      },
+      "pricingLabel": {
+        "en": "Managed programme",
+        "ar": "برنامج إدارة"
+      },
+      "intentIds": ["MARINA_MANAGEMENT", "MARINA_OPERATIONS", "BERTHING"]
+    },
+    {
+      "id": "crew-management",
+      "slug": "crew-management",
+      "title": {
+        "en": "Crew Recruitment Services",
+        "ar": "إدارة الطواقم"
+      },
+      "summary": {
+        "en": "Recruitment, vetting and management of certified marine professionals including captains, engineers and hospitality crew, with contracts, payroll and training.",
+        "ar": "توظيف وتدقيق وإدارة كوادر بحرية معتمدة من قباطنة ومهندسين وطاقم ضيافة، مع العقود والرواتب والتدريب."
+      },
+      "includes": {
+        "en": [
+          "Vetted crew placement",
+          "Contracts and payroll",
+          "Training and certification",
+          "90-day performance follow-up"
+        ],
+        "ar": [
+          "توظيف طاقم مدقق",
+          "العقود والرواتب",
+          "التدريب والشهادات",
+          "متابعة الأداء لـ 90 يوم"
+        ]
+      },
+      "pricingLabel": {
+        "en": "Placement fee",
+        "ar": "رسوم التوظيف"
+      },
+      "intentIds": ["CREW_MANAGEMENT", "CREW_RECRUITMENT", "CREW_SALARIES", "CREW_TRAINING"]
+    }
+  ]
+}

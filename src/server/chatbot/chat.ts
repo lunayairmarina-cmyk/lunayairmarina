@@ -1,7 +1,6 @@
 import { z } from "zod";
 import type {
   ChatErrorCode,
-  ChatHistoryItem,
   ChatRequest,
   ChatResponse,
 } from "@/lib/chatbot/types";
@@ -26,7 +25,6 @@ import {
 } from "@/server/agent/conversationStoreAdmin";
 import {
   createKnowledgeCandidate,
-  estimateAnswerConfidence,
   shouldCreateKnowledgeCandidate,
 } from "@/server/agent/knowledgeCandidates";
 import { detectLeadSignal } from "@/server/agent/leadDetection";
@@ -37,20 +35,23 @@ import {
 } from "@/lib/agent/aiAdminClient";
 import { createAiLeadAdmin, updateAiLeadAdmin } from "@/server/agent/leadsStoreAdmin";
 import { maybeRunPendingKnowledgeSync } from "@/server/agent/knowledgeSync";
-import { buildHistoryContextSnippet, retrieveKnowledge } from "@/server/agent/retrieve";
 import { tryGetAdminFirestore } from "@/server/agent/firebaseAdmin";
 import { logAiUsage } from "@/server/agent/usageLog";
 import { getDb } from "@/lib/firebase";
 import type { AiConversationRecord } from "@/lib/agent/types";
 import { getChatbotConfig } from "./config";
-import {
-  estimateHistoryTokens,
-  prepareGeminiHistory,
-} from "./contextManagement";
 import { resolveConversationHistory } from "./conversationHistory";
 import { createChatRequestId, logChatTrace } from "./chatTrace";
-import { GeminiServiceError, generateChatReply } from "./gemini";
 import { checkRateLimit } from "./rateLimit";
+import { listConversationMessages } from "@/server/agent/conversationStore";
+import { listConversationMessagesAdmin } from "@/server/agent/conversationStoreAdmin";
+import { generateStaticReply } from "./static";
+import { buildContextStack, intentToTopic } from "./static/contextStack";
+import { extractEntities } from "./static/extractEntities";
+import { scoreCommercialIntent, commercialLevel } from "./static/commercialScore";
+import { qualifyLead } from "./static/leadQualification";
+import { computeLeadScoreDelta, mergeLeadContext, leadPatchFromContext } from "./static/leadScore";
+import { hasVisitorContact } from "@/lib/agent/context";
 
 /** Client history is ignored — only message/session/language are validated. */
 export function createChatRequestSchema(maxMessageLength: number) {
@@ -68,12 +69,6 @@ export function createChatRequestSchema(maxMessageLength: number) {
 }
 
 export { trimHistory } from "./contextManagement";
-
-function mapGeminiErrorToCode(error: GeminiServiceError): ChatErrorCode {
-  if (error.kind === "timeout" || error.status === 408) return "TIMEOUT";
-  if (error.kind === "context") return "CONTEXT";
-  return "GEMINI";
-}
 
 export function validateChatRequest(
   input: unknown,
@@ -217,17 +212,6 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
     requestId,
   );
 
-  if (!config.geminiApiKey) {
-    logChatTrace("REQUEST_FAILED", { stage: "config", code: "CONFIG" }, requestId);
-    logAiUsage({
-      event: "chat_error",
-      sessionId: validated.data.sessionId,
-      language: validated.data.language,
-      errorCode: "CONFIG",
-    });
-    return { ok: false, code: "CONFIG" };
-  }
-
   const rate = checkRateLimit(validated.data.sessionId, config);
   if (!rate.allowed) {
     logChatTrace(
@@ -286,45 +270,6 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
     );
     customerContext = extracted.context;
 
-    const historyText = buildHistoryContextSnippet(conversationHistory);
-    const retrieval = await retrieveKnowledge(validated.data.message, validated.data.language, {
-      context: customerContext,
-      historyText,
-    });
-
-    logChatTrace(
-      "RETRIEVAL_PASS",
-      {
-        sessionId: validated.data.sessionId,
-        documents: retrieval.documents.length,
-        intent: retrieval.analysis.intent,
-        fromFallback: retrieval.fromFallback,
-      },
-      requestId,
-    );
-
-    if (retrieval.fromFallback) {
-      logAiUsage({
-        event: "retrieval_fallback",
-        sessionId: validated.data.sessionId,
-        language: validated.data.language,
-        intent: retrieval.analysis.intent,
-        fromFallback: true,
-        knowledgeSource: retrieval.diagnostic.knowledgeSource,
-        documentCount: retrieval.documents.length,
-      });
-    } else if (retrieval.diagnostic.websiteSearchUsed) {
-      logAiUsage({
-        event: "website_search",
-        sessionId: validated.data.sessionId,
-        language: validated.data.language,
-        intent: retrieval.analysis.intent,
-        fromFallback: false,
-        knowledgeSource: retrieval.diagnostic.knowledgeSource,
-        documentCount: retrieval.documents.length,
-      });
-    }
-
     summary = updateConversationSummary(
       summary,
       validated.data.message,
@@ -335,7 +280,7 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
     const lead = detectLeadSignal(
       validated.data.message,
       customerContext,
-      retrieval.analysis.intent,
+      existing?.lastIntent ?? "general",
       priorLeadStatus,
     );
     if (lead.phone && !customerContext.phone) {
@@ -348,62 +293,83 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       customerContext = { ...customerContext, name: lead.name };
     }
 
-    const geminiHistory = prepareGeminiHistory(conversationHistory, config);
+    const turnIndex = conversationHistory.length;
+
+    let recentIntents: string[] = [];
+    try {
+      const adminDb = await tryGetAdminFirestore();
+      const rawMessages = adminDb
+        ? await listConversationMessagesAdmin(adminDb, validated.data.sessionId)
+        : await listConversationMessages(getDb(), validated.data.sessionId);
+      recentIntents = buildContextStack({
+        messages: rawMessages,
+        lastIntent: existing?.lastIntent,
+      }).recentIntents;
+    } catch {
+      recentIntents = existing?.lastIntent ? [existing.lastIntent] : [];
+    }
+
+    const visitorName =
+      customerContext.name?.trim() || existing?.visitorName?.trim() || undefined;
+
+    const staticResult = generateStaticReply({
+      message: validated.data.message,
+      language: validated.data.language,
+      sessionId: validated.data.sessionId,
+      lastIntent: existing?.lastIntent,
+      recentIntents,
+      turnIndex,
+      visitorName,
+    });
+
+    const reply = staticResult.reply;
+    const resolvedIntent = staticResult.intent;
+    const confidence = staticResult.confidence;
+
+    const entityExtract = extractEntities(validated.data.message);
+    const commLevel = commercialLevel(
+      scoreCommercialIntent(
+        validated.data.message,
+        resolvedIntent,
+        customerContext.leadScore ?? 0,
+      ),
+    );
+    const qualification = qualifyLead(resolvedIntent, entityExtract, commLevel);
+    const scoreDelta = computeLeadScoreDelta(resolvedIntent, entityExtract);
+    customerContext = mergeLeadContext(
+      customerContext,
+      qualification,
+      scoreDelta,
+      resolvedIntent,
+      [...recentIntents, resolvedIntent],
+      intentToTopic(resolvedIntent),
+    );
+    customerContext.detectedLanguage = validated.data.language;
 
     logChatTrace(
-      "CONTEXT_PREPARED",
+      "STATIC_REPLY",
       {
         sessionId: validated.data.sessionId,
-        inputHistoryCount: conversationHistory.length,
-        geminiHistoryCount: geminiHistory.length,
-        estimatedHistoryTokens: estimateHistoryTokens(geminiHistory),
+        intent: resolvedIntent,
+        confidence,
+        replyLength: reply.length,
+        clarified: staticResult.clarified,
       },
       requestId,
     );
-
-    logChatTrace("GEMINI_START", { sessionId: validated.data.sessionId }, requestId);
-
-    const reply = await generateChatReply(
-      config,
-      validated.data.language,
-      validated.data.message,
-      geminiHistory,
-      retrieval.formatted,
-      {
-        conversationSummary: summary,
-        customerContext,
-        offerHandoff: lead.shouldOfferHandoff,
-        needsContactCapture: false,
-        contactAlreadyAsked: false,
-      },
-    );
-
-    logChatTrace(
-      "GEMINI_SUCCESS",
-      { sessionId: validated.data.sessionId, replyLength: reply.length },
-      requestId,
-    );
-
-    const topScore = retrieval.diagnostic.selected[0]?.score ?? 0;
-    const confidence = estimateAnswerConfidence(topScore, retrieval.documents.length);
 
     let leadId = existing?.leadId;
-    if (lead.shouldCreateLead || lead.shouldUpdateLead) {
+    const leadPatch = leadPatchFromContext(customerContext, resolvedIntent);
+    const shouldSyncLead =
+      Boolean(leadId) || hasVisitorContact(customerContext) || lead.shouldCreateLead;
+
+    if (shouldSyncLead) {
       try {
         const adminDb = await tryGetAdminFirestore();
-        if (leadId && lead.shouldUpdateLead) {
-          const patch = {
-            name: (lead.name ?? customerContext.name ?? "").slice(0, 120),
-            phone: (lead.phone ?? customerContext.phone ?? "").slice(0, 40),
-            email: (lead.email ?? customerContext.email ?? "").slice(0, 200),
-            yachtType: (customerContext.yachtType ?? customerContext.customerType ?? "").slice(0, 80),
-            yachtLength: (customerContext.yachtLength ?? "").slice(0, 40),
-            location: (customerContext.location ?? "").slice(0, 80),
-            serviceInterest: (customerContext.interests ?? []).slice(0, 12),
-          };
-          if (adminDb) await updateAiLeadAdmin(adminDb, leadId, patch);
-          else await updateAiLeadClient(getDb(), leadId, patch);
-        } else if (lead.shouldCreateLead && !leadId) {
+        if (leadId) {
+          if (adminDb) await updateAiLeadAdmin(adminDb, leadId, leadPatch);
+          else await updateAiLeadClient(getDb(), leadId, leadPatch);
+        } else if (lead.shouldCreateLead || hasVisitorContact(customerContext)) {
           const record = buildAiLeadRecord({
             conversationId: validated.data.sessionId,
             context: customerContext,
@@ -418,11 +384,11 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
             event: "lead_created",
             sessionId: validated.data.sessionId,
             language: validated.data.language,
-            intent: retrieval.analysis.intent,
+            intent: resolvedIntent,
           });
         }
       } catch {
-        // Lead write is best-effort.
+        // Lead write is best-effort — must not block chat replies.
       }
     }
 
@@ -435,8 +401,8 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       assistantReply: reply,
       customerContext,
       summary,
-      intent: retrieval.analysis.intent,
-      retrievedIds: retrieval.documents.map((doc) => doc.id),
+      intent: resolvedIntent,
+      retrievedIds: [],
       confidence,
       leadStatus: lead.leadStatus,
       leadId,
@@ -447,9 +413,9 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
     let candidateCreated = false;
     if (
       shouldCreateKnowledgeCandidate({
-        intent: retrieval.analysis.intent,
-        retrievedCount: retrieval.documents.length,
-        topScore,
+        intent: resolvedIntent,
+        retrievedCount: 0,
+        topScore: staticResult.confidence === "low" ? 0 : 5,
         message: validated.data.message,
       })
     ) {
@@ -488,7 +454,7 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
         event: "candidate_created",
         sessionId: validated.data.sessionId,
         language: validated.data.language,
-        intent: retrieval.analysis.intent,
+        intent: resolvedIntent,
         confidence,
       });
     }
@@ -497,10 +463,10 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       event: "chat_ok",
       sessionId: validated.data.sessionId,
       language: validated.data.language,
-      intent: retrieval.analysis.intent,
-      fromFallback: retrieval.fromFallback,
-      knowledgeSource: retrieval.diagnostic.knowledgeSource,
-      documentCount: retrieval.documents.length,
+      intent: resolvedIntent,
+      fromFallback: false,
+      knowledgeSource: "static",
+      documentCount: 0,
       confidence,
       latencyMs: Date.now() - startedAt,
     });
@@ -513,20 +479,15 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
 
     return { ok: true, reply };
   } catch (error) {
-    const errorCode: ChatErrorCode =
-      error instanceof GeminiServiceError
-        ? mapGeminiErrorToCode(error)
-        : "INTERNAL";
+    const errorCode: ChatErrorCode = "INTERNAL";
     logChatTrace(
       "REQUEST_FAILED",
       {
-        stage: error instanceof GeminiServiceError ? "gemini" : "internal",
+        stage: "static",
         code: errorCode,
         sessionId: validated.data.sessionId,
         conversationHistoryCount: validated.data.history.length,
         errorType: error instanceof Error ? error.name : "unknown",
-        geminiStatus: error instanceof GeminiServiceError ? error.status ?? "" : "",
-        geminiKind: error instanceof GeminiServiceError ? error.kind : "",
       },
       requestId,
     );

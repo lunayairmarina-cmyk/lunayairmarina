@@ -1,0 +1,14 @@
+{
+  "YACHT_MANAGEMENT": ["yacht_existence", "location", "yacht_length", "yacht_type", "customer_goal"],
+  "YACHT_MANAGEMENT_360": ["yacht_existence", "location", "yacht_length", "yacht_type", "customer_goal"],
+  "YACHT_MANAGEMENT_PRICING": [],
+  "CREW_MANAGEMENT": ["yacht_existence", "location", "service_scope"],
+  "CREW_PRICING": [],
+  "MARINA_MANAGEMENT": ["location", "yacht_length"],
+  "VISITING_YACHT_AGENCY": ["location", "yacht_length", "urgency"],
+  "VISITING_YACHT_PERMITS": ["location", "yacht_length"],
+  "VISITING_YACHT_CLEARANCE": ["location", "yacht_length", "urgency"],
+  "VISITING_YACHT_PROVISIONING": ["location"],
+  "MAINTENANCE": ["location", "yacht_length", "service_scope"],
+  "INSURANCE": ["yacht_length", "location"]
+}

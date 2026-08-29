@@ -1305,6 +1305,10 @@
     "contactSubmit": "Start chatting",
     "contactError": "Could not save. Check name and mobile, then try again.",
     "contactGate": "After saving your details you can ask the Assistant Captain directly.",
+    "startChatButton": "Start chat",
+    "registeredWelcome": "Hi {{name}} 👋\nHow can I help you today?",
+    "returningWelcome": "Hi {{name}} 👋\nWelcome back to Lunayair Marina. How can I help?",
+    "contactSyncPending": "Your details are saved locally. They will sync with our team shortly.",
     "whatsappButton": "Chat on WhatsApp",
     "teasers": [
       "Welcome 👋 I'm your Assistant Captain",

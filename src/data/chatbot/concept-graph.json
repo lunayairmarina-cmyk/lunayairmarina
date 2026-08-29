@@ -1,0 +1,41 @@
+{
+  "nodes": {
+    "YACHT": {
+      "children": ["MANAGEMENT", "CREW", "VISITING"],
+      "intents": ["YACHT_MANAGEMENT", "YACHT_MANAGEMENT_360", "YACHT_MANAGEMENT_PRICING"]
+    },
+    "MANAGEMENT": {
+      "parent": "YACHT",
+      "children": ["360", "MAINTENANCE", "REFIT", "INSURANCE", "COMPLIANCE", "OPEX"],
+      "intents": ["YACHT_MANAGEMENT", "YACHT_MANAGEMENT_360"]
+    },
+    "CREW": {
+      "parent": "YACHT",
+      "children": ["RECRUITMENT", "SALARIES", "TRAINING"],
+      "intents": ["CREW_MANAGEMENT", "CREW_RECRUITMENT", "CREW_SALARIES", "CREW_TRAINING", "CREW_PRICING"]
+    },
+    "VISITING": {
+      "parent": "YACHT",
+      "children": ["PERMITS", "CLEARANCE", "PROVISIONING"],
+      "intents": ["VISITING_YACHT_AGENCY", "VISITING_YACHT_PERMITS", "VISITING_YACHT_CLEARANCE", "VISITING_YACHT_PROVISIONING"]
+    },
+    "MARINA": {
+      "children": ["OPERATIONS", "BERTHING"],
+      "intents": ["MARINA_MANAGEMENT", "MARINA_OPERATIONS", "BERTHING"]
+    },
+    "PRICE": {
+      "boosts": {
+        "YACHT_MANAGEMENT": "YACHT_MANAGEMENT_PRICING",
+        "CREW_MANAGEMENT": "CREW_PRICING",
+        "MARINA_MANAGEMENT": "MARINA_MANAGEMENT",
+        "VISITING_YACHT_AGENCY": "VISITING_YACHT_AGENCY"
+      }
+    }
+  },
+  "compoundBoosts": [
+    { "when": ["PRICE", "YACHT", "MANAGEMENT"], "intent": "YACHT_MANAGEMENT_PRICING", "priority": 100 },
+    { "when": ["PRICE", "CREW"], "intent": "CREW_PRICING", "priority": 95 },
+    { "when": ["YACHT", "MANAGEMENT", "CREW"], "primary": "YACHT_MANAGEMENT", "secondary": ["CREW_MANAGEMENT"] },
+    { "when": ["YACHT", "MANAGEMENT", "360"], "intent": "YACHT_MANAGEMENT_360", "priority": 98 }
+  ]
+}

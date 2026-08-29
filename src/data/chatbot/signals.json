@@ -1,0 +1,280 @@
+{
+  "fillers": ["طيب", "تمام", "ok", "okay", "well", "please"],
+  "prefixes": ["و", "ال", "وال", "fa", "wa"],
+  "typos": {
+    "مرينا": "marina",
+    "مرينه": "marina",
+    "مارينه": "marina",
+    "واتس": "whatsapp",
+    "وتساب": "whatsapp",
+    "واتسابب": "whatsapp",
+    "اليخوط": "يخوت",
+    "اليخوتت": "يخوت",
+    "بكاام": "بكام",
+    "بكككام": "بكام",
+    "بكمم": "بكم",
+    "سع": "سعر",
+    "سعرر": "سعر",
+    "السع": "سعر",
+    "رقمم": "phone",
+    "عنون": "address",
+    "جده": "jeddah",
+    "تصاريحh": "permits",
+    "managment": "management",
+    "mangement": "management",
+    "yatch": "yacht",
+    "yacth": "yacht",
+    "marena": "marina",
+    "watss": "whatsapp",
+    "wats": "whatsapp"
+  },
+  "shortForms": [
+    {
+      "id": "pricing",
+      "forms": [
+        "سعر",
+        "السعر",
+        "اسعار",
+        "أسعار",
+        "الاسعار",
+        "تكلفة",
+        "التكلفة",
+        "بكام",
+        "بكم",
+        "كم",
+        "كم يكلف",
+        "تكلف",
+        "رسوم",
+        "الرسوم",
+        "رسومكم",
+        "فلوس",
+        "المبلغ",
+        "قيمة",
+        "كم السعر",
+        "price",
+        "pricing",
+        "cost",
+        "fee",
+        "fees",
+        "how much",
+        "rate",
+        "rates",
+        "budget",
+        "charges",
+        "charge",
+        "بشحال",
+        "كم تكلف",
+        "كم يطلع",
+        "كم تطلع",
+        "وش السعر",
+        "ايش السعر",
+        "كم حسابها",
+        "كم تكلفني",
+        "عامل كام",
+        "تكلف كام",
+        "كام التكلفة",
+        "الفلوس كام",
+        "bkam",
+        "bkm",
+        "kam",
+        "se3r",
+        "bkam el se3r",
+        "$$"
+      ],
+      "concepts": ["price"],
+      "clusters": ["pricing"],
+      "ambiguousAlone": true,
+      "defaultIntent": "PRICING"
+    },
+    {
+      "id": "phone",
+      "forms": ["رقم", "رقمكم", "رقم الهاتف", "هاتف", "اتصل", "phone", "call", "raqam", "raqamkom", "رقمكمم"],
+      "concepts": ["phone"],
+      "clusters": ["phone_contact"],
+      "intent": "PHONE"
+    },
+    {
+      "id": "whatsapp",
+      "forms": ["واتس", "واتساب", "وتساب", "whatsapp", "واتس اب", "watsapp"],
+      "concepts": ["whatsapp"],
+      "clusters": ["whatsapp_contact"],
+      "intent": "WHATSAPP"
+    },
+    {
+      "id": "address",
+      "forms": ["عنوان", "العنوان", "موقع", "الموقع", "مقر", "مقركم", "address", "office", "وين", "فين", "وينكم", "wenkom", "fen el office"],
+      "concepts": ["address"],
+      "clusters": ["address_contact"],
+      "intent": "ADDRESS"
+    },
+    {
+      "id": "email",
+      "forms": ["ايميل", "إيميل", "البريد", "email", "mail"],
+      "concepts": ["email"],
+      "clusters": ["email_contact"],
+      "intent": "EMAIL"
+    },
+    {
+      "id": "hours",
+      "forms": ["ساعات", "الدوام", "دوام", "اوقات", "أوقات", "working hours", "open hours", "مفتوح"],
+      "concepts": ["hours"],
+      "clusters": ["working_hours"],
+      "intent": "WORKING_HOURS"
+    },
+    {
+      "id": "location",
+      "forms": ["جدة", "jeddah", "red sea", "البحر الاحمر", "البحر الأحمر", "gulf", "الخليج", "وينكم", "فينكم", "location"],
+      "concepts": ["location"],
+      "intent": "LOCATION"
+    },
+    {
+      "id": "marina",
+      "forms": ["مارينا", "مرينا", "marina", "المراسي", "مرسى"],
+      "concepts": ["marina"],
+      "clusters": ["marina_mgmt"],
+      "intent": "MARINA_MANAGEMENT"
+    },
+    {
+      "id": "crew",
+      "forms": ["طاقم", "الطاقم", "طواقم", "الطواقم", "crew", "كادر"],
+      "concepts": ["crew"],
+      "clusters": ["crew_mgmt"],
+      "intent": "CREW_MANAGEMENT"
+    },
+    {
+      "id": "captain",
+      "forms": ["قبطان", "captain", "skipper", "قبطان؟"],
+      "concepts": ["crew", "captain"],
+      "clusters": ["crew_mgmt"],
+      "intent": "CREW_RECRUITMENT"
+    },
+    {
+      "id": "maintenance",
+      "forms": ["صيانة", "الصيانة", "maintenance"],
+      "concepts": ["maintenance"],
+      "intent": "MAINTENANCE"
+    },
+    {
+      "id": "insurance",
+      "forms": ["تأمين", "التأمين", "insurance"],
+      "concepts": ["insurance"],
+      "intent": "INSURANCE"
+    },
+    {
+      "id": "permits",
+      "forms": ["تصاريح", "التصاريح", "تصريح", "permits", "permits entry"],
+      "concepts": ["permits"],
+      "intent": "VISITING_YACHT_PERMITS"
+    },
+    {
+      "id": "clearance",
+      "forms": ["تخليص", "التخليص", "clearance", "customs", "جمرك"],
+      "concepts": ["clearance"],
+      "intent": "VISITING_YACHT_CLEARANCE"
+    },
+    {
+      "id": "provisioning",
+      "forms": ["تموين", "التموين", "provisioning", "supplies"],
+      "concepts": ["provisioning"],
+      "clusters": ["provisioning"],
+      "intent": "VISITING_YACHT_PROVISIONING"
+    },
+    {
+      "id": "training",
+      "forms": ["تدريب", "التدريب", "training"],
+      "concepts": ["training"],
+      "clusters": ["training"],
+      "intent": "CREW_TRAINING"
+    },
+    {
+      "id": "app",
+      "forms": ["تطبيق", "التطبيق", "app", "application", "mobile app", "mobile application"],
+      "concepts": ["app"],
+      "clusters": ["mobile_app"],
+      "intent": "MOBILE_APP"
+    },
+    {
+      "id": "consultation",
+      "forms": ["استشارة", "الاستشارة", "consultation", "consult"],
+      "concepts": ["consultation"],
+      "clusters": ["consultation"],
+      "intent": "CONSULTATION"
+    },
+    {
+      "id": "refit",
+      "forms": ["رفيت", "refit", "تجديد"],
+      "concepts": ["refit"],
+      "intent": "REFIT"
+    },
+    {
+      "id": "berthing",
+      "forms": ["\u0631\u0633\u0648", "\u0631\u0635\u064a\u0641", "\u0627\u0644\u0631\u0635\u064a\u0641", "\u0627\u0644\u0631\u0633\u0648", "berth", "berthing", "mooring", "\u062d\u062c\u0632 \u0631\u0635\u064a\u0641"],
+      "concepts": ["berthing"],
+      "intent": "BERTHING"
+    },
+    {
+      "id": "payroll",
+      "forms": ["رواتب", "الرواتب", "payroll", "salary", "wages"],
+      "concepts": ["payroll"],
+      "intent": "CREW_SALARIES"
+    },
+    {
+      "id": "management_ambiguous",
+      "forms": ["ادارة", "إدارة", "اداره", "إداره", "الادارة", "الإدارة", "management"],
+      "concepts": ["management"],
+      "ambiguousAlone": true,
+      "defaultIntent": "CLARIFY",
+      "ambiguousKey": "management_ambiguous"
+    },
+    {
+      "id": "yacht_ambiguous",
+      "forms": ["يخت", "اليخت", "يخوت", "yacht", "boat"],
+      "concepts": ["yacht"],
+      "ambiguousAlone": true,
+      "defaultIntent": "CLARIFY",
+      "ambiguousKey": "yacht_ambiguous"
+    },
+    {
+      "id": "services",
+      "forms": ["خدمات", "خدماتكم", "خدمة", "عندكم", "services", "what do you offer", "what services"],
+      "concepts": ["services"],
+      "clusters": ["services_list"],
+      "intent": "SERVICES_LIST",
+      "ambiguousAlone": true,
+      "defaultIntent": "SERVICES_LIST"
+    },
+    {
+      "id": "contact",
+      "forms": ["تواصل", "contact", "كلمونا", "reach you"],
+      "clusters": ["phone_contact", "email_contact"],
+      "intent": "CONTACT"
+    }
+  ],
+  "contextBoost": {
+    "price": {
+      "YACHT": "YACHT_MANAGEMENT_PRICING",
+      "CREW": "CREW_PRICING",
+      "VISITING": "VISITING_YACHT_AGENCY",
+      "MARINA": "MARINA_MANAGEMENT"
+    },
+    "maintenance": { "YACHT": "MAINTENANCE", "default": "MAINTENANCE" },
+    "insurance": { "YACHT": "INSURANCE", "default": "INSURANCE" },
+    "permits": { "VISITING": "VISITING_YACHT_PERMITS", "default": "VISITING_YACHT_PERMITS" },
+    "clearance": { "VISITING": "VISITING_YACHT_CLEARANCE", "default": "VISITING_YACHT_CLEARANCE" },
+    "provisioning": { "VISITING": "VISITING_YACHT_PROVISIONING", "default": "VISITING_YACHT_PROVISIONING" },
+    "payroll": { "CREW": "CREW_SALARIES", "default": "CREW_SALARIES" },
+    "training": { "CREW": "CREW_TRAINING", "default": "CREW_TRAINING" },
+    "captain": { "CREW": "CREW_RECRUITMENT", "default": "CREW_RECRUITMENT" },
+    "berthing": { "MARINA": "BERTHING", "VISITING": "VISITING_YACHT_AGENCY", "default": "BERTHING" },
+    "crew": { "default": "CREW_MANAGEMENT" },
+    "marina": { "default": "MARINA_MANAGEMENT" },
+    "address": { "default": "ADDRESS" },
+    "phone": { "default": "PHONE" },
+    "whatsapp": { "default": "WHATSAPP" }
+  },
+  "fuzzy": {
+    "enabled": true,
+    "maxDistance": 1,
+    "minLength": 4
+  }
+}

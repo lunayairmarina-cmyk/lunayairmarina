@@ -1,0 +1,37 @@
+{
+  "phone": "966531561212",
+  "phoneDisplay": "+966 53 156 1212",
+  "whatsapp": "966531561212",
+  "whatsappUrl": "https://wa.me/966531561212",
+  "email": "info@lunayairmarina.com",
+  "address": {
+    "en": "Al Murjan Tower, Prince Sultan Road, Al Rawdah, Jeddah",
+    "ar": "برج المرجان، طريق الأمير سلطان، حي الروضة، جدة"
+  },
+  "conciergeHours": {
+    "en": "Daily 7:00 AM – 11:00 PM Saudi time",
+    "ar": "يومياً 7 صباحاً – 11 مساءً بتوقيت السعودية"
+  },
+  "loungeHours": [
+    { "day": { "en": "Monday – Thursday", "ar": "الإثنين – الخميس" }, "time": "08:00 – 20:00" },
+    { "day": { "en": "Friday", "ar": "الجمعة" }, "time": "09:00 – 18:00" },
+    { "day": { "en": "Saturday", "ar": "السبت" }, "time": "10:00 – 16:00" },
+    { "day": { "en": "Sunday", "ar": "الأحد" }, "time": { "en": "By appointment", "ar": "حسب الموعد" } }
+  ],
+  "urls": {
+    "contact": "https://www.lunayairmarina.com/contact",
+    "services": "https://www.lunayairmarina.com/services",
+    "about": "https://www.lunayairmarina.com/about",
+    "application": "https://www.lunayairmarina.com/application",
+    "yachtManagement": "https://www.lunayairmarina.com/services/yacht-management-360",
+    "visitingAgency": "https://www.lunayairmarina.com/services/visiting-yacht-agency",
+    "marinaManagement": "https://www.lunayairmarina.com/services/marina-management",
+    "crewManagement": "https://www.lunayairmarina.com/services/crew-management"
+  },
+  "social": {
+    "instagram": "https://www.instagram.com/lunayairmarina",
+    "linkedin": "https://www.linkedin.com/company/lunayairmarina",
+    "tiktok": "https://vt.tiktok.com/ZSHVceVcD/",
+    "x": "https://x.com/lunayairmarina"
+  }
+}

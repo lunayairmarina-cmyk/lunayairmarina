@@ -1,0 +1,265 @@
+{
+  "concepts": {
+    "management": [
+      "ادارة",
+      "إدارة",
+      "إداره",
+      "الادارة",
+      "الإدارة",
+      "management",
+      "manage",
+      "mgmt"
+    ],
+    "yacht": [
+      "يخت",
+      "يخوت",
+      "يختي",
+      "اليخت",
+      "اليخوت",
+      "yacht",
+      "yachts",
+      "boat",
+      "يacht",
+      "yachti",
+      "قارب",
+      "اليخوط"
+    ],
+    "marina": [
+      "مارينا",
+      "مرسى",
+      "المراسي",
+      "مرينا",
+      "marina",
+      "berth",
+      "berthing",
+      "رسو",
+      "رصيف"
+    ],
+    "crew": [
+      "طاقم",
+      "طواقم",
+      "crew",
+      "staff",
+      "كادر",
+      "قبطان",
+      "captain"
+    ],
+    "agency": [
+      "وكالة",
+      "agency",
+      "زائر",
+      "زاير",
+      "زائرة",
+      "visiting"
+    ],
+    "price": [
+      "سعر",
+      "اسعار",
+      "أسعار",
+      "بكم",
+      "بكام",
+      "كم",
+      "تكلفة",
+      "التكلفة",
+      "price",
+      "pricing",
+      "cost",
+      "how much",
+      "fee",
+      "kam",
+      "bkam"
+    ],
+    "phone": [
+      "رقم",
+      "هاتف",
+      "اتصل",
+      "phone",
+      "call",
+      "raqam",
+      "رقمكم"
+    ],
+    "whatsapp": [
+      "واتساب",
+      "واتس",
+      "وتساب",
+      "whatsapp",
+      "واتس اب"
+    ],
+    "email": [
+      "ايميل",
+      "إيميل",
+      "بريد",
+      "email",
+      "mail"
+    ],
+    "address": [
+      "عنوان",
+      "العنوان",
+      "مقر",
+      "address",
+      "office"
+    ],
+    "hours": [
+      "ساعات",
+      "اوقات",
+      "أوقات",
+      "hours",
+      "working hours",
+      "مفتوح"
+    ],
+    "training": [
+      "تدريب",
+      "training",
+      "شهادة",
+      "certification"
+    ],
+    "maintenance": [
+      "صيانة",
+      "maintenance",
+      "refit",
+      "تجديد"
+    ],
+    "insurance": [
+      "تأمين",
+      "insurance"
+    ],
+    "compliance": [
+      "امتثال",
+      "compliance",
+      "class",
+      "flag",
+      "ism",
+      "isps"
+    ],
+    "charter": [
+      "تأجير",
+      "استئجار",
+      "charter",
+      "rental",
+      "rent"
+    ],
+    "purchase": [
+      "شراء",
+      "اشتري",
+      "buy",
+      "purchase"
+    ],
+    "sale": [
+      "بيع",
+      "sell",
+      "sale"
+    ],
+    "consultation": [
+      "استشارة",
+      "consultation",
+      "consult",
+      "موعد"
+    ],
+    "greeting": [
+      "السلام",
+      "سلام",
+      "اهلا",
+      "أهلا",
+      "هلا",
+      "مرحبا",
+      "hello",
+      "hi",
+      "hey"
+    ],
+    "thanks": [
+      "شكر",
+      "thanks",
+      "thank you",
+      "مشكور",
+      "تسلم"
+    ],
+    "goodbye": [
+      "مع السلامة",
+      "bye",
+      "goodbye",
+      "وداع"
+    ],
+    "how_are_you": [
+      "كيف حالك",
+      "كيفك",
+      "شلونك",
+      "ازيك",
+      "عامل ايه",
+      "how are you"
+    ],
+    "services": [
+      "خدمات",
+      "services",
+      "وش تقدمون",
+      "ما خدماتكم"
+    ],
+    "app": [
+      "تطبيق",
+      "app",
+      "application",
+      "mobile app",
+      "mobile",
+      "app store",
+      "google play"
+    ],
+    "about": [
+      "من نحن",
+      "about",
+      "قصتكم",
+      "تأسيس",
+      "founded"
+    ],
+    "location": [
+      "جدة",
+      "jeddah",
+      "red sea",
+      "البحر الاحمر",
+      "gulf",
+      "الخليج",
+      "وينكم",
+      "فينكم",
+      "wenkom",
+      "location"
+    ],
+    "permits": [
+      "تصاريح",
+      "permits",
+      "تصريح"
+    ],
+    "clearance": [
+      "تخليص",
+      "clearance",
+      "customs",
+      "جمرك"
+    ],
+    "provisioning": [
+      "تموين",
+      "provisioning",
+      "supplies"
+    ],
+    "payroll": [
+      "رواتب",
+      "payroll",
+      "salary",
+      "wages"
+    ],
+    "refit": [
+      "refit",
+      "رفيت",
+      "تجديد"
+    ],
+    "berthing": [
+      "رصيف",
+      "berth",
+      "berthing",
+      "رسو",
+      "mooring",
+      "حجز رصيف"
+    ],
+    "captain": [
+      "قبطان",
+      "captain",
+      "skipper"
+    ]
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "PRICE_OBJECTION": {
+    "phrases": [
+      "السعر غالي",
+      "غالي",
+      "مكلف",
+      "مرتفع",
+      "ما يستاهل",
+      "ليش السعر كذا",
+      "why so expensive",
+      "too expensive",
+      "expensive",
+      "pricey"
+    ],
+    "ar": {
+      "ack": "تفهم منطقي تماماً.",
+      "value": "أسعار الإدارة والتشغيل عندنا غير موحدة لأنها تعتمد على طول اليخت ونطاق الخدمة الفعلي، وهدفنا تحسين مصاريف التشغيل بشفافية بدون تكاليف غير مبررة.",
+      "friction": "ما نضغط على قرار سريع — نقدر نوضح النطاق أولاً ثم تقرر براحتك.",
+      "cta": "إذا حاب، أقدر أوصلك بالفريق عبر واتساب لتفاصيل تناسب حالتك بدون التزام."
+    },
+    "en": {
+      "ack": "That’s a fair concern.",
+      "value": "We don’t publish a single public price because the scope depends on the yacht and the services required. The focus is transparent operating costs, not a one-size fee.",
+      "friction": "There’s no pressure to decide now — we can clarify scope first.",
+      "cta": "If useful, we can connect you with the team on WhatsApp for a tailored outline, with no obligation."
+    }
+  },
+  "HESITATION": {
+    "phrases": [
+      "أفكر",
+      "افكر",
+      "خلني أفكر",
+      "خليني افكر",
+      "بفكر",
+      "بشوف",
+      "بعدين",
+      "مو الحين",
+      "لاحقا",
+      "i need to think",
+      "let me think",
+      "maybe later",
+      "not now"
+    ],
+    "ar": {
+      "ack": "خذ وقتك بالكامل.",
+      "value": "التخطيط لإدارة يخت أو خدمات مارينا قرار تشغيلي، ويستاهل مراجعة هادئة.",
+      "friction": "نقدر نكمل المعلومات هنا بدون أي التزام.",
+      "cta": "متى ما حبيت تكمل، الفريق موجود عبر واتساب أو من خلال المحادثة."
+    },
+    "en": {
+      "ack": "Take all the time you need.",
+      "value": "Yacht and marina decisions are operational — they deserve a careful look.",
+      "friction": "We can keep answering questions here with no commitment.",
+      "cta": "Whenever you’re ready, the team is available on WhatsApp or right here."
+    }
+  },
+  "COMPARISON": {
+    "phrases": [
+      "بشوف شركات ثانية",
+      "بشوف شركات ثانيه",
+      "عندي شركة ثانية",
+      "أقارن",
+      "اقارن",
+      "أقارن الأسعار",
+      "comparing",
+      "other companies",
+      "comparing providers",
+      "i'm comparing providers"
+    ],
+    "ar": {
+      "ack": "مقارنة الخيارات خطوة ممتازة.",
+      "value": "الفرق عندنا في الإدارة الشاملة 360° وتقارير المصاريف والالتزام بالمعايير الملاحية — بدون اختراع أرقام غير منشورة.",
+      "friction": "خذ وقتك في المقارنة، ونقدر نوضح نطاق الخدمة فقط.",
+      "cta": "إذا حاب مقارنة نطاق الخدمات مع فريقنا، نرتب ذلك بهدوء عبر واتساب."
+    },
+    "en": {
+      "ack": "Comparing providers is a sound approach.",
+      "value": "Our distinction is 360° management, operational reporting, and regulatory compliance — we don’t invent unpublished prices.",
+      "friction": "Take the time you need; we can stay focused on scope.",
+      "cta": "If a scope comparison with the team would help, we can arrange that via WhatsApp."
+    }
+  },
+  "NO_CONTACT_OBJECTION": {
+    "phrases": [
+      "ما أبي أتواصل الآن",
+      "ما أبي أتواصل",
+      "ما ابي اتواصل",
+      "ما أبي واتساب",
+      "ما ابي واتس",
+      "أرسل لي المعلومات أول",
+      "ارسل لي المعلومات اول",
+      "مو جاهز",
+      "don't want whatsapp",
+      "no call",
+      "send information first"
+    ],
+    "ar": {
+      "ack": "تمام، نحترم رغبتك.",
+      "value": "تقدر تكمل استكشاف الخدمات من هنا ومن صفحات الموقع.",
+      "friction": "ما راح نطلب واتساب إذا ما تبيه.",
+      "cta": ""
+    },
+    "en": {
+      "ack": "Understood — we respect that.",
+      "value": "You can keep exploring services here and on the website.",
+      "friction": "We won’t push WhatsApp if you’d rather not.",
+      "cta": ""
+    }
+  }
+}

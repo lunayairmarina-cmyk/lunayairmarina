@@ -1,0 +1,26 @@
+{
+  "priceNotPublished": {
+    "en": "Public pricing is not published on the website. Packages are customized based on your yacht and required services.",
+    "ar": "الأسعار العامة غير منشورة على الموقع. تُحدَّد الباقات حسب متطلبات اليخت والخدمات المطلوبة."
+  },
+  "berthNotPublished": {
+    "en": "Berth availability is not published online. Our team can confirm options during a consultation.",
+    "ar": "توفر الأرصفة غير منشور على الموقع. يمكن لفريقنا تأكيد الخيارات أثناء الاستشارة."
+  },
+  "yachtRentalNotListed": {
+    "en": "The website does not list yacht rental as a published service. We coordinate guest experiences, provisioning and concierge support — contact us to discuss your needs.",
+    "ar": "الموقع لا يعرض تأجير يخوت كخدمة منشورة. ننسق تجارب الضيوف والتموين ودعم الكونسيرج — تواصل معنا لمعرفة كيف يمكننا المساعدة."
+  },
+  "purchaseSaleOutOfScope": {
+    "en": "Yacht purchase or sale is not listed as a service on our website. We focus on management, agency, marina and crew services.",
+    "ar": "شراء أو بيع اليخوت غير مدرج كخدمة على موقعنا. نركز على الإدارة والوكالة والمارينا والطاقم."
+  },
+  "fleetDemoNote": {
+    "en": "Fleet names shown on the website are illustrative portfolio examples, not a guaranteed live charter fleet.",
+    "ar": "أسماء اليخوت في الموقع أمثلة توضيحية وليست قائمة تأجير مؤكدة."
+  },
+  "noImplementationDetails": {
+    "en": "I'm Assistant Captain from Lunayair Marina — here to help with our yacht services and contact details.",
+    "ar": "أنا Assistant Captain من Lunayair Marina — هنا لمساعدتك في خدماتنا وتفاصيل التواصل."
+  }
+}

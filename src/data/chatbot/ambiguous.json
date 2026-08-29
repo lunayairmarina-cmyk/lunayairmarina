@@ -1,0 +1,34 @@
+{
+  "clarifications": {
+    "PRICING": {
+      "ar": [
+        "أكيد، هل تقصد سعر إدارة اليخت، إدارة الطاقم، وكالة اليخوت الزائرة، أم إدارة المارينا؟ الأسعار غير منشورة رقمياً على الموقع.",
+        "تفضل توضّح لي: السعر لإدارة اليخت، الطاقم، الوكالة، أو المارينا؟ كل باقة تُحدَّد حسب اليخت والخدمات."
+      ],
+      "en": [
+        "Sure — do you mean pricing for yacht management, crew services, visiting yacht agency, or marina management? Public prices are not published on the website.",
+        "Which service pricing are you asking about: yacht management, crew, agency, or marina? Packages are customized per vessel."
+      ]
+    },
+    "management_ambiguous": {
+      "ar": [
+        "هل تقصد إدارة اليخوت أم إدارة المارينا؟ أقدر أوضح لك التفاصيل لكل خدمة.",
+        "تقصد إدارة يختك (360°) أو تشغيل مارينا؟"
+      ],
+      "en": [
+        "Do you mean yacht management or marina management? I can explain either service.",
+        "Are you asking about managing your yacht (360°) or marina operations?"
+      ]
+    },
+    "yacht_ambiguous": {
+      "ar": [
+        "هل استفسارك عن إدارة اليخت، وكالة اليخوت الزائرة، أم شيء آخر؟",
+        "تقصد إدارة يختك، خدمات اليخوت الزائرة، أم استفسار آخر؟"
+      ],
+      "en": [
+        "Are you asking about yacht management, visiting yacht agency services, or something else?",
+        "Do you mean managing your yacht, agency support for visiting yachts, or another topic?"
+      ]
+    }
+  }
+}

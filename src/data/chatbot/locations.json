@@ -1,0 +1,20 @@
+{
+  "headquarters": {
+    "city": { "en": "Jeddah", "ar": "جدة" },
+    "country": { "en": "Saudi Arabia", "ar": "المملكة العربية السعودية" }
+  },
+  "regions": [
+    { "id": "jeddah", "en": "Jeddah", "ar": "جدة" },
+    { "id": "red_sea", "en": "Red Sea", "ar": "البحر الأحمر" },
+    { "id": "gulf", "en": "Arabian Gulf", "ar": "الخليج العربي" },
+    { "id": "saudi", "en": "Saudi Arabia", "ar": "المملكة العربية السعودية" },
+    { "id": "neom", "en": "NEOM / Red Sea Project", "ar": "نيوم / مشروع البحر الأحمر" },
+    { "id": "dubai", "en": "Dubai", "ar": "دبي" },
+    { "id": "abu_dhabi", "en": "Abu Dhabi", "ar": "أبوظبي" },
+    { "id": "bahrain", "en": "Bahrain", "ar": "البحرين" }
+  ],
+  "coverageNote": {
+    "en": "Based in Jeddah, serving yacht owners across Saudi Arabia and the Gulf region.",
+    "ar": "مقرنا في جدة، وندعم ملاك اليخوت في المملكة العربية السعودية ومنطقة الخليج."
+  }
+}

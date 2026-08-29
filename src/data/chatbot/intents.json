@@ -1,0 +1,532 @@
+{
+  "threshold": 4,
+  "clarifyThreshold": 3,
+  "intents": [
+    {
+      "id": "GREETING",
+      "clusters": [
+        "greeting"
+      ],
+      "exclusive": true
+    },
+    {
+      "id": "THANKS",
+      "clusters": [
+        "thanks"
+      ],
+      "exclusive": true
+    },
+    {
+      "id": "GOODBYE",
+      "clusters": [
+        "goodbye"
+      ],
+      "exclusive": true
+    },
+    {
+      "id": "HOW_ARE_YOU",
+      "clusters": [
+        "how_are_you"
+      ],
+      "exclusive": true
+    },
+    {
+      "id": "IMPLEMENTATION_SECURITY",
+      "clusters": [
+        "implementation_probe"
+      ],
+      "exclusive": true
+    },
+    {
+      "id": "PRICE_OBJECTION",
+      "clusters": [
+        "price_objection"
+      ],
+      "exclusive": true
+    },
+    {
+      "id": "HESITATION",
+      "clusters": [
+        "hesitation"
+      ],
+      "exclusive": true
+    },
+    {
+      "id": "COMPARISON",
+      "clusters": [
+        "comparison"
+      ],
+      "exclusive": true
+    },
+    {
+      "id": "NO_CONTACT_OBJECTION",
+      "clusters": [
+        "no_contact_objection"
+      ],
+      "exclusive": true
+    },
+    {
+      "id": "SERVICES_LIST",
+      "clusters": [
+        "services_list"
+      ],
+      "concepts": [
+        "services"
+      ]
+    },
+    {
+      "id": "YACHT_MANAGEMENT",
+      "clusters": [
+        "yacht_management"
+      ],
+      "concepts": [
+        "management",
+        "yacht"
+      ],
+      "compoundBonus": 3,
+      "keywords": [
+        "محتاج ادارة",
+        "محتاج إدارة"
+      ]
+    },
+    {
+      "id": "YACHT_MANAGEMENT_360",
+      "parent": "YACHT_MANAGEMENT",
+      "clusters": [
+        "yacht_management"
+      ],
+      "keywords": [
+        "360",
+        "شاملة",
+        "كاملة",
+        "full",
+        "360°"
+      ]
+    },
+    {
+      "id": "YACHT_MANAGEMENT_PRICING",
+      "parent": "YACHT_MANAGEMENT",
+      "keywords": [
+        "yacht management price",
+        "management price",
+        "how much is yacht management",
+        "how much yacht management",
+        "سعر إدارة",
+        "بكام إدارة",
+        "كم سعر إدارة",
+        "price for yacht management",
+        "cost of yacht management"
+      ]
+    },
+    {
+      "id": "VISITING_YACHT_AGENCY",
+      "clusters": [
+        "visiting_agency"
+      ],
+      "concepts": [
+        "agency",
+        "yacht"
+      ]
+    },
+    {
+      "id": "VISITING_YACHT_CLEARANCE",
+      "parent": "VISITING_YACHT_AGENCY",
+      "clusters": [
+        "visiting_agency"
+      ],
+      "keywords": [
+        "تخليص",
+        "clearance",
+        "customs",
+        "جمرك"
+      ]
+    },
+    {
+      "id": "VISITING_YACHT_PERMITS",
+      "parent": "VISITING_YACHT_AGENCY",
+      "clusters": [
+        "visiting_agency"
+      ],
+      "keywords": [
+        "تصريح",
+        "permits",
+        "تصاريح",
+        "entry"
+      ]
+    },
+    {
+      "id": "VISITING_YACHT_PROVISIONING",
+      "parent": "VISITING_YACHT_AGENCY",
+      "clusters": [
+        "visiting_agency",
+        "provisioning"
+      ],
+      "keywords": [
+        "تموين",
+        "provisioning",
+        "supplies",
+        "victuals",
+        "تموين يخت",
+        "yacht provisioning"
+      ]
+    },
+    {
+      "id": "MARINA_MANAGEMENT",
+      "clusters": [
+        "marina_mgmt"
+      ],
+      "concepts": [
+        "marina",
+        "management"
+      ]
+    },
+    {
+      "id": "MARINA_OPERATIONS",
+      "parent": "MARINA_MANAGEMENT",
+      "keywords": [
+        "operations",
+        "marina operations",
+        "تشغيل",
+        "club"
+      ]
+    },
+    {
+      "id": "BERTHING",
+      "parent": "MARINA_MANAGEMENT",
+      "clusters": [
+        "marina_mgmt"
+      ],
+      "keywords": [
+        "berth",
+        "رصيف",
+        "رسو",
+        "mooring",
+        "حجز رصيف"
+      ]
+    },
+    {
+      "id": "CREW_MANAGEMENT",
+      "clusters": [
+        "crew_mgmt"
+      ],
+      "concepts": [
+        "crew",
+        "management"
+      ],
+      "keywords": [
+        "هل تديرون الطاقم"
+      ]
+    },
+    {
+      "id": "CREW_RECRUITMENT",
+      "parent": "CREW_MANAGEMENT",
+      "clusters": [
+        "crew_mgmt"
+      ],
+      "keywords": [
+        "توظيف",
+        "recruit",
+        "hire",
+        "placement"
+      ]
+    },
+    {
+      "id": "CREW_SALARIES",
+      "parent": "CREW_MANAGEMENT",
+      "clusters": [
+        "crew_mgmt"
+      ],
+      "keywords": [
+        "رواتب",
+        "payroll",
+        "salary",
+        "wages"
+      ]
+    },
+    {
+      "id": "CREW_TRAINING",
+      "parent": "CREW_MANAGEMENT",
+      "clusters": [
+        "training"
+      ],
+      "concepts": [
+        "crew",
+        "training"
+      ]
+    },
+    {
+      "id": "CREW_PRICING",
+      "parent": "CREW_MANAGEMENT",
+      "keywords": [
+        "سعر الطاقم",
+        "بكام الطاقم",
+        "crew price",
+        "crew management price",
+        "how much crew",
+        "crew cost"
+      ]
+    },
+    {
+      "id": "MAINTENANCE",
+      "parent": "YACHT_MANAGEMENT",
+      "keywords": [
+        "صيانة",
+        "maintenance",
+        "planned maintenance",
+        "هل تشمل الإدارة الصيانة"
+      ]
+    },
+    {
+      "id": "REFIT",
+      "parent": "YACHT_MANAGEMENT",
+      "keywords": [
+        "refit",
+        "تجديد",
+        "renovation"
+      ]
+    },
+    {
+      "id": "INSURANCE",
+      "parent": "YACHT_MANAGEMENT",
+      "keywords": [
+        "تأمين",
+        "insurance"
+      ]
+    },
+    {
+      "id": "COMPLIANCE",
+      "parent": "YACHT_MANAGEMENT",
+      "keywords": [
+        "امتثال",
+        "compliance",
+        "class",
+        "flag",
+        "ism",
+        "isps",
+        "هل الإدارة تشمل الامتثال"
+      ]
+    },
+    {
+      "id": "OPERATIONS",
+      "keywords": [
+        "عمليات",
+        "operations desk",
+        "24/7",
+        "غرفة عمليات"
+      ]
+    },
+    {
+      "id": "OPEX_REPORTING",
+      "parent": "YACHT_MANAGEMENT",
+      "keywords": [
+        "opex",
+        "تقارير",
+        "reporting",
+        "financial",
+        "مالية"
+      ]
+    },
+    {
+      "id": "PHONE",
+      "clusters": [
+        "phone_contact"
+      ],
+      "exclusive": true
+    },
+    {
+      "id": "WHATSAPP",
+      "clusters": [
+        "whatsapp_contact"
+      ],
+      "exclusive": true
+    },
+    {
+      "id": "EMAIL",
+      "clusters": [
+        "email_contact"
+      ],
+      "exclusive": true
+    },
+    {
+      "id": "ADDRESS",
+      "clusters": [
+        "address_contact"
+      ],
+      "exclusive": true
+    },
+    {
+      "id": "LOCATION",
+      "keywords": [
+        "جدة",
+        "jeddah",
+        "red sea",
+        "البحر الاحمر",
+        "gulf",
+        "الخليج",
+        "نيوم",
+        "neom"
+      ]
+    },
+    {
+      "id": "WORKING_HOURS",
+      "clusters": [
+        "working_hours"
+      ],
+      "exclusive": true
+    },
+    {
+      "id": "CONTACT",
+      "clusters": [
+        "phone_contact",
+        "email_contact",
+        "address_contact",
+        "whatsapp_contact"
+      ],
+      "keywords": [
+        "تواصل",
+        "contact",
+        "reach",
+        "كلمونا"
+      ]
+    },
+    {
+      "id": "ABOUT_COMPANY",
+      "clusters": [
+        "about_company"
+      ],
+      "keywords": [
+        "lunayair",
+        "من نحن",
+        "about company"
+      ]
+    },
+    {
+      "id": "FOUNDED",
+      "parent": "ABOUT_COMPANY",
+      "clusters": [
+        "about_company"
+      ],
+      "keywords": [
+        "2014",
+        "تأسس",
+        "تأسسوا",
+        "founded",
+        "since"
+      ]
+    },
+    {
+      "id": "WHY_US",
+      "keywords": [
+        "لماذا",
+        "why choose",
+        "why us",
+        "مميزات"
+      ]
+    },
+    {
+      "id": "MOBILE_APP",
+      "clusters": [
+        "mobile_app"
+      ]
+    },
+    {
+      "id": "ADVERTISING",
+      "keywords": [
+        "advertising",
+        "ads",
+        "إعلان",
+        "اعلانات",
+        "vip partner"
+      ]
+    },
+    {
+      "id": "BLOG",
+      "keywords": [
+        "blog",
+        "مدونة",
+        "مقال",
+        "article"
+      ]
+    },
+    {
+      "id": "PRICING",
+      "clusters": [
+        "pricing"
+      ],
+      "ambiguous": true
+    },
+    {
+      "id": "CONSULTATION",
+      "clusters": [
+        "consultation"
+      ]
+    },
+    {
+      "id": "CHARTER",
+      "keywords": [
+        "كونسييرج",
+        "concierge",
+        "itinerary",
+        "خط سير",
+        "guest experience",
+        "charter yacht",
+        "yacht charter"
+      ]
+    },
+    {
+      "id": "YACHT_RENTAL",
+      "clusters": [
+        "yacht_rental"
+      ],
+      "outOfScopeVariant": true
+    },
+    {
+      "id": "YACHT_PURCHASE",
+      "clusters": [
+        "yacht_purchase"
+      ],
+      "outOfScopeVariant": true
+    },
+    {
+      "id": "YACHT_SALE",
+      "clusters": [
+        "yacht_sale"
+      ],
+      "outOfScopeVariant": true
+    },
+    {
+      "id": "OUT_OF_SCOPE",
+      "fallback": true
+    },
+    {
+      "id": "UNKNOWN",
+      "fallback": true
+    }
+  ],
+  "ambiguousPairs": [
+    {
+      "trigger": "PRICING",
+      "options": [
+        "YACHT_MANAGEMENT",
+        "CREW_MANAGEMENT",
+        "VISITING_YACHT_AGENCY",
+        "MARINA_MANAGEMENT"
+      ]
+    },
+    {
+      "trigger": "management_ambiguous",
+      "concepts": [
+        "management"
+      ],
+      "missing": [
+        "yacht",
+        "marina",
+        "crew"
+      ],
+      "options": [
+        "YACHT_MANAGEMENT",
+        "MARINA_MANAGEMENT"
+      ]
+    }
+  ]
+}

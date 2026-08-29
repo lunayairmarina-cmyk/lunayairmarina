@@ -2,6 +2,7 @@ export interface CustomerContext {
   customerType?: string;
   name?: string;
   phone?: string;
+  normalizedPhone?: string;
   email?: string;
   yachtLength?: string;
   yachtType?: string;
@@ -11,6 +12,25 @@ export interface CustomerContext {
   requestedContactMethod?: string;
   urgency?: "low" | "medium" | "high";
   customerIntent?: string;
+  customerGoal?: string;
+  leadScore?: number;
+  messageCount?: number;
+  yachtMentioned?: boolean;
+  detectedLanguage?: "ar" | "en";
+  lastTopic?: string;
+  recentIntents?: string[];
+  conversationStage?:
+    | "GREETING"
+    | "DISCOVERY"
+    | "SERVICE_IDENTIFICATION"
+    | "QUALIFICATION"
+    | "CONSIDERATION"
+    | "OBJECTION"
+    | "HIGH_INTENT"
+    | "HANDOFF";
+  disclosureLevel?: number;
+  askedMissingFields?: string[];
+  assistantState?: Record<string, unknown>;
 }
 
 export function emptyCustomerContext(): CustomerContext {

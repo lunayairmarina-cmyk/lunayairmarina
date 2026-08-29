@@ -1,0 +1,446 @@
+{
+  "clusters": {
+    "yacht_management": {
+      "weight": 4,
+      "phrases": {
+        "ar": [
+          "ادارة يخت",
+          "إدارة يخت",
+          "ادارة اليخوت",
+          "إدارة اليخوت",
+          "اداره يخت",
+          "يديرون يختي",
+          "تديرون يخوت",
+          "مين يدير اليخت",
+          "وش تشمل الإدارة",
+          "وش تشمل؟",
+          "وش تشمل",
+          "شركة تمسك اليخت كامل",
+          "ابغى ادارة يخت",
+          "أبي ادارة يخت",
+          "أبي أحد يديره",
+          "ابي احد يديره",
+          "عايز حد يدير اليخت",
+          "عندي يخت وابي احد يديره",
+          "عندي يخت",
+          "عندي يخوت",
+          "عندي yacht",
+          "أبي شركة تمسك لي اليacht",
+          "عايز حد يدير اليacht",
+          "تقدرون تديرون يachti",
+          "اداره اليacht",
+          "need إدارة yacht",
+          "yachti",
+          "my yacht",
+          "ادارة 360",
+          "إدارة شاملة",
+          "yacht management",
+          "manage my yacht",
+          "360 management",
+          "yacht mgmt",
+          "edaret yacht",
+          "edara yacht",
+          "3ayez adaret yacht",
+          "3ayz edara yacht",
+          "3ayez 7ad ydeer el yacht",
+          "كيف أبدأ",
+          "كيف ابدا"
+        ]
+      }
+    },
+    "price_objection": {
+      "weight": 5,
+      "phrases": {
+        "ar": ["غالي", "السعر غالي", "مكلف", "السعر مرتفع", "ما يستاهل", "ليش السعر كذا", "بصراحة غالي", "شكرا بس غالي", "مكلف جدا"],
+        "en": ["why so expensive", "too expensive", "expensive"]
+      }
+    },
+    "hesitation": {
+      "weight": 5,
+      "phrases": {
+        "ar": ["أفكر", "افكر", "خلني أفكر", "خليني افكر", "بعدين", "مو الحين", "لاحقا", "بصراحة أفكر"],
+        "en": ["i need to think", "maybe later", "not now"]
+      }
+    },
+    "comparison": {
+      "weight": 5,
+      "phrases": {
+        "ar": ["أقارن الأسعار", "اقارن الاسعار", "بشوف شركات ثانية", "بشوف شركات ثانيه", "عندي عروض ثانية", "عندي عروض ثانيه", "أقارن", "اقارن", "بصراحة أقارن الأسعار", "بصراحة اقارن الاسعار", "بصراحة بشوف شركات ثانية", "بصراحة بشوف شركات ثانيه", "شكرا بس بشوف شركات ثانية", "شكرا بس بشوف شركات ثانيه"],
+        "en": ["comparing options", "looking at other companies", "checking other quotes"]
+      }
+    },
+    "no_contact_objection": {
+      "weight": 5,
+      "phrases": {
+        "ar": ["ما أبي أتواصل", "ما ابي اتواصل", "ما أبي واتساب", "ما ابي واتس", "أرسل لي المعلومات أول", "مو جاهز"],
+        "en": ["don't want whatsapp", "no call", "don't want to contact"]
+      }
+    },
+    "visiting_agency": {
+      "weight": 4,
+      "phrases": {
+        "ar": [
+          "يخت زائر",
+          "اليخوت الزائرة",
+          "وكالة يخوت",
+          "وكالة اليخوت",
+          "تخليص يخت",
+          "تخليص يخت دولي",
+          "تصاريح دخول",
+          "تصاريح دخول يخت",
+          "visiting yacht",
+          "yacht agency",
+          "clearance",
+          "customs",
+          "international yacht",
+          "عندكم وكالة",
+          "عندكم وكالة يخوت",
+          "عندي يacht زائر",
+          "يacht زائر"
+        ]
+      }
+    },
+    "provisioning": {
+      "weight": 4,
+      "phrases": {
+        "ar": [
+          "تموين",
+          "تموين يخت",
+          "تموين اليخت",
+          "provisioning",
+          "yacht provisioning",
+          "supplies",
+          "victuals",
+          "تموين لليخت الزائر"
+        ]
+      }
+    },
+    "marina_mgmt": {
+      "weight": 4,
+      "phrases": {
+        "ar": [
+          "ادارة مارينا",
+          "إدارة مارينا",
+          "إدارة المارينا",
+          "ادارة المراسي",
+          "تشغيل مارينا",
+          "مرينا",
+          "marina management",
+          "marina operations",
+          "yacht club",
+          "berth allocation",
+          "حجز رصيف",
+          "مارينا"
+        ]
+      }
+    },
+    "crew_mgmt": {
+      "weight": 4,
+      "phrases": {
+        "ar": [
+          "ادارة طاقم",
+          "إدارة الطاقم",
+          "إدارة الطواقم",
+          "توظيف طاقم",
+          "رواتب الطاقم",
+          "crew management",
+          "crew recruitment",
+          "hire captain",
+          "payroll crew"
+        ]
+      }
+    },
+    "pricing": {
+      "weight": 3,
+      "phrases": {
+        "ar": [
+          "سعر",
+          "اسعار",
+          "أسعار",
+          "بكم",
+          "بكام",
+          "كم السعر",
+          "التكلفة",
+          "price",
+          "pricing",
+          "cost",
+          "how much",
+          "bkam",
+          "kam",
+          "3ayez kam"
+        ]
+      }
+    },
+    "phone_contact": {
+      "weight": 3,
+      "phrases": {
+        "ar": [
+          "رقم",
+          "رقمكم",
+          "هاتف",
+          "اتصل",
+          "phone number",
+          "call you",
+          "رقم الهاتف"
+        ]
+      }
+    },
+    "whatsapp_contact": {
+      "weight": 5,
+      "phrases": {
+        "ar": [
+          "واتساب",
+          "واتس",
+          "وتساب",
+          "whatsapp",
+          "واتس اب",
+          "WhatsApp"
+        ]
+      }
+    },
+    "address_contact": {
+      "weight": 4,
+      "phrases": {
+        "ar": [
+          "العنوان",
+          "عنوان",
+          "موقعكم",
+          "مقركم",
+          "address",
+          "where are you",
+          "office location",
+          "وين مكتبكم",
+          "فين مكتبكم",
+          "fen el office"
+        ]
+      }
+    },
+    "email_contact": {
+      "weight": 4,
+      "phrases": {
+        "ar": [
+          "ايميل",
+          "إيميل",
+          "البريد",
+          "email address",
+          "email",
+          "info@"
+        ]
+      }
+    },
+    "working_hours": {
+      "weight": 3,
+      "phrases": {
+        "ar": [
+          "ساعات العمل",
+          "اوقات الدوام",
+          "مواعيد العمل",
+          "مفتوح",
+          "working hours",
+          "open hours"
+        ]
+      }
+    },
+    "yacht_rental": {
+      "weight": 4,
+      "phrases": {
+        "ar": [
+          "تأجير يخت",
+          "استئجار يخت",
+          "ابغى استأجر يخت",
+          "ابغى اأجر يخت",
+          "أبي استأجر yacht",
+          "أبي أأجر yacht",
+          "تأجير yacht",
+          "yacht rental",
+          "rent a yacht",
+          "charter yacht",
+          "hire yacht for day"
+        ]
+      }
+    },
+    "yacht_purchase": {
+      "weight": 4,
+      "phrases": {
+        "ar": [
+          "اشتري يخت",
+          "شراء يخت",
+          "buy yacht",
+          "purchase yacht",
+          "ابي اشتري يخت",
+          "ابي اشتري yacht",
+          "أبي أشتري yacht"
+        ]
+      }
+    },
+    "yacht_sale": {
+      "weight": 4,
+      "phrases": {
+        "ar": [
+          "بيع يخت",
+          "sell yacht",
+          "ابي ابيع يخت",
+          "عايز أبيع يخت",
+          "أبي أبيع yacht"
+        ]
+      }
+    },
+    "training": {
+      "weight": 3,
+      "phrases": {
+        "ar": [
+          "تدريب",
+          "تدربون",
+          "training",
+          "certification course",
+          "هل توفرون تدريب"
+        ]
+      }
+    },
+    "greeting": {
+      "weight": 5,
+      "phrases": {
+        "ar": [
+          "السلام عليكم",
+          "السلام عليكم ورحمة الله",
+          "اهلا",
+          "أهلا",
+          "هلا",
+          "مرحبا",
+          "hello",
+          "hi",
+          "hey",
+          "هاي"
+        ]
+      }
+    },
+    "thanks": {
+      "weight": 5,
+      "phrases": {
+        "ar": [
+          "شكرا",
+          "شكراً",
+          "thanks",
+          "thank you",
+          "مشكور",
+          "تسلم"
+        ]
+      }
+    },
+    "goodbye": {
+      "weight": 5,
+      "phrases": {
+        "ar": [
+          "مع السلامة",
+          "bye",
+          "goodbye",
+          "see you"
+        ]
+      }
+    },
+    "how_are_you": {
+      "weight": 5,
+      "phrases": {
+        "ar": [
+          "كيف حالك",
+          "كيفك",
+          "شلونك",
+          "ازيك",
+          "عامل ايه",
+          "how are you"
+        ]
+      }
+    },
+    "services_list": {
+      "weight": 3,
+      "phrases": {
+        "ar": [
+          "ما خدماتكم",
+          "وش خدماتكم",
+          "ايش خدماتكم",
+          "وش تسوون",
+          "what services",
+          "your services",
+          "ما تقدمون"
+        ]
+      }
+    },
+    "consultation": {
+      "weight": 3,
+      "phrases": {
+        "ar": [
+          "استشارة",
+          "اطلب استشارة",
+          "consultation",
+          "book meeting",
+          "موعد"
+        ]
+      }
+    },
+    "mobile_app": {
+      "weight": 5,
+      "phrases": {
+        "ar": [
+          "التطبيق",
+          "تطبيق",
+          "app store",
+          "google play",
+          "mobile app",
+          "application"
+        ]
+      }
+    },
+    "about_company": {
+      "weight": 4,
+      "phrases": {
+        "ar": [
+          "من نحن",
+          "من أنتم",
+          "who are you",
+          "about you",
+          "about company",
+          "قصتكم",
+          "منذ متى",
+          "تأسس",
+          "تأسسوا",
+          "founded 2014"
+        ]
+      }
+    },
+    "implementation_probe": {
+      "weight": 6,
+      "phrases": {
+        "ar": [
+          "gemini",
+          "chatgpt",
+          "openai",
+          "system prompt",
+          "are you ai",
+          "هل انت ai",
+          "انت ai",
+          "انت روبوت",
+          "api key",
+          "what api",
+          "firebase",
+          "كيف تعمل",
+          "show me the code",
+          "backend architecture",
+          "environment variables",
+          "backend source code",
+          "source code",
+          "credentials"
+        ],
+        "en": [
+          "show me the code",
+          "backend architecture",
+          "environment variables",
+          "backend source code",
+          "system prompt",
+          "gemini api",
+          "firebase credentials",
+          "what api do you use"
+        ]
+      }
+    }
+  }
+}

@@ -22,6 +22,7 @@ import {
   extractFirestoreError,
 } from "@/server/agent/firebaseAdminDiagnostics";
 import { logAiUsage } from "@/server/agent/usageLog";
+import { normalizeSaudiPhone } from "@/lib/chatbot/phone";
 
 const contactSchema = z.object({
   sessionId: z
@@ -54,6 +55,7 @@ export async function saveChatContact(input: unknown): Promise<SaveChatContactRe
   const { sessionId, language, name, phone } = parsed.data;
   const rawEmail = parsed.data.email?.trim() ?? "";
   const email = rawEmail && /.+@.+\..+/.test(rawEmail) ? rawEmail.toLowerCase() : undefined;
+  const normalizedPhone = normalizeSaudiPhone(phone);
   const now = new Date().toISOString();
 
   try {
@@ -83,7 +85,9 @@ export async function saveChatContact(input: unknown): Promise<SaveChatContactRe
       ...customerContext,
       name,
       phone,
+      normalizedPhone: normalizedPhone.normalized,
       requestedContactMethod: customerContext.requestedContactMethod || "phone",
+      detectedLanguage: language,
     };
     const resolvedEmail = email || customerContext.email?.trim() || "";
     if (resolvedEmail) customerContext.email = resolvedEmail;
@@ -129,8 +133,8 @@ export async function saveChatContact(input: unknown): Promise<SaveChatContactRe
       role: "assistant" as const,
       content:
         language === "ar"
-          ? `شكرًا ${name}، تم حفظ بياناتك. فريق Lunayair Marina سيتواصل معك قريبًا على ${phone}. كيف يمكنني مساعدتك أكثر؟`
-          : `Thank you ${name} — your details are saved. The Lunayair Marina team will reach you soon on ${phone}. How else can I help?`,
+          ? `أهلًا ${name} 👋 تم حفظ بياناتك. كيف أقدر أساعدك اليوم؟`
+          : `Hi ${name} 👋 Your details are saved. How can I help you today?`,
       timestamp: assistantAt,
       confidence: "high" as const,
     };
@@ -188,6 +192,7 @@ export async function saveChatContact(input: unknown): Promise<SaveChatContactRe
         await updateAiLeadAdmin(adminDb, record.leadId, {
           name,
           phone,
+          normalizedPhone: normalizedPhone.normalized,
           email: resolvedEmail || "",
           yachtType: (customerContext.yachtType ?? customerContext.customerType ?? "").slice(0, 80),
           yachtLength: (customerContext.yachtLength ?? "").slice(0, 40),

@@ -1305,6 +1305,10 @@
     "contactSubmit": "ابدأ الشات",
     "contactError": "تعذر حفظ البيانات. تأكد من الاسم والجوال ثم حاول مرة أخرى.",
     "contactGate": "بعد حفظ بياناتك هتقدر تسأل الكابتن المساعد مباشرة.",
+    "startChatButton": "ابدأ الشات",
+    "registeredWelcome": "أهلًا {{name}} 👋\nكيف أقدر أساعدك اليوم؟",
+    "returningWelcome": "أهلًا {{name}} 👋\nنورت Lunayair Marina مرة ثانية. كيف أقدر أساعدك؟",
+    "contactSyncPending": "تم حفظ بياناتك محليًا. سيتم مزامنتها مع الفريق قريبًا.",
     "whatsappButton": "تواصل عبر واتساب",
     "teasers": [
       "مرحبًا بك 👋 أنا الكابتن المساعد",

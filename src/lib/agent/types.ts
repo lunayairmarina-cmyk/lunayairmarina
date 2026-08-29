@@ -112,10 +112,18 @@ export interface AiLeadRecord {
   location: string;
   serviceInterest: string[];
   conversationId: string;
-  source: "ai_agent";
+  source: "ai_agent" | "chatbot";
   status: AiLeadStatus;
   createdAt: string;
   notes?: string;
+  normalizedPhone?: string;
+  leadScore?: number;
+  lastIntent?: string;
+  messageCount?: number;
+  lastSeenAt?: string;
+  updatedAt?: string;
+  yachtMentioned?: boolean;
+  detectedLanguage?: AgentLanguage;
 }
 
 export interface KnowledgeSyncStatus {
