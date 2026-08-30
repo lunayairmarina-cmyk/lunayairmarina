@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
+import { clearAllChatbotVisitorDataAdmin } from "@/server/agent/chatbotResetAdmin";
 import {
-  deleteAllConversationsAdmin,
   deleteConversationAdmin,
 } from "@/server/agent/conversationStoreAdmin";
 import { getAdminFirestore } from "@/server/agent/firebaseAdmin";
@@ -32,8 +32,8 @@ export const deleteAiConversation = createServerFn({ method: "POST" })
 export const deleteAllAiConversations = createServerFn({ method: "POST" }).handler(async () => {
   try {
     const db = await getAdminFirestore();
-    const deleted = await deleteAllConversationsAdmin(db);
-    return { ok: true as const, deleted };
+    const result = await clearAllChatbotVisitorDataAdmin(db);
+    return { ok: true as const, ...result };
   } catch (error) {
     return {
       ok: false as const,

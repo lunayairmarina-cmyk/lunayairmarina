@@ -140,6 +140,13 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Chatbot visitor reset epoch — public read so browsers clear saved names/phones.
+    match /config/chatbot {
+      allow read: if true;
+      allow create, update: if isSuperAdmin();
+      allow delete: if false;
+    }
+
     // Admin profiles — not public
     match /admins/{uid} {
       allow read: if isActiveAdmin() || (signedIn() && request.auth.uid == uid);

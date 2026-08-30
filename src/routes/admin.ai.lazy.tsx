@@ -258,8 +258,8 @@ function AdminAiPage() {
         setTranscript([]);
         setStatus(
           language === "ar"
-            ? `تم حذف ${result.deleted ?? 0} محادثة`
-            : `Deleted ${result.deleted ?? 0} conversations`,
+            ? `تم مسح ${result.conversations ?? 0} محادثة و${result.leads ?? 0} ليد — كل الزوار سيسجّلون من جديد`
+            : `Cleared ${result.conversations ?? 0} conversations and ${result.leads ?? 0} leads — all visitors must register again`,
         );
       } else {
         setStatus(result.error || t("admin.ai.deleteFailed"));
@@ -362,7 +362,20 @@ function AdminAiPage() {
                 <Trash2 className="size-3.5" aria-hidden />
                 {clearingAll ? t("admin.ai.deletingAll") : t("admin.ai.deleteAll")}
               </button>
-            ) : null}
+            ) : (
+              <button
+                type="button"
+                disabled={clearingAll || deletingId !== null}
+                onClick={() => {
+                  if (!window.confirm(t("admin.ai.resetAllVisitorsConfirm"))) return;
+                  void onDeleteAllConversations();
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 disabled:opacity-60"
+              >
+                <Trash2 className="size-3.5" aria-hidden />
+                {clearingAll ? t("admin.ai.deletingAll") : t("admin.ai.resetAllVisitors")}
+              </button>
+            )}
           </div>
         </div>
         <DataTable

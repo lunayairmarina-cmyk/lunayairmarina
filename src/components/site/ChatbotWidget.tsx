@@ -7,8 +7,10 @@ import { useLanguage } from "@/lib/i18n";
 import type { ChatErrorCode } from "@/lib/chatbot/types";
 import {
   buildIdentity,
+  enforceChatbotIdentityReset,
   loadChatbotIdentity,
   saveChatbotIdentity,
+  syncIdentityEpochAfterRegistration,
   touchChatbotIdentity,
 } from "@/lib/chatbot/identity";
 import { validatePhone, validateVisitorName } from "@/lib/chatbot/phone";
@@ -152,7 +154,8 @@ export function ChatbotWidget() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [sessionId] = useState(() => getOrCreateChatSessionId());
+  const [sessionId, setSessionId] = useState("");
+  const [chatReady, setChatReady] = useState(false);
   // Welcome teasers: replay every time the visitor enters the homepage.
   const [teasersVisible, setTeasersVisible] = useState(false);
   const [teaserDismissed, setTeaserDismissed] = useState(false);
@@ -168,13 +171,18 @@ export function ChatbotWidget() {
   const [contactWarning, setContactWarning] = useState("");
 
   useEffect(() => {
-    const identity = loadChatbotIdentity();
-    if (identity) {
-      setContactSaved(true);
-      setVisitorName(identity.name);
-      setIsReturningUser(true);
-      touchChatbotIdentity();
-    }
+    void (async () => {
+      await enforceChatbotIdentityReset();
+      setSessionId(getOrCreateChatSessionId());
+      const identity = loadChatbotIdentity();
+      if (identity) {
+        setContactSaved(true);
+        setVisitorName(identity.name);
+        setIsReturningUser(true);
+        touchChatbotIdentity();
+      }
+      setChatReady(true);
+    })();
   }, []);
 
   const quickReplies = tv<QuickReply[]>("chatbot.quickReplies");
@@ -326,7 +334,7 @@ export function ChatbotWidget() {
   const submitMessage = useCallback(
     async (rawMessage: string) => {
       const message = rawMessage.trim();
-      if (!contactSaved || !message || sending || message.length > CHATBOT_MAX_MESSAGE_LENGTH) return;
+      if (!chatReady || !sessionId || !contactSaved || !message || sending || message.length > CHATBOT_MAX_MESSAGE_LENGTH) return;
 
       lastUserMessageRef.current = message;
       stickToBottomRef.current = true;
@@ -388,7 +396,7 @@ export function ChatbotWidget() {
         setSending(false);
       }
     },
-    [contactSaved, language, resolveErrorMessage, sending, sessionId, t],
+    [chatReady, contactSaved, language, resolveErrorMessage, sending, sessionId, t],
   );
 
   const handleSubmit = (event?: React.FormEvent) => {
@@ -400,7 +408,7 @@ export function ChatbotWidget() {
     event.preventDefault();
     const name = contactName.trim();
     const phone = contactPhone.trim();
-    if (!validateVisitorName(name) || !validatePhone(phone) || contactSaving) return;
+    if (!sessionId || !validateVisitorName(name) || !validatePhone(phone) || contactSaving) return;
 
     setContactSaving(true);
     setContactError("");
@@ -409,6 +417,7 @@ export function ChatbotWidget() {
     const identity = buildIdentity({ sessionId, name, phone, language });
     saveChatbotIdentity(identity);
     persistSessionId(sessionId, name, phone, language);
+    await syncIdentityEpochAfterRegistration();
 
     try {
       const result = await submitChatbotContact({

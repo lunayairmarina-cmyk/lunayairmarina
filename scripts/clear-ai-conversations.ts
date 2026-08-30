@@ -1,12 +1,12 @@
 /**
- * One-time cleanup: delete all aiConversations (+ messages subcollection, linked leads).
+ * Full chatbot reset: conversations, leads, and visitor identity epoch bump.
  * Run: npx tsx scripts/clear-ai-conversations.ts
  */
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { config as loadEnv } from "dotenv";
 
-import { deleteAllConversationsAdmin } from "../src/server/agent/conversationStoreAdmin";
+import { clearAllChatbotVisitorDataAdmin } from "../src/server/agent/chatbotResetAdmin";
 import { getAdminFirestore, hasFirebaseAdminCredentials } from "../src/server/agent/firebaseAdmin";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -18,8 +18,10 @@ async function main() {
     process.exit(1);
   }
   const db = await getAdminFirestore();
-  const deleted = await deleteAllConversationsAdmin(db);
-  console.log(`deleted_conversations=${deleted}`);
+  const result = await clearAllChatbotVisitorDataAdmin(db);
+  console.log(`deleted_conversations=${result.conversations}`);
+  console.log(`deleted_leads=${result.leads}`);
+  console.log(`identity_reset_epoch=${result.identityResetEpoch}`);
 }
 
 main().catch((error) => {
