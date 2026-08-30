@@ -6,6 +6,10 @@ import { shrinkGeminiHistoryForRetry } from "./contextManagement";
 import { extractUserFacingReply, parseGeminiAgentOutputDetailed } from "./agent/parseOutput";
 import type { AgentTurnResult } from "./agent/types";
 import { geminiResponseJsonSchema } from "./agent/types";
+import {
+  isNearVerbatimKnowledgeMatch,
+  PARAPHRASE_RETRY_HINT,
+} from "./agent/verbatimGuard";
 
 export type GeminiAgentContext = {
   conversationSummary?: string;
@@ -15,6 +19,9 @@ export type GeminiAgentContext = {
   contactAlreadyAsked?: boolean;
   agentStateBlock?: string;
   jsonMode?: boolean;
+  /** KB snippets for near-verbatim detection (quality control). */
+  verbatimSources?: string[];
+  paraphraseRetryDone?: boolean;
 };
 
 interface GeminiContent {
@@ -108,7 +115,8 @@ async function callGeminiOnce(
     contents: [...toGeminiHistory(history), { role: "user", parts: [{ text: message }] }],
     generationConfig: {
       maxOutputTokens: config.maxOutputTokens,
-      temperature: 0.4,
+      temperature: config.geminiTemperature,
+      topP: config.geminiTopP,
       ...(agentContext?.jsonMode === false
         ? {}
         : {
@@ -169,6 +177,20 @@ async function callGeminiOnce(
   }
 }
 
+function extractReplyFromRaw(raw: string): {
+  reply: string;
+  parsed: AgentTurnResult["geminiParsed"];
+  parsedResult: ReturnType<typeof parseGeminiAgentOutputDetailed>;
+} {
+  const parsedResult = parseGeminiAgentOutputDetailed(raw);
+  const parsed = parsedResult.output;
+  const reply =
+    parsed?.reply?.trim() ||
+    parsedResult.reply?.trim() ||
+    extractUserFacingReply(raw);
+  return { reply: reply?.trim() ?? "", parsed, parsedResult };
+}
+
 export async function generateChatReply(
   config: ChatbotConfig,
   language: ChatLanguage,
@@ -207,6 +229,8 @@ export async function generateAgentTurn(
     callGeminiOnce(config, language, message, history, retrievedKnowledge, ctx);
 
   let raw: string;
+  let paraphraseRetried = false;
+  let nearVerbatimDetected = false;
   try {
     raw = await run(agentContext);
   } catch (error) {
@@ -251,12 +275,36 @@ export async function generateAgentTurn(
     }
   }
 
-  const parsedResult = parseGeminiAgentOutputDetailed(raw);
-  const parsed = parsedResult.output;
-  const reply =
-    parsed?.reply?.trim() ||
-    parsedResult.reply?.trim() ||
-    extractUserFacingReply(raw);
+  let { reply, parsed, parsedResult } = extractReplyFromRaw(raw);
+
+  const verbatimSources = agentContext?.verbatimSources ?? [];
+  if (
+    reply &&
+    verbatimSources.length > 0 &&
+    isNearVerbatimKnowledgeMatch(reply, verbatimSources) &&
+    !agentContext?.paraphraseRetryDone
+  ) {
+    nearVerbatimDetected = true;
+    const hint = PARAPHRASE_RETRY_HINT[language === "ar" ? "ar" : "en"];
+    const retryContext: GeminiAgentContext = {
+      ...agentContext,
+      paraphraseRetryDone: true,
+      agentStateBlock: [agentContext?.agentStateBlock?.trim(), hint].filter(Boolean).join("\n\n"),
+    };
+    try {
+      const retryRaw = await run(retryContext);
+      const retryExtracted = extractReplyFromRaw(retryRaw);
+      if (retryExtracted.reply) {
+        raw = retryRaw;
+        reply = retryExtracted.reply;
+        parsed = retryExtracted.parsed;
+        parsedResult = retryExtracted.parsedResult;
+        paraphraseRetried = true;
+      }
+    } catch {
+      // Keep first reply — no infinite retry loop
+    }
+  }
 
   if (!reply?.trim()) {
     throw new GeminiServiceError("Empty Gemini response", { retryable: false, kind: "empty" });
@@ -264,6 +312,9 @@ export async function generateAgentTurn(
 
   return {
     reply,
+    rawGeminiText: raw,
+    paraphraseRetried,
+    nearVerbatimDetected,
     geminiParsed: parsed,
     structuredParseFailed: parsedResult.status === "failed",
     parseStatus: parsedResult.status,
@@ -288,6 +339,7 @@ export async function generateAgentTurn(
       security: false,
       gibberish: false,
       disclosureLevel: 0,
+      questionFocus: "general_service",
     },
   };
 }

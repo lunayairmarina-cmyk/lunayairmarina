@@ -1,6 +1,23 @@
 import type { CustomerContext } from "@/lib/agent/context";
 import type { ChatLanguage } from "@/lib/chatbot/types";
-import { buildDisclosureFacts } from "./progressiveDisclosure";
+
+const LEVEL_LABELS = {
+  en: ["overview themes", "includes/responsibilities", "pricing context", "consultation/handoff"],
+  ar: ["نظرة عامة", "يشمل/مسؤوليات", "سياق التسعير", "استشارة/تسليم"],
+} as const;
+
+export function recordDisclosedFactIds(
+  context: CustomerContext,
+  topicKey: string,
+  factIds: string[],
+): CustomerContext {
+  if (!factIds.length || topicKey === "general") return context;
+  const disclosedFactIdsByTopic = { ...(context.disclosedFactIdsByTopic ?? {}) };
+  const existing = new Set(disclosedFactIdsByTopic[topicKey] ?? []);
+  for (const id of factIds) existing.add(id);
+  disclosedFactIdsByTopic[topicKey] = [...existing].slice(-24);
+  return { ...context, disclosedFactIdsByTopic };
+}
 
 export function recordDisclosedLevel(
   context: CustomerContext,
@@ -11,9 +28,9 @@ export function recordDisclosedLevel(
   if (level <= 0 || topicKey === "general") return context;
   const disclosedByTopic = { ...(context.disclosedSnippetsByTopic ?? {}) };
   const existing = new Set(disclosedByTopic[topicKey] ?? []);
+  const labels = LEVEL_LABELS[language === "ar" ? "ar" : "en"];
   for (let i = 1; i <= level; i += 1) {
-    const facts = buildDisclosureFacts(topicKey, i, language);
-    if (facts) existing.add(`L${i}:${facts.slice(0, 120)}`);
+    existing.add(`L${i}:${labels[i - 1] ?? "detail"}`);
   }
   disclosedByTopic[topicKey] = [...existing].slice(-12);
   return { ...context, disclosedSnippetsByTopic: disclosedByTopic };
@@ -35,17 +52,22 @@ export function buildAntiRepetitionBlock(
   if (context.customerGoal) lines.push(`knownGoal=${context.customerGoal}`);
   if (context.yachtType) lines.push(`knownYachtType=${context.yachtType}`);
 
+  const priorFactIds = context.disclosedFactIdsByTopic?.[topicKey] ?? [];
+  if (priorFactIds.length) {
+    lines.push(`previouslyDisclosedFactIds=${priorFactIds.join(",")} (avoid repeating these facts)`);
+  }
+
   const prior = context.disclosedSnippetsByTopic?.[topicKey] ?? [];
-  if (prior.length) {
-    lines.push("previouslyDisclosed (do NOT repeat verbatim):");
-    prior.forEach((item) => lines.push(`- ${item.slice(0, 140)}`));
+  if (prior.length && !priorFactIds.length) {
+    lines.push("previouslyDisclosedLevels:");
+    prior.forEach((item) => lines.push(`- ${item.slice(0, 80)}`));
   }
 
   if (currentLevel > 1 && topicKey !== "general") {
+    const labels = LEVEL_LABELS[language === "ar" ? "ar" : "en"];
     const forbidden: string[] = [];
     for (let i = 1; i < currentLevel; i += 1) {
-      const facts = buildDisclosureFacts(topicKey, i, language);
-      if (facts) forbidden.push(`L${i}: ${facts.slice(0, 100)}`);
+      forbidden.push(`L${i}: ${labels[i - 1] ?? "detail"} (already covered — advance with new detail)`);
     }
     if (forbidden.length) {
       lines.push("forbiddenRepeatLevels:");

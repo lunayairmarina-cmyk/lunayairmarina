@@ -11,6 +11,7 @@ import {
 } from "@/lib/agent/query";
 import type { CustomerContext } from "@/lib/agent/context";
 import { getKnowledgeForLanguage } from "@/server/chatbot/knowledge";
+import type { QuestionFocus } from "@/server/chatbot/agent/factSelection";
 import { getDb } from "@/lib/firebase";
 import { tryGetAdminFirestore } from "./firebaseAdmin";
 import { estimateTokens, truncateToTokenBudget } from "./normalize";
@@ -31,6 +32,90 @@ import {
 
 const MAX_DOCUMENTS = 8;
 const MAX_RETRIEVAL_TOKENS = 3200;
+
+export interface RetrievalBudgetOptions {
+  questionFocus: QuestionFocus;
+  disclosureLevel: number;
+  serviceId?: string;
+  agentIntent?: string;
+}
+
+function applyRetrievalBudget(
+  docs: KnowledgeDocument[],
+  budget?: RetrievalBudgetOptions,
+): KnowledgeDocument[] {
+  if (!budget || !docs.length) return docs;
+  const { questionFocus, disclosureLevel, serviceId, agentIntent } = budget;
+  const hay = (d: KnowledgeDocument) => `${d.id} ${d.title} ${d.content}`.toLowerCase();
+
+  if (questionFocus === "scope_overview" && disclosureLevel <= 1 && serviceId) {
+    const serviceDocs = docs.filter(
+      (d) =>
+        d.type === "service" &&
+        (d.id.includes(serviceId) || hay(d).includes(serviceId.replace(/-/g, " "))),
+    );
+    if (serviceDocs.length) return serviceDocs.slice(0, 1);
+    return docs.filter((d) => d.type === "service").slice(0, 1);
+  }
+
+  if (questionFocus === "progressive_expand" && serviceId) {
+    const serviceDocs = docs.filter(
+      (d) => d.type === "service" && (d.id.includes(serviceId) || hay(d).includes(serviceId)),
+    );
+    if (serviceDocs.length) return serviceDocs.slice(0, 1);
+    return [];
+  }
+
+  if (questionFocus === "owner_value" && serviceId) {
+    return docs.filter((d) => d.type === "service" && hay(d).includes(serviceId)).slice(0, 1);
+  }
+
+  if (questionFocus === "general_service") {
+    return docs.filter((d) => d.type === "service").slice(0, 4);
+  }
+
+  if (questionFocus === "pricing" || agentIntent?.includes("PRICING")) {
+    return docs
+      .filter(
+        (d) =>
+          d.type === "service" ||
+          d.type === "faq" ||
+          /pric|cost|limitation|تسع|سعر|تكلف/.test(hay(d)),
+      )
+      .slice(0, 4);
+  }
+
+  if (questionFocus === "comparison") {
+    return docs.filter((d) => d.type === "service").slice(0, 3);
+  }
+
+  if (questionFocus === "operational") {
+    if (serviceId) {
+      const serviceDocs = docs.filter(
+        (d) => d.type === "service" && (d.id.includes(serviceId) || hay(d).includes(serviceId)),
+      );
+      if (serviceDocs.length) return serviceDocs.slice(0, 1);
+      return [];
+    }
+    return docs
+      .filter(
+        (d) =>
+          d.type === "service" ||
+          /operat|تشغيل|maintenance|صيان|opex|تخطيط/.test(hay(d)),
+      )
+      .slice(0, 3);
+  }
+
+  if (questionFocus === "crew_detail") {
+    return docs.filter((d) => /crew|طاقم/.test(hay(d))).slice(0, 3);
+  }
+
+  if (agentIntent === "CONTACT" || agentIntent === "WHATSAPP") {
+    return docs.filter((d) => ["contact", "company", "about"].includes(d.type)).slice(0, 3);
+  }
+
+  return docs;
+}
 
 export interface RetrievalDiagnostic {
   query: string;
@@ -435,7 +520,11 @@ export function formatRetrievedKnowledge(documents: KnowledgeDocument[]): string
 export async function retrieveKnowledge(
   query: string,
   language: AgentLanguage,
-  options?: { context?: CustomerContext; historyText?: string },
+  options?: {
+    context?: CustomerContext;
+    historyText?: string;
+    retrievalBudget?: RetrievalBudgetOptions;
+  },
 ): Promise<{
   documents: KnowledgeDocument[];
   formatted: string;
@@ -607,7 +696,10 @@ export async function retrieveKnowledge(
     }
   }
 
-  const selected = selectedItems.map((item) => item.doc);
+  const selected = applyRetrievalBudget(
+    selectedItems.map((item) => item.doc),
+    options?.retrievalBudget,
+  );
   let tokenBudget = 0;
   const bounded: KnowledgeDocument[] = [];
   for (const doc of selected) {

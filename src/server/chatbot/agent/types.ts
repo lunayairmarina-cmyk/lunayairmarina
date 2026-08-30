@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { QuestionFocus } from "./factSelection";
 
 export const CONVERSATION_STAGES = [
   "DISCOVERY",
@@ -150,6 +151,7 @@ export interface AgentAnalysis {
   gibberish: boolean;
   disclosureLevel: number;
   disclosureTopic?: string;
+  questionFocus: QuestionFocus;
 }
 
 export interface AgentTurnResult {
@@ -160,6 +162,11 @@ export interface AgentTurnResult {
   parseStatus: "valid" | "salvaged" | "failed";
   parseErrors: string[];
   salvageMethod?: string;
+  /** Raw Gemini text before extraction (diagnostics). */
+  rawGeminiText?: string;
+  /** True when a near-verbatim KB match triggered one paraphrase retry. */
+  paraphraseRetried?: boolean;
+  nearVerbatimDetected?: boolean;
 }
 
 /** JSON schema for Gemini structured output (responseMimeType: application/json). */

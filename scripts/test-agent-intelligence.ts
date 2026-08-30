@@ -25,6 +25,11 @@ import {
   buildDisclosureFacts,
   detectScopeQuestion,
 } from "../src/server/chatbot/agent/progressiveDisclosure";
+import {
+  resolveQuestionFocus,
+  selectAllowedFacts,
+} from "../src/server/chatbot/agent/factSelection";
+import { composeGeminiKnowledge } from "../src/server/chatbot/knowledge";
 import { parseGeminiAgentOutput, extractUserFacingReply } from "../src/server/chatbot/agent/parseOutput";
 import { polishAgentReply } from "../src/server/chatbot/agent/responseQuality";
 import { detectGroundingViolations } from "../src/server/chatbot/agent/groundingGuard";
@@ -103,6 +108,19 @@ assert(includes.context.lastServiceMentioned === "yacht-management-360", "includ
 assert(includes.analysis.disclosureLevel === 1, "scope question sets disclosure L1");
 assert(detectScopeQuestion("وش تشمل إدارة اليخت؟"), "scope question detected");
 assert(buildDisclosureFacts("yacht-management-360", 1, "ar").includes("إدارة"), "L1 facts from KB");
+assert(resolveQuestionFocus("وش تشمل إدارة اليخت؟") === "scope_overview", "questionFocus scope");
+const l1Facts = selectAllowedFacts({
+  serviceId: "yacht-management-360",
+  disclosureLevel: 1,
+  questionFocus: "scope_overview",
+  intent: "YACHT_MANAGEMENT",
+  disclosedFactIds: [],
+  language: "ar",
+  message: "وش تشمل إدارة اليخت؟",
+});
+assert(!l1Facts.allowedFactIds.some((id) => id.startsWith("ym360_")), "L1 hides ym360 fact IDs");
+const l1Kb = composeGeminiKnowledge("ar", "", { intent: "YACHT_MANAGEMENT", factSelection: l1Facts });
+assert(!l1Kb.includes('"includes"'), "L1 KB has no includes array");
 
 const progressive1 = turn("وش بعد؟", includes.context);
 assert(progressive1.analysis.nextBestAction === "SHOW_MORE", "وش بعد is SHOW_MORE");

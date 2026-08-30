@@ -2,6 +2,7 @@ import type { ChatLanguage } from "@/lib/chatbot/types";
 import servicesFile from "@/data/chatbot/services.json";
 import contact from "@/data/chatbot/contact.json";
 import limitations from "@/data/chatbot/limitations.json";
+import type { FactSelectionResult } from "./factSelection";
 
 type Localized = { en: string; ar: string };
 
@@ -44,7 +45,7 @@ export function advanceDisclosureLevel(
   return Math.min(MAX_DISCLOSURE_LEVEL, current + 1);
 }
 
-/** KB-grounded facts for the requested level only (no invented details). */
+/** Full KB prose for internal tracking / anti-repetition fingerprints (not prompt copy templates). */
 export function buildDisclosureFacts(
   topicKey: string,
   level: number,
@@ -87,16 +88,77 @@ export function buildDisclosureFacts(
   return "";
 }
 
+export function buildDisclosureFactHintsFromSelection(
+  selection: FactSelectionResult,
+  language: ChatLanguage,
+): string {
+  const lines = selection.allowedFacts.map((fact) => `${fact.id} (${fact.kind})=${fact.text}`);
+  lines.push(`angleHint=${selection.angleHint}`);
+  lines.push(
+    language === "ar"
+      ? "instruction=استخدم هذه الحقائق فقط كمادة مصدر — أعد صياغتها محادثياً دون نسخ حرفي."
+      : "instruction=Use only these facts as source material — express naturally without copying verbatim.",
+  );
+  return lines.join("\n");
+}
+
+/**
+ * Structured fact hints for Gemini prompt — source material, not copy-paste templates.
+ * Prefer factSelection when provided (information budget enforced server-side).
+ */
+export function buildDisclosureFactHints(
+  topicKey: string,
+  level: number,
+  language: ChatLanguage,
+  factSelection?: FactSelectionResult,
+): string {
+  if (factSelection) return buildDisclosureFactHintsFromSelection(factSelection, language);
+
+  if (level <= 0 || topicKey === "general") return "";
+  const service = findService(topicKey);
+  const lang = language === "ar" ? "ar" : "en";
+  if (!service) return "";
+
+  if (level === 1) {
+    return [
+      `serviceId=${topicKey}`,
+      `title=${loc(service.title, lang)}`,
+      `themes=operational management, technical supervision, financial oversight, crew coordination, planned maintenance, maritime compliance`,
+      `instruction=Cover these themes in your own words; do not quote the website summary sentence.`,
+    ].join("\n");
+  }
+
+  if (level === 2) {
+    return [
+      `instruction=Present up to 3 new facts in natural prose — server will supply allowed facts via ALLOWED FACTS block.`,
+    ].join("\n");
+  }
+
+  if (level === 3) {
+    return [
+      `pricingModel=${loc(service.pricingLabel, lang)}`,
+      `pricePolicy=${loc(limitations.priceNotPublished, lang)}`,
+      "instruction=Explain pricing context naturally without inventing numbers.",
+    ].join("\n");
+  }
+
+  return [
+    `consultationPaths=${contact.urls.application}, ${contact.email}`,
+    `pricePolicy=${loc(limitations.priceNotPublished, lang)}`,
+    "instruction=Offer consultation/handoff naturally; no pressure.",
+  ].join("\n");
+}
+
 /** Only the content allowed at the current disclosure level. */
 export function buildAllowedDisclosureContent(
   topicKey: string,
   level: number,
   language: ChatLanguage,
 ): string {
-  return buildDisclosureFacts(topicKey, level, language);
+  return buildDisclosureFactHints(topicKey, level, language);
 }
 
-/** Summaries of prior levels that must NOT be repeated verbatim. */
+/** Prior level themes already covered — avoid repeating same information. */
 export function buildForbiddenDisclosureList(
   topicKey: string,
   currentLevel: number,
@@ -105,9 +167,18 @@ export function buildForbiddenDisclosureList(
   if (currentLevel <= 1 || topicKey === "general") return [];
   const forbidden: string[] = [];
   for (let i = 1; i < currentLevel; i += 1) {
-    const facts = buildDisclosureFacts(topicKey, i, language);
-    if (facts) forbidden.push(`L${i}: ${facts.slice(0, 160)}`);
+    const label =
+      i === 1
+        ? "overview themes"
+        : i === 2
+          ? "includes/responsibilities list"
+          : i === 3
+            ? "pricing context"
+            : "consultation/handoff";
+    forbidden.push(`L${i}: ${label} (already covered — advance with new detail)`);
   }
+  void language;
+  void topicKey;
   return forbidden;
 }
 
@@ -117,38 +188,38 @@ export function buildProgressiveDisclosureBlock(input: {
   language: ChatLanguage;
   nextLevel?: number;
   forbiddenLevels?: string[];
+  factSelection?: FactSelectionResult;
+  questionFocus?: string;
 }): string {
-  const { topicKey, level, language, nextLevel, forbiddenLevels } = input;
+  const { topicKey, level, language, nextLevel, forbiddenLevels, factSelection, questionFocus } = input;
   if (level <= 0) return "";
 
-  const facts = buildAllowedDisclosureContent(topicKey, level, language);
-  const levelLabel =
+  const hints = buildDisclosureFactHints(topicKey, level, language, factSelection);
+  const levelLabel = factSelection?.reason ?? (
     level === 1
       ? "Overview"
       : level === 2
         ? "Main responsibilities"
         : level === 3
           ? "Operational / pricing context"
-          : "Consultation / handoff";
-
-  const nextFacts =
-    nextLevel && nextLevel <= MAX_DISCLOSURE_LEVEL
-      ? buildDisclosureFacts(topicKey, nextLevel, language)
-      : "";
+          : "Consultation / handoff"
+  );
 
   const lang = language === "ar" ? "ar" : "en";
   const header =
     lang === "ar"
-      ? `PROGRESSIVE DISCLOSURE (internal — use ONLY these published facts for level ${level}, do NOT repeat prior levels verbatim):`
-      : `PROGRESSIVE DISCLOSURE (internal — use ONLY these published facts for level ${level}, do NOT repeat prior levels verbatim):`;
+      ? `PROGRESSIVE DISCLOSURE (internal — ALLOWED FACTS for this turn; paraphrase naturally):`
+      : `PROGRESSIVE DISCLOSURE (internal — ALLOWED FACTS for this turn; paraphrase naturally):`;
 
-  let block = `${header}\ntopic=${topicKey}\nlevel=${level} (${levelLabel})\nallowedContentOnly:\n${facts}`;
+  let block = `${header}\ntopic=${topicKey}\nlevel=${level} (${levelLabel})`;
+  if (questionFocus) block += `\nquestionFocus=${questionFocus}`;
+  block += `\nallowedFactsSource:\n${hints}`;
   const forbidden = forbiddenLevels ?? buildForbiddenDisclosureList(topicKey, level, language);
   if (forbidden.length) {
-    block += `\nforbiddenRepeat (already disclosed — do NOT repeat):\n${forbidden.map((item) => `- ${item}`).join("\n")}`;
+    block += `\nalreadyCovered (do not repeat):\n${forbidden.map((item) => `- ${item}`).join("\n")}`;
   }
-  if (nextFacts && nextLevel) {
-    block += `\nnextLevelPreview=${nextLevel} (do not disclose until visitor asks for more)`;
+  if (nextLevel && nextLevel <= MAX_DISCLOSURE_LEVEL) {
+    block += `\nnextLevel=${nextLevel} (hold until visitor asks for more)`;
   }
   return block;
 }

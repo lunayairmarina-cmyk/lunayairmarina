@@ -27,6 +27,8 @@ import {
   blockWhatsAppForTurns,
   buildAntiRepetitionBlock,
 } from "./antiRepetition";
+import { resolveQuestionFocus } from "./factSelection";
+import type { FactSelectionResult } from "./factSelection";
 import { resolveCtaType } from "./ctaIntelligence";
 import { detectTopicShift, resolveActiveObjections } from "./contextIsolation";
 
@@ -451,6 +453,7 @@ export function analyzeAgentTurn(
   const intent = resolveIntent(message, merged, entities);
   const secondary = secondaryIntents(message, intent);
   const topicKey = resolveDisclosureTopic(service, intent);
+  const questionFocus = resolveQuestionFocus(message, intent);
   const disclosureByTopic = { ...(merged.disclosureByTopic ?? {}) };
   let disclosureLevel = disclosureByTopic[topicKey] ?? 0;
   if (scopeQuestion && topicKey !== "general") {
@@ -549,6 +552,7 @@ export function analyzeAgentTurn(
     gibberish,
     disclosureLevel,
     disclosureTopic: topicKey,
+    questionFocus,
   };
 
   return {
@@ -586,6 +590,7 @@ export function mergeGeminiAnalysis(
     buyingSignals: server.buyingSignals,
     disclosureLevel: server.disclosureLevel,
     disclosureTopic: server.disclosureTopic,
+    questionFocus: server.questionFocus,
     ctaType: server.ctaType,
     entities: {
       yachtLength: server.entities.yachtLength ?? gemini.entities?.yachtLength ?? undefined,
@@ -611,6 +616,7 @@ export function buildAgentStateBlock(
   analysis: AgentAnalysis,
   language: ChatLanguage,
   context?: CustomerContext,
+  factSelection?: FactSelectionResult,
 ): string {
   const missingHint =
     analysis.nextBestAction === "ASK_MISSING_INFO" && analysis.missingFieldToAsk
@@ -632,6 +638,8 @@ export function buildAgentStateBlock(
           language,
           nextLevel: analysis.progressive ? Math.min(4, analysis.disclosureLevel + 1) : undefined,
           forbiddenLevels: context?.disclosedSnippetsByTopic?.[topicKey],
+          factSelection,
+          questionFocus: analysis.questionFocus,
         })
       : "";
   const objectionBlock = buildObjectionGuidance(analysis.objections, language);
@@ -651,10 +659,11 @@ missing=${analysis.missingInformation.join(",") || "none"}
 askOnly=${missingHint}
 disclosureTopic=${topicKey}
 disclosureLevel=${analysis.disclosureLevel}
+questionFocus=${analysis.questionFocus}
 objections=${analysis.objections.join(",") || "none"}
 Role: sales + support + qualification agent (not FAQ bot, not human).
 Answer first when facts exist. One missing-info question max. Never re-ask known facts.
-Use PROGRESSIVE DISCLOSURE facts only — no invented details. Do not repeat forbidden/previously disclosed content.
+Use ONLY ALLOWED FACTS from PROGRESSIVE DISCLOSURE and VERIFIED KNOWLEDGE — paraphrase naturally; no invented details. Do not repeat previously disclosed fact IDs.
 Cold= value first; hot/urgent= direct WhatsApp only if visitor did not refuse and ctaType allows.`;
   return [shared, disclosureBlock, objectionBlock, antiRepBlock].filter(Boolean).join("\n\n");
 }

@@ -16,7 +16,18 @@ export const CHATBOT_DEFAULTS = {
   maxOutputTokens: 2048,
   requestTimeoutMs: 30_000,
   geminiModel: "gemini-3.5-flash-lite",
+  /** Higher than 0.4 for natural paraphrase; still conservative for grounding. */
+  geminiTemperature: 0.6,
+  geminiTopP: 0.92,
 } as const;
+
+function readFloat(name: string, fallback: number, min: number, max: number): number {
+  const raw = process.env[name];
+  if (!raw) return fallback;
+  const parsed = Number.parseFloat(raw);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, parsed));
+}
 
 function readInt(name: string, fallback: number, min: number, max: number): number {
   const raw = process.env[name];
@@ -72,6 +83,13 @@ export function getChatbotConfig() {
       5_000,
       120_000,
     ),
+    geminiTemperature: readFloat(
+      "CHATBOT_GEMINI_TEMPERATURE",
+      CHATBOT_DEFAULTS.geminiTemperature,
+      0.1,
+      1,
+    ),
+    geminiTopP: readFloat("CHATBOT_GEMINI_TOP_P", CHATBOT_DEFAULTS.geminiTopP, 0.5, 1),
   };
 }
 

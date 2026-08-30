@@ -37,6 +37,8 @@ export interface CustomerContext {
   buyingSignals?: string[];
   lastNextBestAction?: string;
   disclosedSnippetsByTopic?: Record<string, string[]>;
+  /** Stable fact IDs already exposed per service topic (backward-compatible). */
+  disclosedFactIdsByTopic?: Record<string, string[]>;
   askedQuestions?: string[];
   lastCtaType?: string;
   whatsappBlockedTurns?: number;

@@ -45,7 +45,7 @@ import { resolveConversationHistory } from "./conversationHistory";
 import { createChatRequestId, logChatTrace } from "./chatTrace";
 import { checkRateLimit } from "./rateLimit";
 import { generateAgentTurn, GeminiServiceError } from "./gemini";
-import { composeGeminiKnowledge } from "./knowledge";
+import { composeGeminiKnowledge, getVerbatimCheckSources } from "./knowledge";
 import { prepareGeminiHistory } from "./contextManagement";
 import { leadPatchFromContext } from "./leadPatch";
 import {
@@ -58,8 +58,13 @@ import { sanitizeContextForGemini } from "./agent/contextIsolation";
 import {
   decrementWhatsAppBlock,
   noteAssistantQuestion,
+  recordDisclosedFactIds,
   recordDisclosedLevel,
 } from "./agent/antiRepetition";
+import {
+  factIdsToRecord,
+  selectAllowedFacts,
+} from "./agent/factSelection";
 import { polishAgentReply } from "./agent/responseQuality";
 import {
   buildHistoryContextSnippet,
@@ -320,6 +325,27 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
 
     summary = buildCompactAgentSummary(customerContext, agentAnalysis);
 
+    const topicKey = agentAnalysis.disclosureTopic ?? "general";
+    const serviceId =
+      customerContext.lastServiceMentioned ??
+      (topicKey !== "general" ? topicKey : undefined) ??
+      "yacht-management-360";
+    const disclosedFactIds = customerContext.disclosedFactIdsByTopic?.[topicKey] ?? [];
+    const factSelection =
+      topicKey !== "general" || agentAnalysis.questionFocus === "general_service"
+        ? selectAllowedFacts({
+            serviceId: serviceId === "general" ? "yacht-management-360" : serviceId,
+            disclosureLevel: agentAnalysis.disclosureLevel,
+            questionFocus: agentAnalysis.questionFocus,
+            intent: agentAnalysis.intent,
+            disclosedFactIds,
+            language: validated.data.language,
+            message: validated.data.message,
+            secondaryServiceIds:
+              agentAnalysis.questionFocus === "comparison" ? ["marina-management"] : undefined,
+          })
+        : undefined;
+
     const geminiHistory = prepareGeminiHistory(conversationHistory, config);
     const historyText = buildHistoryContextSnippet(geminiHistory);
 
@@ -330,6 +356,14 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       retrieval = await retrieveKnowledge(validated.data.message, validated.data.language, {
         context: customerContext,
         historyText,
+        retrievalBudget: factSelection
+          ? {
+              questionFocus: agentAnalysis.questionFocus,
+              disclosureLevel: agentAnalysis.disclosureLevel,
+              serviceId: factSelection.serviceId ?? serviceId,
+              agentIntent: agentAnalysis.intent,
+            }
+          : undefined,
       });
     } catch {
       retrieval = {
@@ -362,10 +396,28 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
     const resolvedIntent = agentAnalysis.intent || retrieval.analysis.intent;
     const topScore = retrieval.diagnostic.selected[0]?.score ?? 0;
     const confidence = estimateAnswerConfidence(topScore, retrieval.documents.length);
+    const composeOptions = {
+      intent: resolvedIntent,
+      disclosureTopic: agentAnalysis.disclosureTopic,
+      lastServiceMentioned: customerContext.lastServiceMentioned,
+      needsContact:
+        agentAnalysis.nextBestAction === "CTA_WHATSAPP" ||
+        agentAnalysis.nextBestAction === "HANDOFF" ||
+        agentAnalysis.intent === "CONTACT" ||
+        agentAnalysis.intent === "WHATSAPP",
+      needsPricing:
+        agentAnalysis.intent === "PRICING" ||
+        agentAnalysis.intent === "YACHT_MANAGEMENT_PRICING" ||
+        agentAnalysis.intent === "OBJECTION" ||
+        agentAnalysis.questionFocus === "pricing",
+      factSelection,
+    };
     const composedKnowledge = composeGeminiKnowledge(
       validated.data.language,
       retrieval.formatted,
+      composeOptions,
     );
+    const verbatimSources = getVerbatimCheckSources(validated.data.language, composeOptions);
 
     const lead = detectLeadSignal(
       validated.data.message,
@@ -396,12 +448,14 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
             agentAnalysis,
             validated.data.language,
             customerContext,
+            factSelection,
           ),
           customerContext: sanitizeContextForGemini(customerContext),
           conversationSummary: redactConversationSummaryForGemini(summary),
           offerHandoff: lead.shouldOfferHandoff || agentAnalysis.nextBestAction === "HANDOFF",
           needsContactCapture: !hasVisitorContact(customerContext),
           contactAlreadyAsked: hasVisitorContact(customerContext),
+          verbatimSources,
         },
       );
       agentAnalysis = mergeGeminiAnalysis(agentAnalysis, turn.geminiParsed, customerContext);
@@ -427,6 +481,13 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
         agentAnalysis.disclosureLevel,
         validated.data.language,
       );
+      if (factSelection && topicKey !== "general") {
+        customerContext = recordDisclosedFactIds(
+          customerContext,
+          topicKey,
+          factIdsToRecord(factSelection),
+        );
+      }
       customerContext = noteAssistantQuestion(customerContext, reply);
       customerContext = decrementWhatsAppBlock(customerContext);
       customerContext = { ...customerContext, lastCtaType: polished.ctaType };
@@ -460,6 +521,12 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
           knowledgeSource: retrieval.diagnostic.knowledgeSource,
           documentCount: retrieval.documents.length,
           polished: polished.repaired,
+          questionFocus: agentAnalysis.questionFocus,
+          disclosureLevel: agentAnalysis.disclosureLevel,
+          disclosureTopic: agentAnalysis.disclosureTopic,
+          allowedFactIds: factSelection?.allowedFactIds,
+          hiddenFactIds: factSelection?.hiddenFactIds,
+          factSelectionReason: factSelection?.reason,
         },
         requestId,
       );
