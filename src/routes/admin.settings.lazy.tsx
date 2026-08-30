@@ -4,6 +4,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ModalField } from "@/components/admin/Modal";
 import { MediaUploader } from "@/components/admin/MediaUploader";
 import { useLanguage } from "@/lib/i18n";
+import { changeOwnAdminPassword } from "@/services/adminUsersService";
 import { loadCmsStore } from "@/lib/cms-store";
 import {
   defaultSettingsFromMock,
@@ -29,6 +30,10 @@ function AdminSettingsPage() {
   const [logoUrl, setLogoUrl] = useState(initial.logoUrl);
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [passwordStatus, setPasswordStatus] = useState<string | null>(null);
+  const [passwordBusy, setPasswordBusy] = useState(false);
 
   const save = async () => {
     setBusy(true);
@@ -40,6 +45,32 @@ function AdminSettingsPage() {
       }),
     );
     setBusy(false);
+  };
+
+  const savePassword = async () => {
+    if (newPassword.trim().length < 6) {
+      setPasswordStatus(t("admin.users.passwordRequired"));
+      return;
+    }
+    setPasswordBusy(true);
+    setPasswordStatus(null);
+    try {
+      await changeOwnAdminPassword(currentPassword, newPassword);
+      setCurrentPassword("");
+      setNewPassword("");
+      setPasswordStatus(t("admin.settings.passwordChanged"));
+    } catch (error) {
+      const raw = error instanceof Error ? error.message : "";
+      if (raw === "AUTH_REQUIRED") {
+        setPasswordStatus(t("admin.users.authRequired"));
+      } else if (raw === "WEAK_PASSWORD") {
+        setPasswordStatus(t("admin.users.passwordRequired"));
+      } else {
+        setPasswordStatus(t("admin.settings.passwordChangeFailed"));
+      }
+    } finally {
+      setPasswordBusy(false);
+    }
   };
 
   return (
@@ -152,6 +183,38 @@ function AdminSettingsPage() {
                 })
               }
             />
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-navy/8 bg-white p-6 shadow-sm">
+          <h2 className="font-display text-lg text-navy">{t("admin.settings.changePassword")}</h2>
+          <p className="mt-2 text-xs text-muted-foreground">{t("admin.settings.changePasswordHint")}</p>
+          <div className="mt-6 flex flex-col gap-5">
+            <ModalField
+              label={t("admin.settings.currentPassword")}
+              type="password"
+              value={currentPassword}
+              onChange={setCurrentPassword}
+            />
+            <ModalField
+              label={t("admin.settings.newPassword")}
+              type="password"
+              value={newPassword}
+              onChange={setNewPassword}
+            />
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                disabled={passwordBusy}
+                onClick={() => void savePassword()}
+                className="rounded-full bg-navy px-5 py-2.5 text-xs tracking-[0.18em] text-white uppercase disabled:opacity-60"
+              >
+                {t("admin.settings.updatePassword")}
+              </button>
+              {passwordStatus ? (
+                <span className="text-xs text-navy/60">{passwordStatus}</span>
+              ) : null}
+            </div>
           </div>
         </section>
       </div>

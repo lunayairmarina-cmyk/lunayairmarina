@@ -25,6 +25,7 @@ import {
 import {
   createAdminUser,
   deleteAdminUserProfile,
+  fetchAdminPasswords,
   fetchAdminUsersFromFirebase,
   sendAdminPasswordReset,
   updateAdminUser,
@@ -51,8 +52,9 @@ const emptyDraft: Draft = {
 
 export function UsersAdminPage() {
   const { t } = useLanguage();
-  const { user: currentUser, can } = useAdminAuth();
+  const { user: currentUser, can, isSuperAdmin: viewerIsSuperAdmin } = useAdminAuth();
   const [rows, setRows] = useState<AdminUser[]>(() => loadAdminUsers());
+  const [passwords, setPasswords] = useState<Record<string, string>>({});
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
@@ -71,6 +73,20 @@ export function UsersAdminPage() {
         // Keep local cache if Firebase is unreachable.
       });
   }, []);
+
+  useEffect(() => {
+    if (!viewerIsSuperAdmin) return;
+    const ids = visibleUsers(currentUser, rows).map((row) => row.id);
+    if (!ids.length) {
+      setPasswords({});
+      return;
+    }
+    void fetchAdminPasswords(ids)
+      .then(setPasswords)
+      .catch(() => {
+        setPasswords({});
+      });
+  }, [viewerIsSuperAdmin, currentUser, rows]);
 
   if (!can("users") || !canDelegateAccounts(currentUser)) {
     return (
@@ -168,7 +184,12 @@ export function UsersAdminPage() {
         });
         persistLocal(rows.map((row) => (row.id === editingId ? updated : row)));
         if (draft.password.trim()) {
-          setNotice(t("admin.users.resetSent"));
+          if (viewerIsSuperAdmin) {
+            setPasswords((prev) => ({ ...prev, [editingId]: draft.password.trim() }));
+            setNotice(t("admin.users.passwordUpdated"));
+          } else {
+            setNotice(t("admin.users.resetSent"));
+          }
         }
       } else {
         const created = await createAdminUser({
@@ -183,6 +204,9 @@ export function UsersAdminPage() {
           (row) => row.id !== created.id && row.email !== created.email,
         );
         persistLocal([...withoutDup, created]);
+        if (viewerIsSuperAdmin) {
+          setPasswords((prev) => ({ ...prev, [created.id]: draft.password.trim() }));
+        }
         setNotice(t("admin.users.saved"));
       }
       setOpen(false);
@@ -230,6 +254,19 @@ export function UsersAdminPage() {
       header: t("admin.users.role"),
       render: (row) => <span className="text-navy">{t(`admin.users.roles.${row.role}`)}</span>,
     },
+    ...(viewerIsSuperAdmin
+      ? [
+          {
+            key: "password",
+            header: t("admin.users.passwordColumn"),
+            render: (row: AdminUser) => (
+              <span className="font-mono text-xs text-navy/80" dir="ltr">
+                {passwords[row.id] || t("admin.users.passwordUnknown")}
+              </span>
+            ),
+          } satisfies Column<AdminUser>,
+        ]
+      : []),
     {
       key: "permissions",
       header: t("admin.users.permissions"),
@@ -357,6 +394,13 @@ export function UsersAdminPage() {
           value={draft.password}
           onChange={(value) => setDraft({ ...draft, password: value })}
         />
+        {editingId && viewerIsSuperAdmin ? (
+          <p className="text-xs text-muted-foreground">{t("admin.users.editPasswordHintSuperAdmin")}</p>
+        ) : editingId ? (
+          <p className="text-xs text-muted-foreground">{t("admin.users.editPasswordHint")}</p>
+        ) : (
+          <p className="text-xs text-muted-foreground">{t("admin.users.passwordHint")}</p>
+        )}
 
         <label className="flex flex-col gap-2">
           <span className="text-[0.6rem] tracking-[0.22em] text-muted-foreground uppercase">

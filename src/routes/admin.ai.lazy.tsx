@@ -8,7 +8,7 @@ import {
   query,
   type Firestore,
 } from "firebase/firestore";
-import { Bot, MessageSquareText, Phone, RefreshCw } from "lucide-react";
+import { Bot, MessageSquareText, Phone, RefreshCw, Trash2 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { DataTable, RowAction, StatusBadge, type Column } from "@/components/admin/DataTable";
 import { Modal } from "@/components/admin/Modal";
@@ -24,7 +24,7 @@ import {
 } from "@/lib/agent/types";
 import { sortMessagesChronologically } from "@/lib/agent/messageOrder";
 import { readKnowledgeSyncStatusClient } from "@/lib/agent/knowledgeSyncClient";
-import { triggerKnowledgeSync } from "@/functions/aiAdmin";
+import { triggerKnowledgeSync, deleteAiConversation, deleteAllAiConversations } from "@/functions/aiAdmin";
 import { cn } from "@/lib/utils";
 
 export const Route = createLazyFileRoute("/admin/ai")({
@@ -110,6 +110,8 @@ function AdminAiPage() {
   const [activeConversation, setActiveConversation] = useState<AiConversationRecord | null>(null);
   const [transcript, setTranscript] = useState<AiMessageRecord[]>([]);
   const [transcriptLoading, setTranscriptLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [clearingAll, setClearingAll] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -221,6 +223,54 @@ function AdminAiPage() {
     },
   ];
 
+  async function onDeleteConversation(row: AiConversationRecord) {
+    setDeletingId(row.sessionId);
+    setStatus("");
+    try {
+      const result = await deleteAiConversation({
+        data: { sessionId: row.sessionId, leadId: row.leadId },
+      });
+      if (result.ok) {
+        setConversations((prev) => prev.filter((item) => item.sessionId !== row.sessionId));
+        if (activeConversation?.sessionId === row.sessionId) {
+          setActiveConversation(null);
+          setTranscript([]);
+        }
+        setStatus(t("admin.ai.deleteSuccess"));
+      } else {
+        setStatus(result.error || t("admin.ai.deleteFailed"));
+      }
+    } catch {
+      setStatus(t("admin.ai.deleteFailed"));
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  async function onDeleteAllConversations() {
+    setClearingAll(true);
+    setStatus("");
+    try {
+      const result = await deleteAllAiConversations();
+      if (result.ok) {
+        setConversations([]);
+        setActiveConversation(null);
+        setTranscript([]);
+        setStatus(
+          language === "ar"
+            ? `تم حذف ${result.deleted ?? 0} محادثة`
+            : `Deleted ${result.deleted ?? 0} conversations`,
+        );
+      } else {
+        setStatus(result.error || t("admin.ai.deleteFailed"));
+      }
+    } catch {
+      setStatus(t("admin.ai.deleteFailed"));
+    } finally {
+      setClearingAll(false);
+    }
+  }
+
   async function onSync() {
     setSyncing(true);
     setStatus("");
@@ -294,21 +344,46 @@ function AdminAiPage() {
             <h3 className="font-display text-lg text-navy">{t("admin.ai.conversations")}</h3>
             <p className="mt-0.5 text-xs text-navy/50">{t("admin.ai.conversationsHint")}</p>
           </div>
-          <p className="text-xs text-navy/45">
-            {t("admin.ai.knowledgeDocs")}: {knowledgeCount}
-            {syncNeeds ? ` · ${t("admin.ai.syncNeeded")}` : ""}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-xs text-navy/45">
+              {t("admin.ai.knowledgeDocs")}: {knowledgeCount}
+              {syncNeeds ? ` · ${t("admin.ai.syncNeeded")}` : ""}
+            </p>
+            {conversations.length > 0 ? (
+              <button
+                type="button"
+                disabled={clearingAll || deletingId !== null}
+                onClick={() => {
+                  if (!window.confirm(t("admin.ai.deleteAllConfirm"))) return;
+                  void onDeleteAllConversations();
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 disabled:opacity-60"
+              >
+                <Trash2 className="size-3.5" aria-hidden />
+                {clearingAll ? t("admin.ai.deletingAll") : t("admin.ai.deleteAll")}
+              </button>
+            ) : null}
+          </div>
         </div>
         <DataTable
           columns={conversationColumns}
           rows={conversations}
           getRowId={(row) => row.conversationId}
           actions={(row) => (
-            <RowAction
-              icon={MessageSquareText}
-              label={t("admin.ai.viewChat")}
-              onClick={() => void openTranscript(row)}
-            />
+            <>
+              <RowAction
+                icon={MessageSquareText}
+                label={t("admin.ai.viewChat")}
+                onClick={() => void openTranscript(row)}
+              />
+              <RowAction
+                icon={Trash2}
+                label={t("admin.ai.deleteConversation")}
+                tone="danger"
+                confirmMessage={t("admin.ai.deleteConversationConfirm")}
+                onClick={() => void onDeleteConversation(row)}
+              />
+            </>
           )}
         />
       </section>

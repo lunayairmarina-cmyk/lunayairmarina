@@ -23,6 +23,7 @@ import {
   ensureAdminProfileFromAuth,
   fetchAdminUsersFromFirebase,
   mergeUsersCache,
+  storeAdminPassword,
 } from "@/services/adminUsersService";
 
 function authErrorKey(error: unknown): string {
@@ -176,6 +177,11 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         }
 
         applyUser(profile);
+        try {
+          await storeAdminPassword(profile.id, pass);
+        } catch {
+          // Non-blocking — Super Admin visibility may lag until next successful write.
+        }
         try {
           const users = await fetchAdminUsersFromFirebase();
           if (users.length) mergeUsersCache(users);

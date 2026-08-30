@@ -159,6 +159,13 @@ service cloud.firestore {
         )
         || (delegatesTo(uid) && ownsTarget(uid));
       allow delete: if isSuperAdmin() || ownsTarget(uid);
+
+      // Stored passwords — Super Admin read; Super Admin or owner can write on change.
+      match /private/{docId} {
+        allow read: if isSuperAdmin();
+        allow create, update: if isSuperAdmin() || (signedIn() && request.auth.uid == uid);
+        allow delete: if isSuperAdmin();
+      }
     }
 
     // Contact leads — public can create only; admins manage
@@ -215,6 +222,7 @@ service cloud.firestore {
           && request.resource.data.conversationId == resource.data.conversationId
           && request.resource.data.startedAt == resource.data.startedAt
         );
+      allow delete: if isActiveAdmin();
 
       match /messages/{messageId} {
         allow read: if isActiveAdmin()
@@ -223,7 +231,8 @@ service cloud.firestore {
             && get(/databases/$(database)/documents/aiConversations/$(conversationId)).data.sessionId == conversationId
           );
         allow create: if isValidAiMessageCreate();
-        allow update, delete: if false;
+        allow delete: if isActiveAdmin();
+        allow update: if false;
       }
     }
 

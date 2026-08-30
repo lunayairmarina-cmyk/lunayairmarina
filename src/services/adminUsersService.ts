@@ -1,12 +1,15 @@
 import {
   createUserWithEmailAndPassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
+  updatePassword,
   updateProfile,
   type User,
 } from "firebase/auth";
-import { collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc, type Firestore } from "firebase/firestore";
 import { getDb, getFirebaseAuth, getSecondaryAuth, getSecondaryDb } from "@/lib/firebase";
 import {
   ADMIN_PERMISSIONS,
@@ -15,6 +18,7 @@ import {
   canManageUser,
   DEFAULT_ADMIN_USERS,
   grantablePermissions,
+  isSuperAdmin,
   migratedPermissionsFor,
   normalizeRole,
   saveAdminUsers,
@@ -22,8 +26,11 @@ import {
   type AdminRoleId,
   type AdminUser,
 } from "@/lib/admin-roles";
+import { setAdminUserPassword } from "@/functions/adminUsers";
 
 const ADMINS_COLLECTION = "admins";
+const PRIVATE_COLLECTION = "private";
+const CREDENTIALS_DOC = "credentials";
 
 /** Raised when the signed-in actor tries to reach above or across their own level. */
 const FORBIDDEN = "FORBIDDEN_HIERARCHY";
@@ -94,6 +101,64 @@ function buildProfile(uid: string, input: AdminUserInput, email: string): AdminU
     permissions: input.role === "super_admin" ? [...ADMIN_PERMISSIONS] : [...input.permissions],
     active: input.active,
   };
+}
+
+function credentialsRef(uid: string, db: Firestore = getDb()) {
+  return doc(db, ADMINS_COLLECTION, uid, PRIVATE_COLLECTION, CREDENTIALS_DOC);
+}
+
+export async function storeAdminPassword(
+  uid: string,
+  password: string,
+  db: Firestore = getDb(),
+): Promise<void> {
+  await setDoc(credentialsRef(uid, db), {
+    password,
+    updatedAt: new Date().toISOString(),
+  });
+}
+
+export async function getAdminPassword(uid: string): Promise<string | null> {
+  const snap = await getDoc(credentialsRef(uid));
+  if (!snap.exists()) return null;
+  const value = snap.data()?.password;
+  return typeof value === "string" && value.length ? value : null;
+}
+
+export async function fetchAdminPasswords(uids: string[]): Promise<Record<string, string>> {
+  const entries = await Promise.all(
+    uids.map(async (uid) => {
+      const password = await getAdminPassword(uid);
+      return password ? ([uid, password] as const) : null;
+    }),
+  );
+  return Object.fromEntries(entries.filter(Boolean) as Array<[string, string]>);
+}
+
+export async function changeOwnAdminPassword(
+  currentPassword: string,
+  newPassword: string,
+): Promise<void> {
+  const auth = getFirebaseAuth();
+  await auth.authStateReady();
+  const user = auth.currentUser;
+  const email = user?.email?.trim().toLowerCase();
+  if (!user || !email) throw new Error("AUTH_REQUIRED");
+  if (newPassword.trim().length < 6) throw new Error("WEAK_PASSWORD");
+
+  const credential = EmailAuthProvider.credential(email, currentPassword.trim());
+  await reauthenticateWithCredential(user, credential);
+  await updatePassword(user, newPassword.trim());
+  await storeAdminPassword(user.uid, newPassword.trim());
+}
+
+async function setPasswordAsSuperAdmin(uid: string, password: string): Promise<void> {
+  const auth = getFirebaseAuth();
+  await auth.authStateReady();
+  const idToken = await auth.currentUser?.getIdToken();
+  if (!idToken) throw new Error("AUTH_REQUIRED");
+  const result = await setAdminUserPassword({ data: { idToken, uid, password } });
+  if (!result.ok) throw new Error(result.error || "PASSWORD_UPDATE_FAILED");
 }
 
 /** Resolve the signed-in actor's stored profile and confirm they may delegate at all. */
@@ -210,6 +275,7 @@ export async function createAdminUser(input: AdminUserInput): Promise<AdminUser>
 
     const profile = buildProfile(uid, input, email);
     await writeAdminProfile(profile);
+    await storeAdminPassword(uid, password);
     return profile;
   } finally {
     try {
@@ -285,10 +351,13 @@ export async function updateAdminUser(
     updatedAt: new Date().toISOString(),
   });
 
-  // Password for other users cannot be set from client Auth without Admin SDK.
-  // Super Admin can trigger a reset email instead.
   if (input.password?.trim()) {
-    await sendPasswordResetEmail(getFirebaseAuth(), profile.email);
+    const nextPassword = input.password.trim();
+    if (isSuperAdmin(actor)) {
+      await setPasswordAsSuperAdmin(id, nextPassword);
+    } else {
+      await sendPasswordResetEmail(getFirebaseAuth(), profile.email);
+    }
   }
 
   return profile;
@@ -359,6 +428,7 @@ export async function bootstrapSuperAdminIfNeeded(
       updatedAt: new Date().toISOString(),
     });
     await markBootstrap(profile.id, profile.email, getSecondaryDb());
+    await storeAdminPassword(profile.id, pass, getSecondaryDb());
     return profile;
   } catch (error) {
     const code = authCode(error);
