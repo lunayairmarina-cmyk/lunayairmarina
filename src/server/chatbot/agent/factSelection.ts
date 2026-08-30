@@ -1,7 +1,9 @@
 import type { ChatLanguage } from "@/lib/chatbot/types";
 import servicesFile from "@/data/chatbot/services.json";
+import company from "@/data/chatbot/company.json";
 import contact from "@/data/chatbot/contact.json";
 import limitations from "@/data/chatbot/limitations.json";
+import { getPublishedContactChannels } from "../contactChannels";
 
 type Localized = { en: string; ar: string };
 
@@ -13,7 +15,16 @@ export type QuestionFocus =
   | "owner_value"
   | "crew_detail"
   | "progressive_expand"
-  | "general_service";
+  | "general_service"
+  | "contact_phone"
+  | "contact_whatsapp"
+  | "contact_form"
+  | "contact_general"
+  | "website_attribution"
+  | "chatbot_identity"
+  | "yacht_rental"
+  | "yacht_need_ambiguous"
+  | "casual_greeting";
 
 export type AllowedFactKind = "theme" | "fact" | "summary" | "pricing" | "consultation";
 
@@ -119,9 +130,109 @@ function normalize(text: string): string {
   return text.normalize("NFKC").toLowerCase();
 }
 
+export function detectWhatsAppRequest(message: string): boolean {
+  const text = normalize(message);
+  return /واتس|whatsapp|watsp|wa\.me/.test(text);
+}
+
+export function detectPhoneRequest(message: string): boolean {
+  const text = normalize(message);
+  if (detectWhatsAppRequest(message)) return false;
+  return /(?:^|\s)(?:ممكن\s*)?رقم\s*(?:ال)?(?:هاتف|جوال|اتصال|تواصل)|(?:^|\s)(?:phone|call)\s*(?:number)?|(?:^|\s)(?:voice|direct)\s*phone|(?:^|\s)(?:في|فيه)\s*رقم\s*(?:اتصال|هاتف|تواصل)|(?:^|\s)(?:مفيش|ما\s*في|لا\s*يوجد)\s*رقم|(?:^|\s)no\s*phone|(?:^|\s)is\s*there\s*(?:a\s*)?(?:phone|number)|(?:^|\s)contact\s*number/.test(
+    text,
+  );
+}
+
+export function detectWebsiteAttribution(message: string): boolean {
+  const text = normalize(message);
+  return /مين\s*(?:عمل|مصمم|نفذ|طور|برمج|صمم)|(?:ال)?(?:موقع|شات\s*بوت|chatbot)\s*(?:من\s*)?(?:تنفيذ|عمل)|(?:ال)?(?:شركة|وكالة)\s*(?:اللي\s*)?(?:عملت|نفذت|طورت)|who\s*(?:built|developed|designed|created)|which\s*(?:company|agency)\s*(?:built|developed)|(?:built|developed|designed|created)\s*(?:this\s*)?(?:website|site|chatbot)|top\s*1\s*markt|top1markt/.test(
+    text,
+  );
+}
+
+const AR_YOU = /(?:انت|إنت|أنت)/;
+
+function asksWhoAreYou(text: string): boolean {
+  return new RegExp(`(?:^|\\s)${AR_YOU.source}\\s*مين`).test(text) || /(?:^|\s)who\s*are\s*you/.test(text);
+}
+
+function asksAssistantOrCaptain(text: string): boolean {
+  return (
+    /(?:^|\s)مين\s*(?:المساعد|الكابتن(?:\s*المساعد)?)/.test(text) ||
+    /(?:^|\s)(?:assistant\s*)?captain\b/.test(text) ||
+    /(?:^|\s)الكابتن\s*المساعد/.test(text)
+  );
+}
+
+function asksIfAiOrBot(text: string): boolean {
+  return (
+    new RegExp(`(?:^|\\s)(?:هل\\s*)?${AR_YOU.source}\\s*(?:ai|ذكاء\\s*اصطناعي|روبوت|بوت)`).test(text) ||
+    /(?:^|\s)are\s*you\s*(?:ai|a\s*bot|human)/.test(text)
+  );
+}
+
+function mentionsChatbot(text: string): boolean {
+  return (
+    /(?:^|\s)شات\s*بوت(?:\s|$|[?.!،])/.test(text) ||
+    /(?:^|\s)chatbot(?:\s|$|[?.!])/i.test(text)
+  );
+}
+
+export function detectChatbotIdentity(message: string): boolean {
+  const text = normalize(message);
+  return (
+    asksWhoAreYou(text) ||
+    asksAssistantOrCaptain(text) ||
+    asksIfAiOrBot(text) ||
+    mentionsChatbot(text)
+  );
+}
+
+export function detectYachtRental(message: string): boolean {
+  const text = normalize(message);
+  return /(?:^|\s)(?:تأجير|تاجير|ايجار|إيجار|charter|rent(?:al)?|rent a yacht)/.test(text) && /(?:يخت|yacht|boat|قارب)/.test(text);
+}
+
+export function detectAmbiguousYachtNeed(message: string): boolean {
+  const text = normalize(message);
+  if (detectYachtRental(message)) return false;
+  if (/شراء|بيع|buy|purchase|sell|own|أملك|عندي\s*يخت/.test(text) && /(?:إدارة|manage|ادير|management)/.test(text)) {
+    return false;
+  }
+  return /(?:^|\s)(?:محتاج|ابغى|ابي|عايز|أحتاج|need|want)\s*(?:يخت|yacht|boat|قارب)/.test(text);
+}
+
+export function detectCasualGreeting(message: string): boolean {
+  const text = normalize(message);
+  return /(?:^|\s)(?:ازيك|ازي|إزيك|كيف\s*حال|شلون|how\s*are\s*you|what'?s\s*up|sup\b|hello\s*again|hi\s*again|مرحبا\s*مرة|هلا\s*مرة)/.test(text);
+}
+
+/** Focuses that require fact selection even when disclosure topic is general. */
+export const GENERAL_TOPIC_FACT_FOCUSES = new Set<QuestionFocus>([
+  "contact_phone",
+  "contact_whatsapp",
+  "contact_form",
+  "contact_general",
+  "website_attribution",
+  "chatbot_identity",
+  "yacht_rental",
+  "yacht_need_ambiguous",
+  "casual_greeting",
+  "general_service",
+]);
+
 /** Deterministic question focus — takes precedence over stale disclosure level for content plane. */
 export function resolveQuestionFocus(message: string, intent?: string): QuestionFocus {
   const text = normalize(message);
+
+  if (detectPhoneRequest(message)) return "contact_phone";
+  if (detectWhatsAppRequest(message)) return "contact_whatsapp";
+  if (/contact form|نموذج|استمارة|application form|submit inquiry/.test(text)) return "contact_form";
+  if (detectWebsiteAttribution(message)) return "website_attribution";
+  if (detectChatbotIdentity(message)) return "chatbot_identity";
+  if (detectYachtRental(message) || intent === "YACHT_RENTAL") return "yacht_rental";
+  if (detectAmbiguousYachtNeed(message) || intent === "YACHT_CLARIFY") return "yacht_need_ambiguous";
+  if (detectCasualGreeting(message) || intent === "GREETING") return "casual_greeting";
 
   if (/ناحية التشغيل|من ناحية التشغيل|تشغيلي|day-to-day|operational|daily operations/.test(text)) {
     return "operational";
@@ -141,6 +252,7 @@ export function resolveQuestionFocus(message: string, intent?: string): Question
     return "scope_overview";
   }
   if (intent === "SERVICES" || /خدمات|what services|what do you offer/.test(text)) return "general_service";
+  if (intent === "CONTACT") return "contact_general";
   return "general_service";
 }
 
@@ -206,6 +318,249 @@ export function selectAllowedFacts(input: SelectAllowedFactsInput): FactSelectio
   const allIds = allFactIdsForService(serviceId);
   const budget = levelBudget(level, questionFocus);
   const focusGroup = FOCUS_FACT_GROUPS[serviceId]?.[questionFocus];
+
+  if (questionFocus === "contact_phone") {
+    const channels = getPublishedContactChannels(language);
+    const allowedFacts: AllowedFact[] = [
+      {
+        id: "contact_phone_display",
+        text: `${channels.phone.label}: ${channels.phone.display}`,
+        kind: "summary",
+      },
+      {
+        id: "contact_phone_available",
+        text:
+          language === "ar"
+            ? "يتوفر رقم اتصال هاتفي منشور على الموقع للمكالمات الصوتية."
+            : "A published direct phone number is available on the website for voice calls.",
+        kind: "summary",
+      },
+      {
+        id: "contact_email",
+        text: `${language === "ar" ? "البريد" : "Email"}: ${channels.email}`,
+        kind: "summary",
+      },
+    ];
+    return {
+      allowedFacts,
+      allowedFactIds: allowedFacts.map((f) => f.id),
+      hiddenFactIds: [],
+      angleHint:
+        language === "ar"
+          ? "أعطِ رقم الهاتف المنشور للاتصال الصوتي. لا تقل إن الرقم غير متوفر. لا تستبدل الهاتف برابط واتساب إلا إذا طلب الزائر واتساب صراحة."
+          : "Give the published direct phone number for voice calls. Never say no phone is available. Do not replace phone with WhatsApp unless the visitor explicitly asked for WhatsApp.",
+      reason: "contact_phone",
+    };
+  }
+
+  if (questionFocus === "contact_whatsapp") {
+    const channels = getPublishedContactChannels(language);
+    const allowedFacts: AllowedFact[] = [
+      {
+        id: "contact_whatsapp_url",
+        text: `${channels.whatsapp.label}: ${channels.whatsapp.url}`,
+        kind: "summary",
+      },
+      {
+        id: "contact_whatsapp_number",
+        text: `${language === "ar" ? "رقم واتساب" : "WhatsApp number"}: ${channels.whatsapp.display}`,
+        kind: "summary",
+      },
+    ];
+    return {
+      allowedFacts,
+      allowedFactIds: allowedFacts.map((f) => f.id),
+      hiddenFactIds: [],
+      angleHint:
+        language === "ar"
+          ? "قدّم رابط واتساب المنشور في سطر مستقل. واتساب للمراسلة — ليس بالضرورة بديلاً عن الهاتف الصوتي."
+          : "Provide the published WhatsApp link on its own line. WhatsApp is for messaging — not necessarily a substitute for voice phone.",
+      reason: "contact_whatsapp",
+    };
+  }
+
+  if (questionFocus === "contact_form") {
+    const channels = getPublishedContactChannels(language);
+    const allowedFacts: AllowedFact[] = [
+      {
+        id: "contact_form_url",
+        text: `${channels.contactForm.label}: ${channels.contactForm.url}`,
+        kind: "summary",
+      },
+      {
+        id: "contact_email",
+        text: `${language === "ar" ? "البريد" : "Email"}: ${channels.email}`,
+        kind: "summary",
+      },
+    ];
+    return {
+      allowedFacts,
+      allowedFactIds: allowedFacts.map((f) => f.id),
+      hiddenFactIds: [],
+      angleHint: "Point to the published contact form or email.",
+      reason: "contact_form",
+    };
+  }
+
+  if (questionFocus === "contact_general") {
+    const channels = getPublishedContactChannels(language);
+    const allowedFacts: AllowedFact[] = [
+      {
+        id: "contact_phone_display",
+        text: `${channels.phone.label}: ${channels.phone.display}`,
+        kind: "summary",
+      },
+      {
+        id: "contact_whatsapp_url",
+        text: `${channels.whatsapp.label}: ${channels.whatsapp.url}`,
+        kind: "summary",
+      },
+      {
+        id: "contact_form_url",
+        text: `${channels.contactForm.label}: ${channels.contactForm.url}`,
+        kind: "summary",
+      },
+    ];
+    return {
+      allowedFacts,
+      allowedFactIds: allowedFacts.map((f) => f.id),
+      hiddenFactIds: [],
+      angleHint:
+        language === "ar"
+          ? "ميّز بين الهاتف الصوتي وواتساب ونموذج التواصل حسب ما يناسب سؤال الزائر."
+          : "Distinguish voice phone, WhatsApp, and contact form as appropriate to the question.",
+      reason: "contact_general",
+    };
+  }
+
+  if (questionFocus === "website_attribution") {
+    const impl = company.websiteImplementation;
+    const allowedFacts: AllowedFact[] = [
+      {
+        id: "website_agency",
+        text: `${language === "ar" ? "تنفيذ الموقع والشات بوت" : "Website and chatbot implementation"}: ${impl.agency}`,
+        kind: "summary",
+      },
+      {
+        id: "website_agency_url",
+        text: `${language === "ar" ? "الموقع الرسمي" : "Official website"}: ${impl.websiteUrl}`,
+        kind: "summary",
+      },
+    ];
+    return {
+      allowedFacts,
+      allowedFactIds: allowedFacts.map((f) => f.id),
+      hiddenFactIds: [],
+      angleHint:
+        language === "ar"
+          ? "حدّد Top1Markting كمنفّذ الموقع/الشات بوت عند السؤال. لا تختلق تفاصيل عن الشركة غير المنشورة."
+          : "Identify Top1Markting as the website/chatbot implementer when asked. Do not invent unsupported agency details.",
+      reason: "website_attribution",
+    };
+  }
+
+  if (questionFocus === "chatbot_identity") {
+    const assistantName = loc(company.assistantName, language);
+    const allowedFacts: AllowedFact[] = [
+      {
+        id: "assistant_identity",
+        text:
+          language === "ar"
+            ? `${assistantName} — المساعد الذكي (AI) لـ ${company.name}. لست موظفاً بشرياً.`
+            : `${assistantName} — the AI assistant for ${company.name}. Not a human employee.`,
+        kind: "summary",
+      },
+      {
+        id: "assistant_role",
+        text: loc(company.description, language),
+        kind: "summary",
+      },
+    ];
+    return {
+      allowedFacts,
+      allowedFactIds: allowedFacts.map((f) => f.id),
+      hiddenFactIds: [],
+      angleHint:
+        language === "ar"
+          ? "عرّف نفسك باختصار كمساعد ذكي للمارينا. لا تدّعِ أنك إنسان."
+          : "Briefly identify as the marina AI assistant. Do not claim to be human.",
+      reason: "chatbot_identity",
+    };
+  }
+
+  if (questionFocus === "yacht_rental") {
+    const allowedFacts: AllowedFact[] = [
+      {
+        id: "yacht_rental_not_listed",
+        text: loc(limitations.yachtRentalNotListed, language),
+        kind: "summary",
+      },
+    ];
+    for (const svc of servicesFile.services.slice(0, 3)) {
+      allowedFacts.push({
+        id: `summary_${svc.id}`,
+        text: `${loc(svc.title, language)}: ${loc(svc.summary, language)}`,
+        kind: "summary",
+      });
+    }
+    return {
+      allowedFacts,
+      allowedFactIds: allowedFacts.map((f) => f.id),
+      hiddenFactIds: Object.values(SERVICE_FACT_ORDER).flat(),
+      angleHint:
+        language === "ar"
+          ? "وضّح أن تأجير اليخوت ليس خدمة منشورة. اعرض الخدمات الفعلية بلطف دون اختلاق أسعار أو توفر."
+          : "Clarify yacht rental is not a published service. Gently guide to actual services without inventing prices or availability.",
+      reason: "yacht_rental",
+    };
+  }
+
+  if (questionFocus === "yacht_need_ambiguous") {
+    const allowedFacts: AllowedFact[] = servicesFile.services.map((svc) => ({
+      id: `summary_${svc.id}`,
+      text: `${loc(svc.title, language)}: ${loc(svc.summary, language)}`,
+      kind: "summary",
+    }));
+    allowedFacts.unshift({
+      id: "yacht_need_clarify",
+      text:
+        language === "ar"
+          ? "احتياجك قد يكون إدارة يخت، طاقم، وكالة زيارة، أو مارينا — أو استفسار عن تأجير (غير منشور)."
+          : "Your need may be yacht management, crew, visiting agency, marina — or rental (not published).",
+      kind: "summary",
+    });
+    return {
+      allowedFacts,
+      allowedFactIds: allowedFacts.map((f) => f.id),
+      hiddenFactIds: Object.values(SERVICE_FACT_ORDER).flat(),
+      angleHint:
+        language === "ar"
+          ? "اسأل سؤال توضيح واحد مفيد: هل تقصد إدارة يختك، تأجير لرحلة، أم خدمة أخرى؟ لا ترد بعبارة عامة عن الخدمات التشغيلية."
+          : "Ask ONE useful clarifying question: management, charter/rental, or another service? Avoid generic operational-services prompts.",
+      reason: "yacht_need_ambiguous",
+    };
+  }
+
+  if (questionFocus === "casual_greeting") {
+    const assistantName = loc(company.assistantName, language);
+    const allowedFacts: AllowedFact[] = [
+      {
+        id: "greeting_persona",
+        text: `${assistantName} — ${loc(company.tagline, language)}`,
+        kind: "theme",
+      },
+    ];
+    return {
+      allowedFacts,
+      allowedFactIds: allowedFacts.map((f) => f.id),
+      hiddenFactIds: Object.values(SERVICE_FACT_ORDER).flat(),
+      angleHint:
+        language === "ar"
+          ? "ردّ بترحيب قصير وطبيعي. إذا وُجد lastCasualGreetingReply في ANTI-REPETITION، غيّر الصياغة — لا تكرر نفس الجملة حرفياً."
+          : "Reply with a short natural greeting. If lastCasualGreetingReply is in ANTI-REPETITION, vary wording — do not repeat the exact same sentence.",
+      reason: "casual_greeting",
+    };
+  }
 
   // Comparison — two service summaries only
   if (questionFocus === "comparison") {

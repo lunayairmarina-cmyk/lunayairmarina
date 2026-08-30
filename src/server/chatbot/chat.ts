@@ -58,11 +58,13 @@ import { sanitizeContextForGemini } from "./agent/contextIsolation";
 import {
   decrementWhatsAppBlock,
   noteAssistantQuestion,
+  recordCasualReply,
   recordDisclosedFactIds,
   recordDisclosedLevel,
 } from "./agent/antiRepetition";
 import {
   factIdsToRecord,
+  GENERAL_TOPIC_FACT_FOCUSES,
   selectAllowedFacts,
 } from "./agent/factSelection";
 import { polishAgentReply } from "./agent/responseQuality";
@@ -332,7 +334,7 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       "yacht-management-360";
     const disclosedFactIds = customerContext.disclosedFactIdsByTopic?.[topicKey] ?? [];
     const factSelection =
-      topicKey !== "general" || agentAnalysis.questionFocus === "general_service"
+      topicKey !== "general" || GENERAL_TOPIC_FACT_FOCUSES.has(agentAnalysis.questionFocus)
         ? selectAllowedFacts({
             serviceId: serviceId === "general" ? "yacht-management-360" : serviceId,
             disclosureLevel: agentAnalysis.disclosureLevel,
@@ -489,6 +491,9 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
         );
       }
       customerContext = noteAssistantQuestion(customerContext, reply);
+      if (agentAnalysis.intent === "GREETING" || agentAnalysis.questionFocus === "casual_greeting") {
+        customerContext = recordCasualReply(customerContext, reply);
+      }
       customerContext = decrementWhatsAppBlock(customerContext);
       customerContext = { ...customerContext, lastCtaType: polished.ctaType };
       if (!reply.trim()) {

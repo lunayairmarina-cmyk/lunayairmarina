@@ -11,13 +11,15 @@ import {
 import { sanitizeReplyForObjections, blocksWhatsAppCta } from "./objectionGuidance";
 import { resolveCtaType, shouldAttachWhatsApp } from "./ctaIntelligence";
 import {
+  appendPublishedWhatsAppUrl,
+  replyContainsPublishedWhatsAppUrl,
+} from "../contactChannels";
+import {
   detectReplyLanguageMismatch,
   looksLikeLeakedJson,
   stripWhatsAppLinks,
 } from "./contextIsolation";
 import { parseGeminiAgentOutputDetailed } from "./parseOutput";
-
-const WHATSAPP_URL = "https://wa.me/966531561212";
 
 export interface QualityPolishResult {
   reply: string;
@@ -143,8 +145,11 @@ export function polishAgentReply(input: {
     }
   }
 
-  if (shouldAttachWhatsApp(ctaType, input.analysis, input.context) && !/wa\.me\/966531561212/i.test(reply)) {
-    reply = `${reply.trim()}\n\n${WHATSAPP_URL}`;
+  if (
+    shouldAttachWhatsApp(ctaType, input.analysis, input.context) &&
+    !replyContainsPublishedWhatsAppUrl(reply)
+  ) {
+    reply = appendPublishedWhatsAppUrl(reply);
   }
 
   if (blocksWhatsAppCta(input.analysis.objections, input.context)) {

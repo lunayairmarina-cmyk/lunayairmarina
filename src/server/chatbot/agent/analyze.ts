@@ -27,7 +27,19 @@ import {
   blockWhatsAppForTurns,
   buildAntiRepetitionBlock,
 } from "./antiRepetition";
-import { resolveQuestionFocus } from "./factSelection";
+import {
+  appendPublishedWhatsAppUrl,
+  replyContainsPublishedWhatsAppUrl,
+} from "../contactChannels";
+import {
+  resolveQuestionFocus,
+  detectWhatsAppRequest,
+  detectPhoneRequest,
+  detectWebsiteAttribution,
+  detectChatbotIdentity,
+  detectYachtRental,
+  detectAmbiguousYachtNeed,
+} from "./factSelection";
 import type { FactSelectionResult } from "./factSelection";
 import { resolveCtaType } from "./ctaIntelligence";
 import { detectTopicShift, resolveActiveObjections } from "./contextIsolation";
@@ -40,8 +52,6 @@ const SERVICE_FIELD_PRIORITY: Record<string, string[]> = {
   "marina-management": ["location"],
   "visiting-yacht-agency": ["location", "customerGoal"],
 };
-
-const WHATSAPP_URL = "https://wa.me/966531561212";
 
 export function extractYachtLength(message: string): string | undefined {
   const text = message.normalize("NFKC");
@@ -77,7 +87,13 @@ export function extractServiceId(message: string): string | undefined {
   const hasVisiting = /زائر|visiting|agency|وكال/.test(text);
   const hasYachtWord = /يخت|yacht/.test(text);
   const hasMgmtWord = /إدارة|ادارة|management|360|mgmt|managment/.test(text);
+  const hasRental = /(?:^|\s)(?:تأجير|تاجير|ايجار|إيجار|charter|rent(?:al)?)/.test(text);
 
+  if (hasRental && hasYachtWord) return undefined;
+  if (/عندي\s*يخت|أملك\s*يخت|own(?:ing)?\s*(?:a\s*)?yacht|i\s+have\s+a\s+yacht/.test(text) && hasMgmtWord) {
+    return "yacht-management-360";
+  }
+  if (/أدير|ادير|manage|managing/.test(text) && hasYachtWord) return "yacht-management-360";
   if (hasVisiting && !hasMgmtWord) return "visiting-yacht-agency";
   if (hasMarina && !hasYachtWord && !hasMgmtWord) return "marina-management";
   if (hasMgmtWord && hasYachtWord) return "yacht-management-360";
@@ -232,6 +248,8 @@ export function detectPricingInterest(message: string): boolean {
 
 function resolveIntent(message: string, prior: CustomerContext, entities: AgentEntities): string {
   if (detectSecurityProbe(message)) return "SECURITY";
+  if (detectWebsiteAttribution(message)) return "WEBSITE_ATTRIBUTION";
+  if (detectChatbotIdentity(message)) return "CHATBOT_IDENTITY";
   if (detectGibberish(message) && !prior.lastServiceMentioned && !prior.yachtLength) return "GIBBERISH";
   if (detectRepair(message)) return "REPAIR";
   if (detectProgressive(message)) return "PROGRESSIVE";
@@ -241,6 +259,8 @@ function resolveIntent(message: string, prior: CustomerContext, entities: AgentE
       : "GENERAL";
   }
   if (detectObjections(message).length) return "OBJECTION";
+  if (detectYachtRental(message)) return "YACHT_RENTAL";
+  if (detectAmbiguousYachtNeed(message)) return "YACHT_CLARIFY";
   const service = entities.service ?? prior.lastServiceMentioned;
   const pricing = detectPricingInterest(message);
   if (service === "yacht-management-360" && pricing) return "YACHT_MANAGEMENT_PRICING";
@@ -249,13 +269,16 @@ function resolveIntent(message: string, prior: CustomerContext, entities: AgentE
   if (service === "visiting-yacht-agency") return "VISITING_YACHT_AGENCY";
   if (service === "yacht-management-360") return "YACHT_MANAGEMENT";
   if (pricing) return "PRICING";
-  if (/واتس|whatsapp|watsp/.test(message.toLowerCase())) return "WHATSAPP";
-  if (/تواصل|contact|هاتف|phone/.test(message.toLowerCase())) return "CONTACT";
+  if (detectWhatsAppRequest(message)) return "WHATSAPP";
+  if (detectPhoneRequest(message)) return "CONTACT";
+  if (/تواصل|contact|email|ايميل|بريد|contact form|نموذج/.test(message.toLowerCase())) return "CONTACT";
   if (/what services|what do you offer|services do you|what can you help/i.test(message.toLowerCase())) {
     return "SERVICES";
   }
   if (/خدمات|services/.test(message.toLowerCase())) return "SERVICES";
-  if (/سلام|مرحبا|hello|hi\b|ازيك/.test(message.toLowerCase())) return "GREETING";
+  if (/سلام|مرحبا|hello|hi\b|ازيك|ازي|إزيك|كيف\s*حال|شلون|how are you|what's up|good morning|good evening|صباح|مساء/.test(message.toLowerCase())) {
+    return "GREETING";
+  }
   if (prior.lastServiceMentioned && detectShortQuery(message)) {
     if (pricing) return prior.lastServiceMentioned.includes("yacht")
       ? "YACHT_MANAGEMENT_PRICING"
@@ -357,7 +380,11 @@ export function resolveNextBestAction(input: {
   if (input.repair && !extractServiceId(input.message)) return "CLARIFY";
   if (input.progressive) return "SHOW_MORE";
   if (detectScopeQuestion(input.message) && input.context.lastServiceMentioned) return "ANSWER";
-  if (/واتس|whatsapp|watsp/.test(input.message.toLowerCase()) && !refusedWhatsapp) {
+  if (detectPhoneRequest(input.message)) return "ANSWER";
+  if (detectWebsiteAttribution(input.message) || detectChatbotIdentity(input.message)) return "ANSWER";
+  if (detectYachtRental(input.message)) return "ANSWER";
+  if (detectAmbiguousYachtNeed(input.message)) return "CLARIFY";
+  if (detectWhatsAppRequest(input.message) && !refusedWhatsapp) {
     return "CTA_WHATSAPP";
   }
   if (input.signals.includes("talk_to_human")) {
@@ -435,6 +462,11 @@ export function analyzeAgentTurn(
     yachtMentioned: prior.yachtMentioned || /يخت|yacht|قارب|boat/.test(message.toLowerCase()),
     urgency:
       urgency === "HIGH" ? "high" : urgency === "MEDIUM" ? "medium" : prior.urgency ?? "low",
+    requestedContactMethod: detectWhatsAppRequest(message)
+      ? "whatsapp"
+      : detectPhoneRequest(message)
+        ? "phone"
+        : prior.requestedContactMethod,
     interests: [
       ...(service === "yacht-management-360" ? ["yacht_management"] : []),
       ...(service === "crew-management" ? ["crew_management"] : []),
@@ -605,11 +637,12 @@ export function mergeGeminiAnalysis(
 export function maybeAttachWhatsApp(reply: string, analysis: AgentAnalysis): string {
   let text = sanitizeReplyForObjections(reply, analysis.objections);
   if (blocksWhatsAppCta(analysis.objections)) return text;
+  if (analysis.questionFocus === "contact_phone") return text;
   if (analysis.nextBestAction !== "CTA_WHATSAPP" && analysis.nextBestAction !== "HANDOFF") {
     return text;
   }
-  if (/wa\.me\/966531561212/i.test(text)) return text;
-  return `${text.trim()}\n\n${WHATSAPP_URL}`;
+  if (replyContainsPublishedWhatsAppUrl(text)) return text;
+  return appendPublishedWhatsAppUrl(text);
 }
 
 export function buildAgentStateBlock(

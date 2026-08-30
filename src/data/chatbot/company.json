@@ -24,5 +24,17 @@
     "partners": 78,
     "responseMinutes": 13
   },
-  "persona": "Assistant Captain"
+  "persona": "Assistant Captain",
+  "assistantName": {
+    "en": "Assistant Captain",
+    "ar": "الكابتن المساعد"
+  },
+  "websiteImplementation": {
+    "agency": "Top1Markting",
+    "websiteUrl": "https://www.top1markting.com/",
+    "scope": {
+      "en": "Website and chatbot implementation",
+      "ar": "تنفيذ الموقع والشات بوت"
+    }
+  }
 }

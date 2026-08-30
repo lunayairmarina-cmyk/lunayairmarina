@@ -22,6 +22,8 @@ export function resolveCtaType(analysis: AgentAnalysis, context: CustomerContext
 
 export function shouldAttachWhatsApp(cta: CtaType, analysis: AgentAnalysis, context: CustomerContext): boolean {
   if (blocksWhatsAppCta(analysis.objections, context)) return false;
+  if (analysis.questionFocus === "contact_phone") return false;
+  if (analysis.intent === "CONTACT" && context.requestedContactMethod === "phone") return false;
   return cta === "WHATSAPP" || cta === "HANDOFF";
 }
 

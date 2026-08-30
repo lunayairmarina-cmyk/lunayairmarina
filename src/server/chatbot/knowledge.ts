@@ -1,4 +1,5 @@
 import type { ChatLanguage } from "@/lib/chatbot/types";
+import { getPublishedContactChannels } from "./contactChannels";
 import faqKnowledge from "@/data/chatbot-knowledge.json";
 import company from "@/data/chatbot/company.json";
 import contact from "@/data/chatbot/contact.json";
@@ -30,11 +31,17 @@ function verifiedFactsPayload(language: ChatLanguage) {
     company: {
       name: company.name,
       persona: company.persona,
+      assistantName: loc(company.assistantName, lang),
       tagline: loc(company.tagline, lang),
       founded: company.founded,
       description: loc(company.description, lang),
       mission: loc(company.mission, lang),
       vision: loc(company.vision, lang),
+      websiteImplementation: {
+        agency: company.websiteImplementation.agency,
+        websiteUrl: company.websiteImplementation.websiteUrl,
+        scope: loc(company.websiteImplementation.scope, lang),
+      },
       stats: {
         yachtsManaged: company.stats.yachtsManaged,
         yachtsManagedLabel: loc(company.stats.yachtsManagedLabel, lang),
@@ -57,15 +64,35 @@ function verifiedFactsPayload(language: ChatLanguage) {
       includes: service.includes[lang],
       pricingLabel: loc(service.pricingLabel, lang),
     })),
-    contact: {
-      phoneDisplay: contact.phoneDisplay,
-      whatsappUrl: contact.whatsappUrl,
-      email: contact.email,
-      address: loc(contact.address, lang),
-      hours: loc(contact.conciergeHours, lang),
-      urls: contact.urls,
-      social: contact.social,
-    },
+    contact: (() => {
+      const channels = getPublishedContactChannels(lang);
+      return {
+        phoneDisplay: channels.phone.display,
+        phoneVoice: channels.phone.display,
+        whatsappUrl: channels.whatsapp.url,
+        whatsappNumber: channels.whatsapp.display,
+        email: channels.email,
+        address: loc(contact.address, lang),
+        hours: loc(contact.conciergeHours, lang),
+        urls: contact.urls,
+        social: contact.social,
+        channels: {
+          phone: {
+            display: channels.phone.display,
+            purpose: channels.phone.label,
+          },
+          whatsapp: {
+            display: channels.whatsapp.display,
+            url: channels.whatsapp.url,
+            purpose: channels.whatsapp.label,
+          },
+          contactForm: {
+            url: channels.contactForm.url,
+            purpose: channels.contactForm.label,
+          },
+        },
+      };
+    })(),
     limitations: {
       priceNotPublished: loc(limitations.priceNotPublished, lang),
       berthNotPublished: loc(limitations.berthNotPublished, lang),
@@ -98,7 +125,10 @@ function intentNeedsAllServices(intent?: string): boolean {
 
 function intentNeedsContact(intent?: string, options?: ComposeKnowledgeOptions): boolean {
   if (options?.needsContact) return true;
-  return Boolean(intent && /CONTACT|WHATSAPP|HANDOFF/.test(intent));
+  return Boolean(
+    intent &&
+      /CONTACT|WHATSAPP|HANDOFF|WEBSITE_ATTRIBUTION|CHATBOT_IDENTITY|YACHT_RENTAL|YACHT_CLARIFY/.test(intent),
+  );
 }
 
 function intentNeedsPricing(intent?: string, options?: ComposeKnowledgeOptions): boolean {
@@ -107,7 +137,10 @@ function intentNeedsPricing(intent?: string, options?: ComposeKnowledgeOptions):
 }
 
 function intentNeedsCompanyDetail(intent?: string): boolean {
-  return Boolean(intent && /GENERAL|GREETING|SERVICES|REPAIR|OUT_OF_SCOPE|SECURITY/.test(intent));
+  return Boolean(
+    intent &&
+      /GENERAL|GREETING|SERVICES|REPAIR|OUT_OF_SCOPE|SECURITY|WEBSITE_ATTRIBUTION|CHATBOT_IDENTITY/.test(intent),
+  );
 }
 
 /** Snippets used for verbatim detection (not sent as copy templates). */

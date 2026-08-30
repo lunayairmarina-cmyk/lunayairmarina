@@ -42,6 +42,8 @@ export interface CustomerContext {
   askedQuestions?: string[];
   lastCtaType?: string;
   whatsappBlockedTurns?: number;
+  /** Last casual/greeting assistant reply — used to avoid verbatim repetition. */
+  lastCasualReply?: string;
 }
 
 export function emptyCustomerContext(): CustomerContext {

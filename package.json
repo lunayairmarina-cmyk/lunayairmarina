@@ -32,6 +32,7 @@
     "test:gemini-runtime": "tsx scripts/test-gemini-runtime.ts",
     "test:response-variation": "tsx scripts/test-response-variation.ts",
     "test:fact-selection": "tsx scripts/test-fact-selection.ts",
+    "test:contact-attribution": "tsx scripts/test-contact-attribution.ts",
     "test:agent:live": "tsx scripts/test-agent-live.ts",
     "verify:agent": "tsx scripts/verify-agent-retrieval.ts",
     "typecheck": "tsc --noEmit"

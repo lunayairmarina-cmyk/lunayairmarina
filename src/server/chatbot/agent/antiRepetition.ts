@@ -79,6 +79,11 @@ export function buildAntiRepetitionBlock(
     lines.push("whatsappBlocked=true (do NOT include WhatsApp link this turn)");
   }
   if (context.lastCtaType) lines.push(`lastCta=${context.lastCtaType} (vary approach)`);
+  if (context.lastCasualReply?.trim()) {
+    lines.push(
+      `lastCasualGreetingReply="${context.lastCasualReply.replace(/"/g, "'").slice(0, 160)}" (vary wording naturally — do NOT repeat verbatim)`,
+    );
+  }
 
   if (!lines.length) return "";
   return `ANTI-REPETITION (internal):\n${lines.join("\n")}`;
@@ -97,6 +102,12 @@ export function decrementWhatsAppBlock(context: CustomerContext): CustomerContex
   const left = context.whatsappBlockedTurns ?? 0;
   if (left <= 0) return context;
   return { ...context, whatsappBlockedTurns: left - 1 };
+}
+
+export function recordCasualReply(context: CustomerContext, reply: string): CustomerContext {
+  const snippet = reply.replace(/\s+/g, " ").trim().slice(0, 200);
+  if (!snippet) return context;
+  return { ...context, lastCasualReply: snippet };
 }
 
 export function blockWhatsAppForTurns(context: CustomerContext, turns = 2): CustomerContext {
