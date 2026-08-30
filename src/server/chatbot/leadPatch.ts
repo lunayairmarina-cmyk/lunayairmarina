@@ -16,6 +16,8 @@ export function leadPatchFromContext(
     serviceInterest: (context.interests ?? []).slice(0, 12),
     leadScore: context.leadScore ?? 0,
     lastIntent: intentId,
+    conversationStage: context.conversationStage ?? "",
+    nextBestAction: context.lastNextBestAction ?? "",
     messageCount: context.messageCount ?? 0,
     yachtMentioned: Boolean(context.yachtMentioned),
     detectedLanguage: context.detectedLanguage,

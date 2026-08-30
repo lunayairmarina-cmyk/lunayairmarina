@@ -8,7 +8,6 @@ import {
   emptyCustomerContext,
   extractContextFromMessage,
   hasVisitorContact,
-  updateConversationSummary,
   type CustomerContext,
 } from "@/lib/agent/context";
 import {
@@ -45,11 +44,24 @@ import { getChatbotConfig } from "./config";
 import { resolveConversationHistory } from "./conversationHistory";
 import { createChatRequestId, logChatTrace } from "./chatTrace";
 import { checkRateLimit } from "./rateLimit";
-import { generateChatReply, GeminiServiceError } from "./gemini";
+import { generateAgentTurn, GeminiServiceError } from "./gemini";
 import { ensureAssistantReply } from "./geminiFallback";
 import { composeGeminiKnowledge } from "./knowledge";
 import { prepareGeminiHistory } from "./contextManagement";
 import { leadPatchFromContext } from "./leadPatch";
+import {
+  analyzeAgentTurn,
+  buildAgentStateBlock,
+  buildCompactAgentSummary,
+  mergeGeminiAnalysis,
+} from "./agent/analyze";
+import { sanitizeContextForGemini } from "./agent/contextIsolation";
+import {
+  decrementWhatsAppBlock,
+  noteAssistantQuestion,
+  recordDisclosedLevel,
+} from "./agent/antiRepetition";
+import { polishAgentReply } from "./agent/responseQuality";
 import {
   buildHistoryContextSnippet,
   retrieveKnowledge,
@@ -280,15 +292,19 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       customerContext,
     );
     customerContext = extracted.context;
-    customerContext.detectedLanguage = validated.data.language;
-    customerContext.messageCount = (customerContext.messageCount ?? 0) + 1;
-
-    summary = updateConversationSummary(
-      summary,
+    const priorStage = customerContext.conversationStage;
+    const priorScore = customerContext.leadScore ?? 0;
+    const analyzed = analyzeAgentTurn(
       validated.data.message,
       validated.data.language,
       customerContext,
     );
+    customerContext = analyzed.context;
+    customerContext.detectedLanguage = validated.data.language;
+    customerContext.messageCount = (customerContext.messageCount ?? 0) + 1;
+    let agentAnalysis = analyzed.analysis;
+
+    summary = buildCompactAgentSummary(customerContext, agentAnalysis);
 
     const geminiHistory = prepareGeminiHistory(conversationHistory, config);
     const historyText = buildHistoryContextSnippet(geminiHistory);
@@ -329,7 +345,7 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
         },
       };
     }
-    const resolvedIntent = retrieval.analysis.intent;
+    const resolvedIntent = agentAnalysis.intent || retrieval.analysis.intent;
     const topScore = retrieval.diagnostic.selected[0]?.score ?? 0;
     const confidence = estimateAnswerConfidence(topScore, retrieval.documents.length);
     const composedKnowledge = composeGeminiKnowledge(
@@ -340,7 +356,7 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
     const lead = detectLeadSignal(
       validated.data.message,
       customerContext,
-      resolvedIntent,
+      retrieval.analysis.intent,
       priorLeadStatus,
     );
     if (lead.phone && !customerContext.phone) {
@@ -356,23 +372,54 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
     let reply: string;
     let fromGeminiFallback = false;
     try {
-      reply = await generateChatReply(
+      const turn = await generateAgentTurn(
         config,
         validated.data.language,
         validated.data.message,
         geminiHistory,
         composedKnowledge,
         {
+          agentStateBlock: buildAgentStateBlock(
+            agentAnalysis,
+            validated.data.language,
+            customerContext,
+          ),
+          customerContext: sanitizeContextForGemini(customerContext),
           conversationSummary: redactConversationSummaryForGemini(summary),
-          customerContext,
-          offerHandoff: lead.shouldOfferHandoff,
+          offerHandoff: lead.shouldOfferHandoff || agentAnalysis.nextBestAction === "HANDOFF",
           needsContactCapture: !hasVisitorContact(customerContext),
           contactAlreadyAsked: hasVisitorContact(customerContext),
         },
       );
+      agentAnalysis = mergeGeminiAnalysis(agentAnalysis, turn.geminiParsed, customerContext);
+      customerContext = {
+        ...customerContext,
+        conversationStage: agentAnalysis.conversationStage,
+        leadScore: agentAnalysis.commercialScore,
+        lastTopic: agentAnalysis.intent,
+        lastNextBestAction: agentAnalysis.nextBestAction,
+      };
+      const polished = polishAgentReply({
+        reply: ensureAssistantReply(turn.reply, validated.data.language, "empty"),
+        language: validated.data.language,
+        analysis: agentAnalysis,
+        context: customerContext,
+        userMessage: validated.data.message,
+      });
+      agentAnalysis = { ...agentAnalysis, ctaType: polished.ctaType };
+      reply = polished.reply;
+      customerContext = recordDisclosedLevel(
+        customerContext,
+        agentAnalysis.disclosureTopic ?? "general",
+        agentAnalysis.disclosureLevel,
+        validated.data.language,
+      );
+      customerContext = noteAssistantQuestion(customerContext, reply);
+      customerContext = decrementWhatsAppBlock(customerContext);
+      customerContext = { ...customerContext, lastCtaType: polished.ctaType };
       if (!reply.trim()) {
         fromGeminiFallback = true;
-        reply = ensureAssistantReply(reply, validated.data.language, "empty");
+        reply = ensureAssistantReply(null, validated.data.language, "empty");
       }
       logChatTrace(
         fromGeminiFallback ? "GEMINI_FALLBACK" : "GEMINI_OK",
@@ -507,11 +554,53 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       });
     }
 
-    logAiUsage({
-      event: "chat_ok",
+    const usageBase = {
       sessionId: validated.data.sessionId,
       language: validated.data.language,
       intent: resolvedIntent,
+      stage: agentAnalysis.conversationStage,
+      nba: agentAnalysis.nextBestAction,
+      ctaType: agentAnalysis.ctaType,
+      score: agentAnalysis.commercialScore,
+      urgency: agentAnalysis.urgency,
+      disclosureLevel: agentAnalysis.disclosureLevel,
+      disclosureTopic: agentAnalysis.disclosureTopic,
+      objectionTypes: agentAnalysis.objections.join(",") || undefined,
+      missingField: agentAnalysis.missingFieldToAsk,
+    };
+    logAiUsage({ event: "chat_message", ...usageBase });
+    logAiUsage({ event: "intent_detected", ...usageBase });
+    if (priorStage && priorStage !== agentAnalysis.conversationStage) {
+      logAiUsage({ event: "stage_changed", ...usageBase });
+    }
+    if (priorScore !== agentAnalysis.commercialScore) {
+      logAiUsage({ event: "lead_score_changed", ...usageBase });
+    }
+    if (agentAnalysis.objections.length) {
+      logAiUsage({ event: "objection_detected", ...usageBase });
+    }
+    if (agentAnalysis.nextBestAction === "ASK_MISSING_INFO") {
+      logAiUsage({ event: "missing_info_asked", ...usageBase });
+    }
+    if (
+      agentAnalysis.nextBestAction === "CTA_WHATSAPP" ||
+      agentAnalysis.nextBestAction === "CTA_CONSULTATION" ||
+      agentAnalysis.ctaType === "WHATSAPP" ||
+      agentAnalysis.ctaType === "CONSULTATION" ||
+      agentAnalysis.ctaType === "HANDOFF"
+    ) {
+      logAiUsage({ event: "cta_shown", ...usageBase });
+    }
+    if (agentAnalysis.nextBestAction === "HANDOFF" || agentAnalysis.handoff) {
+      logAiUsage({ event: "handoff_triggered", ...usageBase });
+    }
+    if (agentAnalysis.buyingSignals.includes("start") || agentAnalysis.buyingSignals.includes("offer")) {
+      logAiUsage({ event: "conversion_signal", ...usageBase });
+    }
+
+    logAiUsage({
+      event: "chat_ok",
+      ...usageBase,
       fromFallback: fromGeminiFallback || retrieval.fromFallback,
       knowledgeSource: fromGeminiFallback ? "gemini-fallback" : retrieval.diagnostic.knowledgeSource,
       documentCount: retrieval.documents.length,

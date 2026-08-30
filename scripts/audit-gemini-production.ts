@@ -128,7 +128,9 @@ async function main() {
   );
   record(
     "runtime-uses-gemini",
-    chatSource.includes("generateChatReply") ? "PASS" : "FAIL",
+    chatSource.includes("generateAgentTurn") || chatSource.includes("generateChatReply")
+      ? "PASS"
+      : "FAIL",
   );
 
   const staticDir = existsSync(resolve(root, "src/server/chatbot/static"));

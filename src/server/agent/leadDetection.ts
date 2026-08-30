@@ -20,7 +20,7 @@ function hasBuyingIntent(message: string, context: CustomerContext, intent: Agen
   if (intent === "human_handoff" || intent === "pricing" || intent === "availability") return true;
   if (context.yachtLength && context.location && context.interests.length > 0) return true;
   if (
-    /عايز|محتاج|interested|need help|consult|استشار|تواصلوا|كلموني|contact me|call me|whatsapp/i.test(
+    /عايز|محتاج|أبي أبدأ|ابي ابدأ|أبي عرض|interested|need help|consult|استشار|تواصلوا|كلموني|contact me|call me|whatsapp|i want to start|send me an offer/i.test(
       text,
     )
   ) {

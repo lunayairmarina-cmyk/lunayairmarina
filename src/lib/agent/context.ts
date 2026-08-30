@@ -29,8 +29,17 @@ export interface CustomerContext {
     | "HIGH_INTENT"
     | "HANDOFF";
   disclosureLevel?: number;
+  disclosureByTopic?: Record<string, number>;
   askedMissingFields?: string[];
   assistantState?: Record<string, unknown>;
+  objections?: string[];
+  objectionHistory?: string[];
+  buyingSignals?: string[];
+  lastNextBestAction?: string;
+  disclosedSnippetsByTopic?: Record<string, string[]>;
+  askedQuestions?: string[];
+  lastCtaType?: string;
+  whatsappBlockedTurns?: number;
 }
 
 export function emptyCustomerContext(): CustomerContext {
@@ -142,10 +151,18 @@ export function extractContextFromMessage(
   const original = message.normalize("NFKC").trim();
   const patch: Partial<CustomerContext> = {};
 
-  const lengthMatch = normalized.match(/(\d+)\s*(?:ft|feet|foot|قدم)/i);
-  if (lengthMatch) patch.yachtLength = `${lengthMatch[1]} feet`;
-  const meterMatch = normalized.match(/(\d+)\s*(?:m\b|متر|مترا|meters?)/i);
+  const feetAr = normalized.match(/(\d+(?:\.\d+)?)\s*قدم/);
+  if (feetAr) patch.yachtLength = `${feetAr[1]}ft`;
+  const lengthMatch = normalized.match(/(\d+(?:\.\d+)?)\s*(?:ft|feet|foot)\b/i);
+  if (lengthMatch) patch.yachtLength = `${lengthMatch[1]}ft`;
+  const gluedFt = normalized.match(/(\d+(?:\.\d+)?)ft\b/i);
+  if (gluedFt) patch.yachtLength = `${gluedFt[1]}ft`;
+  const meterMatch = normalized.match(/(\d+(?:\.\d+)?)\s*(?:متر(?:ا|ة)?|meters?)/i);
   if (meterMatch) patch.yachtLength = `${meterMatch[1]}m`;
+  const glued = normalized.match(/(\d+(?:\.\d+)?)m\b/i);
+  if (glued) patch.yachtLength = `${glued[1]}m`;
+  const spacedM = normalized.match(/(\d+(?:\.\d+)?)\s+m\b/i);
+  if (spacedM) patch.yachtLength = `${spacedM[1]}m`;
 
   if (/مالك\s*يخت|yacht owner|owner/i.test(normalized)) patch.customerType = "yacht_owner";
 
@@ -190,7 +207,9 @@ export function extractContextFromMessage(
       : /^[a-zA-Z][a-zA-Z\s'.-]{1,39}$/.test(original))
   ) {
     if (
-      !/^(نعم|لا|ok|okay|thanks|شكرا|مرحبا|السلام|hi|hello|yes|no)$/i.test(original.trim())
+      !/^(نعم|لا|ok|okay|thanks|شكرا|مرحبا|السلام|hi|hello|yes|no|غالي|بفكر|تمام|طيب|والله)$/i.test(
+        original.trim(),
+      )
     ) {
       patch.name = original.trim();
     }
@@ -222,8 +241,13 @@ export function extractContextFromMessage(
 
   if (/يخت|yacht|قارب|boat/.test(normalized)) patch.yachtMentioned = true;
 
-  if (/عاجل|urgent|asap|بسرعة|اليوم|today/i.test(normalized)) patch.urgency = "high";
-  else if (/قريب|soon|قريبا/i.test(normalized)) patch.urgency = "medium";
+  if (/عاجل|urgent|asap|ضروري (الآن|حالا)|أحتاج.*(الآن|today|now)|need.*(now|today|urgent|immediately)/i.test(
+    normalized,
+  )) {
+    patch.urgency = "high";
+  } else if (/قريب|soon|الشهر الجاي|next month|بسرعة/i.test(normalized)) {
+    patch.urgency = "medium";
+  }
 
   if (/whatsapp|واتس/i.test(normalized)) patch.requestedContactMethod = "whatsapp";
   if (/email|ايميل|إيميل|بريد/i.test(normalized)) patch.requestedContactMethod = "email";

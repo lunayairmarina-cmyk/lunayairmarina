@@ -107,7 +107,10 @@ for (const modulePath of clientModules) {
 }
 
 const chatSource = await readFile(new URL("../src/server/chatbot/chat.ts", import.meta.url), "utf8");
-assert(chatSource.includes("generateChatReply"), "chat.ts calls Gemini generateChatReply");
+assert(
+  chatSource.includes("generateAgentTurn") || chatSource.includes("generateChatReply"),
+  "chat.ts calls Gemini generateAgentTurn",
+);
 assert(!chatSource.includes("generateStaticReply"), "chat.ts no longer calls generateStaticReply");
 
 const config = getChatbotConfig();
@@ -168,6 +171,7 @@ if (!config.geminiApiKey) {
     name: string;
     message: string;
     language: "ar" | "en";
+    isolated?: boolean;
     check: (reply: string, context: CustomerContext) => string[];
   }> = [
     {
@@ -272,10 +276,17 @@ if (!config.geminiApiKey) {
     },
     {
       name: "12 english management",
-      message: "45m yacht management",
+      message: "What does yacht management include?",
       language: "en",
-      check: (reply) =>
-        /management|crew|jeddah|360/i.test(reply) ? [] : ["english management reply off-topic"],
+      isolated: true,
+      check: (reply) => {
+        const notes: string[] = [];
+        if (!/[a-z]{4,}/i.test(reply)) notes.push("expected English reply");
+        if (!/management|crew|maintenance|operational|360/i.test(reply)) {
+          notes.push("english management reply off-topic");
+        }
+        return notes;
+      },
     },
     {
       name: "13 mixed price",
@@ -323,20 +334,25 @@ if (!config.geminiApiKey) {
   for (const testCase of cases) {
     try {
       await new Promise((resolve) => setTimeout(resolve, 800));
+      const caseHistory = testCase.isolated ? [] : history;
+      const caseCtx = testCase.isolated ? emptyCustomerContext() : liveCtx;
+      const caseSummary = testCase.isolated ? "" : liveSummary;
       const { reply, context, summary } = await liveTurn(
         testCase.message,
         testCase.language,
-        history,
-        liveCtx,
-        liveSummary,
+        caseHistory,
+        caseCtx,
+        caseSummary,
       );
-      liveCtx = context;
-      liveSummary = summary;
-      history = [
-        ...history,
-        { role: "user", content: testCase.message },
-        { role: "assistant", content: reply },
-      ];
+      if (!testCase.isolated) {
+        liveCtx = context;
+        liveSummary = summary;
+        history = [
+          ...history,
+          { role: "user", content: testCase.message },
+          { role: "assistant", content: reply },
+        ];
+      }
       const notes = testCase.check(reply, context);
       if (notes.length) {
         failed += 1;

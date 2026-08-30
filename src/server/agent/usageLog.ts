@@ -9,9 +9,18 @@ import { tryGetAdminFirestore } from "./firebaseAdmin";
 export type AiUsageEvent =
   | "chat_ok"
   | "chat_error"
+  | "chat_message"
+  | "intent_detected"
   | "retrieval_fallback"
   | "website_search"
   | "lead_created"
+  | "lead_score_changed"
+  | "stage_changed"
+  | "cta_shown"
+  | "handoff_triggered"
+  | "objection_detected"
+  | "missing_info_asked"
+  | "conversion_signal"
   | "candidate_created"
   | "sync_ok"
   | "sync_error";
@@ -27,6 +36,15 @@ export interface AiUsageLogInput {
   confidence?: "high" | "medium" | "low";
   errorCode?: string;
   latencyMs?: number;
+  stage?: string;
+  nba?: string;
+  score?: number;
+  urgency?: string;
+  disclosureLevel?: number;
+  disclosureTopic?: string;
+  objectionTypes?: string;
+  missingField?: string;
+  ctaType?: string;
 }
 
 function sanitize(input: AiUsageLogInput): Record<string, unknown> {
@@ -41,8 +59,25 @@ function sanitize(input: AiUsageLogInput): Record<string, unknown> {
     confidence: input.confidence ?? "",
     errorCode: input.errorCode?.slice(0, 40) ?? "",
     latencyMs: typeof input.latencyMs === "number" ? Math.max(0, Math.round(input.latencyMs)) : 0,
+    stage: input.stage?.slice(0, 40) ?? "",
+    nba: input.nba?.slice(0, 40) ?? "",
+    score: typeof input.score === "number" ? Math.max(0, Math.min(100, Math.round(input.score))) : 0,
+    urgency: input.urgency?.slice(0, 12) ?? "",
+    disclosureLevel:
+      typeof input.disclosureLevel === "number"
+        ? Math.max(0, Math.min(4, Math.round(input.disclosureLevel)))
+        : 0,
+    disclosureTopic: input.disclosureTopic?.slice(0, 48) ?? "",
+    objectionTypes: input.objectionTypes?.slice(0, 80) ?? "",
+    missingField: input.missingField?.slice(0, 32) ?? "",
+    ctaType: input.ctaType?.slice(0, 24) ?? "",
     createdAt: new Date().toISOString(),
   };
+}
+
+/** Test-only export for certification suites. */
+export function sanitizeAiUsageLogInput(input: AiUsageLogInput): Record<string, unknown> {
+  return sanitize(input);
 }
 
 export async function writeAiUsageLogAdmin(

@@ -13,7 +13,7 @@ export const CHATBOT_DEFAULTS = {
    * Override via CHATBOT_RATE_LIMIT_PER_MINUTE on Vercel (avoid legacy value 10).
    */
   rateLimitMaxRequests: 120,
-  maxOutputTokens: 512,
+  maxOutputTokens: 2048,
   requestTimeoutMs: 30_000,
   geminiModel: "gemini-3.5-flash-lite",
 } as const;

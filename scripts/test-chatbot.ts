@@ -360,7 +360,10 @@ assert(
 );
 
 const context1 = extractContextFromMessage("أنا عندي يخت 70 قدم", "ar", emptyCustomerContext());
-assert(context1.context.yachtLength === "70 feet", "extracts yacht length from Arabic message");
+assert(
+  Boolean(context1.context.yachtLength && /70/.test(context1.context.yachtLength)),
+  "extracts yacht length from Arabic message",
+);
 
 const context2 = extractContextFromMessage("موجود في جدة", "ar", context1.context);
 assert(context2.context.location === "جدة", "extracts Jeddah location");

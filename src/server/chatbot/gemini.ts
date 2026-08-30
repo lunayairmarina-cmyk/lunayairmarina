@@ -3,6 +3,20 @@ import type { CustomerContext } from "@/lib/agent/context";
 import type { ChatbotConfig } from "./config";
 import { buildSystemPrompt } from "./prompt";
 import { shrinkGeminiHistoryForRetry } from "./contextManagement";
+import { extractUserFacingReply, parseGeminiAgentOutputDetailed } from "./agent/parseOutput";
+import type { AgentTurnResult } from "./agent/types";
+import { geminiResponseJsonSchema } from "./agent/types";
+import { ensureAssistantReply } from "./geminiFallback";
+
+export type GeminiAgentContext = {
+  conversationSummary?: string;
+  customerContext?: CustomerContext;
+  offerHandoff?: boolean;
+  needsContactCapture?: boolean;
+  contactAlreadyAsked?: boolean;
+  agentStateBlock?: string;
+  jsonMode?: boolean;
+};
 
 interface GeminiContent {
   role: "user" | "model";
@@ -73,13 +87,7 @@ async function callGeminiOnce(
   message: string,
   history: ChatHistoryItem[],
   retrievedKnowledge: string,
-  agentContext?: {
-    conversationSummary?: string;
-    customerContext?: CustomerContext;
-    offerHandoff?: boolean;
-    needsContactCapture?: boolean;
-    contactAlreadyAsked?: boolean;
-  },
+  agentContext?: GeminiAgentContext,
 ): Promise<string> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(config.geminiModel)}:generateContent`;
 
@@ -93,6 +101,7 @@ async function callGeminiOnce(
             offerHandoff: agentContext?.offerHandoff,
             needsContactCapture: agentContext?.needsContactCapture,
             contactAlreadyAsked: agentContext?.contactAlreadyAsked,
+            agentStateBlock: agentContext?.agentStateBlock,
           }),
         },
       ],
@@ -101,6 +110,12 @@ async function callGeminiOnce(
     generationConfig: {
       maxOutputTokens: config.maxOutputTokens,
       temperature: 0.4,
+      ...(agentContext?.jsonMode === false
+        ? {}
+        : {
+            responseMimeType: "application/json",
+            responseSchema: geminiResponseJsonSchema(),
+          }),
     },
   };
 
@@ -161,14 +176,27 @@ export async function generateChatReply(
   message: string,
   history: ChatHistoryItem[],
   retrievedKnowledge: string,
-  agentContext?: {
-    conversationSummary?: string;
-    customerContext?: CustomerContext;
-    offerHandoff?: boolean;
-    needsContactCapture?: boolean;
-    contactAlreadyAsked?: boolean;
-  },
+  agentContext?: GeminiAgentContext,
 ): Promise<string> {
+  const turn = await generateAgentTurn(
+    config,
+    language,
+    message,
+    history,
+    retrievedKnowledge,
+    agentContext,
+  );
+  return turn.reply;
+}
+
+export async function generateAgentTurn(
+  config: ChatbotConfig,
+  language: ChatLanguage,
+  message: string,
+  history: ChatHistoryItem[],
+  retrievedKnowledge: string,
+  agentContext?: GeminiAgentContext,
+): Promise<AgentTurnResult> {
   if (!config.geminiApiKey) {
     throw new GeminiServiceError("Gemini API key is not configured", {
       retryable: false,
@@ -176,28 +204,88 @@ export async function generateChatReply(
     });
   }
 
+  const run = async (ctx: GeminiAgentContext | undefined) =>
+    callGeminiOnce(config, language, message, history, retrievedKnowledge, ctx);
+
+  let raw: string;
   try {
-    return await callGeminiOnce(
-      config,
-      language,
-      message,
-      history,
-      retrievedKnowledge,
-      agentContext,
-    );
+    raw = await run(agentContext);
   } catch (error) {
     if (error instanceof GeminiServiceError && error.retryable) {
       const trimmedHistory =
         error.status === 400 ? shrinkGeminiHistoryForRetry(history) : history;
-      return callGeminiOnce(
-        config,
-        language,
-        message,
-        trimmedHistory,
-        retrievedKnowledge,
-        agentContext,
-      );
+      try {
+        raw = await callGeminiOnce(
+          config,
+          language,
+          message,
+          trimmedHistory,
+          retrievedKnowledge,
+          agentContext,
+        );
+      } catch (retryError) {
+        if (
+          retryError instanceof GeminiServiceError &&
+          retryError.status === 400 &&
+          agentContext?.jsonMode !== false
+        ) {
+          raw = await callGeminiOnce(
+            config,
+            language,
+            message,
+            trimmedHistory,
+            retrievedKnowledge,
+            { ...agentContext, jsonMode: false },
+          );
+        } else {
+          throw retryError;
+        }
+      }
+    } else if (
+      error instanceof GeminiServiceError &&
+      error.status === 400 &&
+      agentContext?.jsonMode !== false
+    ) {
+      raw = await run({ ...agentContext, jsonMode: false });
+    } else {
+      throw error;
     }
-    throw error;
   }
+
+  const parsedResult = parseGeminiAgentOutputDetailed(raw);
+  const parsed = parsedResult.output;
+  const reply =
+    parsed?.reply?.trim() ||
+    parsedResult.reply?.trim() ||
+    extractUserFacingReply(raw) ||
+    ensureAssistantReply(null, language, "empty");
+
+  return {
+    reply,
+    geminiParsed: parsed,
+    structuredParseFailed: parsedResult.status === "failed",
+    parseStatus: parsedResult.status,
+    parseErrors: parsedResult.errors,
+    salvageMethod: parsedResult.salvageMethod,
+    analysis: {
+      intent: parsed?.intent ?? "GENERAL",
+      secondaryIntents: parsed?.secondaryIntents ?? [],
+      conversationStage: "DISCOVERY",
+      commercialScore: parsed?.commercialScore ?? 0,
+      nextBestAction: "ANSWER",
+      urgency: "LOW",
+      entities: {},
+      missingInformation: parsed?.missingInformation ?? [],
+      leadSignals: parsed?.leadSignals ?? [],
+      objections: [],
+      buyingSignals: [],
+      handoff: Boolean(parsed?.handoff),
+      repair: false,
+      progressive: false,
+      shortQuery: false,
+      security: false,
+      gibberish: false,
+      disclosureLevel: 0,
+    },
+  };
 }
