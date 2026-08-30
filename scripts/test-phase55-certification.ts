@@ -343,7 +343,7 @@ for (const c of ctaCases) {
   }
 }
 
-// Language repair
+// Language repair — Gemini-only: flag mismatch but keep Gemini reply
 const repaired = polishAgentReply({
   reply: "مرحباً بك في خدماتنا المتكاملة لليacht management في جدة",
   language: "en",
@@ -351,7 +351,8 @@ const repaired = polishAgentReply({
   context: emptyCustomerContext(),
   userMessage: "What does yacht management include?",
 });
-assertDet(!detectReplyLanguageMismatch(repaired.reply, "en"), "language mismatch repaired for EN");
+assertDet(repaired.violations.includes("language_mismatch"), "language mismatch flagged");
+assertDet(repaired.reply.includes("مرحب"), "gemini reply preserved on mismatch");
 
 // Grounding deterministic
 const groundingCases = [

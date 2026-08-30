@@ -5,19 +5,15 @@ import {
   asksKnownMissingField,
   countQuestions,
   detectKbGroundingViolations,
-  safePricingFallback,
-  safeSecurityFallback,
   stripInventedPricingSentences,
   stripUnsupportedClaims,
 } from "./groundingGuard";
 import { sanitizeReplyForObjections, blocksWhatsAppCta } from "./objectionGuidance";
-import { buildDisclosureFacts } from "./progressiveDisclosure";
 import { resolveCtaType, shouldAttachWhatsApp } from "./ctaIntelligence";
 import {
   detectReplyLanguageMismatch,
   looksLikeLeakedJson,
   stripWhatsAppLinks,
-  repairLanguageMismatchReply,
 } from "./contextIsolation";
 import { parseGeminiAgentOutputDetailed } from "./parseOutput";
 
@@ -43,21 +39,16 @@ function trimToOneQuestion(reply: string, language: ChatLanguage): string {
     }
     kept.push(part);
   }
-  const trimmed = kept.join("").trim();
-  return trimmed || (language === "ar" ? "كيف أقدر أساعدك أكثر؟" : "How can I help you further?");
+  return kept.join("").trim();
 }
 
-function appendDisclosureIfNeeded(
-  reply: string,
-  analysis: AgentAnalysis,
-  language: ChatLanguage,
-): string {
-  if (analysis.nextBestAction !== "SHOW_MORE" && analysis.disclosureLevel <= 0) return reply;
-  const topic = analysis.disclosureTopic ?? "general";
-  const facts = buildDisclosureFacts(topic, analysis.disclosureLevel, language);
-  if (!facts || reply.includes(facts.slice(0, 40))) return reply;
-  const prefix = language === "ar" ? "باختصار:" : "In brief:";
-  return `${reply.trim()}\n\n${prefix}\n${facts}`;
+function stripSecurityLeakSentences(reply: string, language: ChatLanguage): string {
+  const sentences = reply.split(/(?<=[.!?؟])\s+/);
+  const kept = sentences.filter((sentence) => {
+    if (/system prompt|api key|hidden instructions/i.test(sentence)) return false;
+    return !detectKbGroundingViolations(sentence, language).some((v) => v.code === "security_leak");
+  });
+  return kept.join(" ").trim();
 }
 
 export function polishAgentReply(input: {
@@ -75,9 +66,9 @@ export function polishAgentReply(input: {
 
   if (!reply) {
     return {
-      reply: input.language === "ar" ? "كيف أقدر أساعدك في خدمات Lunayair Marina؟" : "How can I help with Lunayair Marina services?",
-      repaired: true,
-      usedFallback: true,
+      reply: "",
+      repaired: false,
+      usedFallback: false,
       violations: ["empty_reply"],
       ctaType,
     };
@@ -90,29 +81,24 @@ export function polishAgentReply(input: {
       repaired = true;
     } else {
       violations.push("leaked_json");
-      reply =
-        input.language === "ar"
-          ? "كيف أقدر أساعدك في خدمات Lunayair Marina؟"
-          : "How can I help with Lunayair Marina services?";
-      usedFallback = true;
+      reply = "";
       repaired = true;
     }
   }
 
   if (detectReplyLanguageMismatch(reply, input.language)) {
     violations.push("language_mismatch");
-    reply = repairLanguageMismatchReply(input.language, input.analysis);
-    repaired = true;
-    usedFallback = true;
   }
 
   if (input.analysis.security) {
     const leak = detectKbGroundingViolations(reply, input.language).some((v) => v.code === "security_leak");
     if (leak || /system prompt|api key|hidden instructions/i.test(reply)) {
-      reply = safeSecurityFallback(input.language);
-      violations.push("security_leak");
-      repaired = true;
-      usedFallback = true;
+      const stripped = stripSecurityLeakSentences(reply, input.language);
+      if (stripped !== reply) {
+        reply = stripped;
+        violations.push("security_leak");
+        repaired = true;
+      }
     }
   }
 
@@ -121,10 +107,6 @@ export function polishAgentReply(input: {
 
   if (grounding.some((v) => v.code === "invented_price")) {
     reply = stripInventedPricingSentences(reply, input.language);
-    if (/price|سعر|pricing|تكلف/i.test(input.userMessage) && !reply.trim()) {
-      reply = safePricingFallback(input.language);
-      usedFallback = true;
-    }
     repaired = true;
   }
 
@@ -134,9 +116,8 @@ export function polishAgentReply(input: {
     )
   ) {
     const stripped = stripUnsupportedClaims(reply, input.language);
-    reply = stripped || safePricingFallback(input.language);
+    reply = stripped;
     repaired = true;
-    if (!stripped) usedFallback = true;
   }
 
   const priorAsked = input.context.askedMissingFields ?? [];
@@ -158,14 +139,6 @@ export function polishAgentReply(input: {
     if (stripped !== reply) {
       violations.push("whatsapp_after_refusal");
       reply = stripped;
-      repaired = true;
-    }
-  }
-
-  if (input.analysis.progressive || input.analysis.disclosureLevel > 0) {
-    const enriched = appendDisclosureIfNeeded(reply, input.analysis, input.language);
-    if (enriched !== reply) {
-      reply = enriched;
       repaired = true;
     }
   }

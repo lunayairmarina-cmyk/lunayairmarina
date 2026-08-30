@@ -6,7 +6,6 @@ import { shrinkGeminiHistoryForRetry } from "./contextManagement";
 import { extractUserFacingReply, parseGeminiAgentOutputDetailed } from "./agent/parseOutput";
 import type { AgentTurnResult } from "./agent/types";
 import { geminiResponseJsonSchema } from "./agent/types";
-import { ensureAssistantReply } from "./geminiFallback";
 
 export type GeminiAgentContext = {
   conversationSummary?: string;
@@ -257,8 +256,11 @@ export async function generateAgentTurn(
   const reply =
     parsed?.reply?.trim() ||
     parsedResult.reply?.trim() ||
-    extractUserFacingReply(raw) ||
-    ensureAssistantReply(null, language, "empty");
+    extractUserFacingReply(raw);
+
+  if (!reply?.trim()) {
+    throw new GeminiServiceError("Empty Gemini response", { retryable: false, kind: "empty" });
+  }
 
   return {
     reply,

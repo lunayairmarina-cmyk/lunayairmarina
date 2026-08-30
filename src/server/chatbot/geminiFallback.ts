@@ -1,3 +1,6 @@
+/**
+ * Legacy parse/test helpers — production chat returns GEMINI/CONFIG errors instead of these messages.
+ */
 import type { ChatLanguage } from "@/lib/chatbot/types";
 
 export const GEMINI_FALLBACK_REPLY = {

@@ -111,7 +111,7 @@ export function stripUnsupportedClaims(reply: string, language: ChatLanguage): s
     const violations = detectKbGroundingViolations(sentence, language);
     return !violations.some((v) => v.severity === "critical");
   });
-  if (kept.length === 0) return safePricingFallback(language);
+  if (kept.length === 0) return "";
   return kept.join(" ").trim();
 }
 
@@ -151,7 +151,7 @@ export function stripInventedPricingSentences(reply: string, language: ChatLangu
   const kept = sentences.filter(
     (sentence) => !detectGroundingViolations(sentence).some((v) => v.code === "invented_price"),
   );
-  if (kept.length === 0) return safePricingFallback(language);
+  if (kept.length === 0) return "";
   return kept.join(" ").trim();
 }
 

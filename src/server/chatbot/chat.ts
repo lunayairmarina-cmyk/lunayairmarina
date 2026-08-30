@@ -45,7 +45,6 @@ import { resolveConversationHistory } from "./conversationHistory";
 import { createChatRequestId, logChatTrace } from "./chatTrace";
 import { checkRateLimit } from "./rateLimit";
 import { generateAgentTurn, GeminiServiceError } from "./gemini";
-import { ensureAssistantReply } from "./geminiFallback";
 import { composeGeminiKnowledge } from "./knowledge";
 import { prepareGeminiHistory } from "./contextManagement";
 import { leadPatchFromContext } from "./leadPatch";
@@ -257,6 +256,21 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
   }
   logChatTrace("RATE_LIMIT_PASS", { sessionId: validated.data.sessionId }, requestId);
 
+  if (!config.geminiApiKey) {
+    logChatTrace(
+      "REQUEST_FAILED",
+      { stage: "config", code: "CONFIG", sessionId: validated.data.sessionId },
+      requestId,
+    );
+    logAiUsage({
+      event: "chat_error",
+      sessionId: validated.data.sessionId,
+      language: validated.data.language,
+      errorCode: "CONFIG",
+    });
+    return { ok: false, code: "CONFIG" };
+  }
+
   try {
     void maybeRunPendingKnowledgeSync();
 
@@ -370,7 +384,6 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
     }
 
     let reply: string;
-    let fromGeminiFallback = false;
     try {
       const turn = await generateAgentTurn(
         config,
@@ -400,7 +413,7 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
         lastNextBestAction: agentAnalysis.nextBestAction,
       };
       const polished = polishAgentReply({
-        reply: ensureAssistantReply(turn.reply, validated.data.language, "empty"),
+        reply: turn.reply.trim(),
         language: validated.data.language,
         analysis: agentAnalysis,
         context: customerContext,
@@ -418,11 +431,27 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       customerContext = decrementWhatsAppBlock(customerContext);
       customerContext = { ...customerContext, lastCtaType: polished.ctaType };
       if (!reply.trim()) {
-        fromGeminiFallback = true;
-        reply = ensureAssistantReply(null, validated.data.language, "empty");
+        logChatTrace(
+          "REQUEST_FAILED",
+          {
+            stage: "gemini",
+            code: "GEMINI",
+            reason: "empty_reply_after_polish",
+            sessionId: validated.data.sessionId,
+            violations: polished.violations,
+          },
+          requestId,
+        );
+        logAiUsage({
+          event: "chat_error",
+          sessionId: validated.data.sessionId,
+          language: validated.data.language,
+          errorCode: "GEMINI",
+        });
+        return { ok: false, code: "GEMINI" };
       }
       logChatTrace(
-        fromGeminiFallback ? "GEMINI_FALLBACK" : "GEMINI_OK",
+        "GEMINI_OK",
         {
           sessionId: validated.data.sessionId,
           intent: resolvedIntent,
@@ -430,26 +459,32 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
           replyLength: reply.length,
           knowledgeSource: retrieval.diagnostic.knowledgeSource,
           documentCount: retrieval.documents.length,
+          polished: polished.repaired,
         },
         requestId,
       );
     } catch (error) {
-      fromGeminiFallback = true;
       const kind = error instanceof GeminiServiceError ? error.kind : "unknown";
-      reply = ensureAssistantReply(
-        null,
-        validated.data.language,
-        kind === "empty" ? "empty" : "error",
-      );
+      const code: ChatErrorCode =
+        kind === "timeout" ? "TIMEOUT" : kind === "context" ? "CONTEXT" : "GEMINI";
       logChatTrace(
-        "GEMINI_FALLBACK",
+        "REQUEST_FAILED",
         {
+          stage: "gemini",
+          code,
           sessionId: validated.data.sessionId,
-          kind: error instanceof GeminiServiceError ? error.kind : "unknown",
+          kind,
           hasApiKey: Boolean(config.geminiApiKey),
         },
         requestId,
       );
+      logAiUsage({
+        event: "chat_error",
+        sessionId: validated.data.sessionId,
+        language: validated.data.language,
+        errorCode: code,
+      });
+      return { ok: false, code };
     }
 
     let leadId = existing?.leadId;
@@ -506,7 +541,6 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
 
     let candidateCreated = false;
     if (
-      !fromGeminiFallback &&
       shouldCreateKnowledgeCandidate({
         intent: resolvedIntent,
         retrievedCount: retrieval.documents.length,
@@ -601,8 +635,8 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
     logAiUsage({
       event: "chat_ok",
       ...usageBase,
-      fromFallback: fromGeminiFallback || retrieval.fromFallback,
-      knowledgeSource: fromGeminiFallback ? "gemini-fallback" : retrieval.diagnostic.knowledgeSource,
+      fromFallback: retrieval.fromFallback,
+      knowledgeSource: retrieval.diagnostic.knowledgeSource,
       documentCount: retrieval.documents.length,
       confidence,
       latencyMs: Date.now() - startedAt,
