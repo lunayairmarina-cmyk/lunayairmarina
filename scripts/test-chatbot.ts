@@ -5,6 +5,7 @@
 
 import {
   decodeHtmlEntities,
+  extractPublishedAgencyLink,
   normalizeAssistantText,
   stripHtmlTags,
 } from "../src/lib/chatbot/renderAssistantMessage";
@@ -514,6 +515,13 @@ assert(
   !normalizeAssistantText("**bold**").includes("&#x"),
   "normalized text hides entity literals",
 );
+
+assert(
+  extractPublishedAgencyLink("Visit https://www.top1markting.com/ for details") ===
+    "https://www.top1markting.com",
+  "detects published agency link",
+);
+assert(extractPublishedAgencyLink("no external links here") === null, "ignores messages without agency link");
 
 // Agent identity (not FAQ-only) + consultative rules
 const agentPrompt = buildSystemPrompt("ar", "doc knowledge", {

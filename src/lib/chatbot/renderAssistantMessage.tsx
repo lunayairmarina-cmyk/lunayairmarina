@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from "react";
+import company from "@/data/chatbot/company.json";
 import { companyInfo } from "@/data/companyInfo";
 import { useLanguage } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -37,8 +38,11 @@ export function normalizeAssistantText(text: string): string {
 
 const WA_URL_RE =
   /https?:\/\/(?:wa\.me\/(\d{8,15})|api\.whatsapp\.com\/send\?(?:[^&\s]*&)*phone=(\d{8,15}))/gi;
+const EXTERNAL_HTTP_URL_RE =
+  /https?:\/\/(?!wa\.me(?:\/|\b))(?!api\.whatsapp\.com)[^\s<>)\]"']+/gi;
 const PHONE_CANDIDATE_RE = /(?:\+?\d[\d\s\-()]{6,}\d)/g;
 const WHATSAPP_WORD_RE = /whatsapp|واتساب|واتس/i;
+const AGENCY_HOST = "top1markting.com";
 
 function digitsOnly(value: string): string {
   return value.replace(/\D/g, "");
@@ -92,6 +96,60 @@ function stripWhatsAppUrls(text: string): string {
     .replace(/[ \t]+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
+}
+
+function normalizeExternalUrl(url: string): string {
+  return url.replace(/[.,;:!?]+$/g, "").replace(/\/+$/, "").toLowerCase();
+}
+
+export function extractPublishedAgencyLink(text: string): string | null {
+  const published = company.websiteImplementation.websiteUrl.replace(/\/+$/, "");
+  EXTERNAL_HTTP_URL_RE.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = EXTERNAL_HTTP_URL_RE.exec(text)) !== null) {
+    const raw = match[0].replace(/[.,;:!?]+$/g, "");
+    if (raw.toLowerCase().includes(AGENCY_HOST)) {
+      return published;
+    }
+    if (normalizeExternalUrl(raw) === normalizeExternalUrl(published)) {
+      return published;
+    }
+  }
+  return null;
+}
+
+function stripPublishedAgencyUrls(text: string): string {
+  const patterns = [
+    company.websiteImplementation.websiteUrl,
+    company.websiteImplementation.websiteUrl.replace(/\/$/, ""),
+    `https://www.${AGENCY_HOST}`,
+    `https://www.${AGENCY_HOST}/`,
+    `https://${AGENCY_HOST}`,
+    `https://${AGENCY_HOST}/`,
+  ];
+  let result = text;
+  for (const pattern of patterns) {
+    result = result.split(pattern).join("");
+  }
+  return result
+    .replace(/(?:عبر\s*الرابط\s*:?\s*)/gi, "")
+    .replace(/(?:via\s*the\s*link\s*:?\s*)/gi, "")
+    .replace(/(?:for\s*more\s*information\s*\.?\s*)/gi, "")
+    .replace(/(?:للمزيد\s*من\s*المعلومات\s*\.?\s*)/gi, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function externalLinkLabel(url: string): string {
+  if (url.toLowerCase().includes(AGENCY_HOST)) {
+    return company.websiteImplementation.agency;
+  }
+  return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+}
+
+function isWhatsAppMatch(raw: string): boolean {
+  return /wa\.me|api\.whatsapp\.com/i.test(raw);
 }
 
 function isListLine(line: string): boolean {
@@ -155,7 +213,8 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
 
 function renderPlainWithPhones(text: string, keyPrefix: string): ReactNode[] {
   const nodes: ReactNode[] = [];
-  const pattern = /(?:https?:\/\/(?:wa\.me\/\d{8,15}|api\.whatsapp\.com\/send\?[^\s]+)|(?:\+?\d[\d\s\-()]{6,}\d))/gi;
+  const pattern =
+    /(?:https?:\/\/(?:wa\.me\/\d{8,15}|api\.whatsapp\.com\/send\?[^\s]+)|https?:\/\/(?!wa\.me(?:\/|\b))(?!api\.whatsapp\.com)[^\s<>)\]"']+|(?:\+?\d[\d\s\-()]{6,}\d))/gi;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
   let part = 0;
@@ -169,28 +228,62 @@ function renderPlainWithPhones(text: string, keyPrefix: string): ReactNode[] {
     }
 
     const raw = match[0];
-    const waUrlMatch = raw.match(
-      /https?:\/\/(?:wa\.me\/(\d{8,15})|api\.whatsapp\.com\/send\?(?:[^&\s]*&)*phone=(\d{8,15}))/i,
-    );
-    const digits = waUrlMatch
-      ? normalizeWhatsAppDigits(waUrlMatch[1] || waUrlMatch[2] || "")
-      : normalizeWhatsAppDigits(raw);
+    if (isWhatsAppMatch(raw)) {
+      const waUrlMatch = raw.match(
+        /https?:\/\/(?:wa\.me\/(\d{8,15})|api\.whatsapp\.com\/send\?(?:[^&\s]*&)*phone=(\d{8,15}))/i,
+      );
+      const digits = waUrlMatch
+        ? normalizeWhatsAppDigits(waUrlMatch[1] || waUrlMatch[2] || "")
+        : normalizeWhatsAppDigits(raw);
 
-    if (digits) {
+      if (digits) {
+        nodes.push(
+          <a
+            key={`${keyPrefix}-phone-${part}`}
+            href={whatsappHrefFromDigits(digits)}
+            target="_blank"
+            rel="noreferrer"
+            className="font-medium text-gold underline decoration-gold/50 underline-offset-2 hover:decoration-gold"
+            dir="ltr"
+          >
+            {waUrlMatch ? companyInfo.phoneDisplay || raw : raw.trim()}
+          </a>,
+        );
+      } else {
+        nodes.push(<Fragment key={`${keyPrefix}-raw-${part}`}>{raw}</Fragment>);
+      }
+    } else if (/^https?:\/\//i.test(raw)) {
+      const href = raw.replace(/[.,;:!?]+$/g, "");
       nodes.push(
         <a
-          key={`${keyPrefix}-phone-${part}`}
-          href={whatsappHrefFromDigits(digits)}
+          key={`${keyPrefix}-link-${part}`}
+          href={href}
           target="_blank"
           rel="noreferrer"
           className="font-medium text-gold underline decoration-gold/50 underline-offset-2 hover:decoration-gold"
           dir="ltr"
         >
-          {waUrlMatch ? companyInfo.phoneDisplay || raw : raw.trim()}
+          {externalLinkLabel(href)}
         </a>,
       );
     } else {
-      nodes.push(<Fragment key={`${keyPrefix}-raw-${part}`}>{raw}</Fragment>);
+      const digits = normalizeWhatsAppDigits(raw);
+      if (digits) {
+        nodes.push(
+          <a
+            key={`${keyPrefix}-phone-${part}`}
+            href={whatsappHrefFromDigits(digits)}
+            target="_blank"
+            rel="noreferrer"
+            className="font-medium text-gold underline decoration-gold/50 underline-offset-2 hover:decoration-gold"
+            dir="ltr"
+          >
+            {raw.trim()}
+          </a>,
+        );
+      } else {
+        nodes.push(<Fragment key={`${keyPrefix}-raw-${part}`}>{raw}</Fragment>);
+      }
     }
     part += 1;
     lastIndex = pattern.lastIndex;
@@ -250,17 +343,42 @@ function WhatsAppCta({ href, label }: { href: string; label: string }) {
   );
 }
 
+function ExternalLinkCta({ href, label }: { href: string; label: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-3 py-2.5 text-sm font-semibold text-gold shadow-sm transition hover:bg-gold/20 active:scale-[0.99]"
+    >
+      <svg viewBox="0 0 24 24" className="size-4 shrink-0" aria-hidden fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        <polyline points="15 3 21 3 21 9" />
+        <line x1="10" y1="14" x2="21" y2="3" />
+      </svg>
+      <span>{label}</span>
+    </a>
+  );
+}
+
 interface AssistantMessageContentProps {
   content: string;
   className?: string;
 }
 
 export function AssistantMessageContent({ content, className }: AssistantMessageContentProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const normalized = normalizeAssistantText(content);
   const whatsappDigits = extractWhatsAppTarget(normalized);
-  const displayText = whatsappDigits ? stripWhatsAppUrls(normalized) : normalized;
+  const agencyLink = extractPublishedAgencyLink(normalized);
+  let displayText = normalized;
+  if (whatsappDigits) displayText = stripWhatsAppUrls(displayText);
+  if (agencyLink) displayText = stripPublishedAgencyUrls(displayText);
   const blocks = displayText ? renderAssistantMessage(displayText) : [];
+  const agencyButtonLabel =
+    language === "ar"
+      ? `زيارة موقع ${company.websiteImplementation.agency}`
+      : `Visit ${company.websiteImplementation.agency} website`;
 
   return (
     <div className={cn("space-y-2 break-words [overflow-wrap:anywhere]", className)}>
@@ -269,6 +387,7 @@ export function AssistantMessageContent({ content, className }: AssistantMessage
       ) : displayText ? (
         <p className="leading-relaxed">{displayText}</p>
       ) : null}
+      {agencyLink ? <ExternalLinkCta href={agencyLink} label={agencyButtonLabel} /> : null}
       {whatsappDigits ? (
         <WhatsAppCta
           href={whatsappHrefFromDigits(whatsappDigits)}
