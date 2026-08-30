@@ -16,8 +16,7 @@
     "ingest:knowledge:dry": "tsx scripts/ingest-knowledge.ts --dry-run",
     "test:chatbot": "tsx scripts/test-chatbot.ts",
     "test:chatbot-lead": "tsx scripts/test-chatbot-lead.ts",
-    "test:static-chatbot": "tsx scripts/generate-question-bank.ts && tsx scripts/test-static-chatbot.ts",
-    "generate:question-bank": "tsx scripts/generate-question-bank.ts",
+    "test:gemini-runtime": "tsx scripts/test-gemini-runtime.ts",
     "test:agent:live": "tsx scripts/test-agent-live.ts",
     "verify:agent": "tsx scripts/verify-agent-retrieval.ts",
     "typecheck": "tsc --noEmit"

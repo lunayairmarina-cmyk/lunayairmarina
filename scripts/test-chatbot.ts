@@ -32,6 +32,11 @@ import {
   updateConversationSummary,
 } from "../src/lib/agent/context";
 import { getKnowledgeForLanguage } from "../src/server/chatbot/knowledge";
+import { extractGeminiText } from "../src/server/chatbot/gemini";
+import {
+  ensureAssistantReply,
+  GEMINI_UNCLEAR_REPLY,
+} from "../src/server/chatbot/geminiFallback";
 import { buildSystemPrompt } from "../src/server/chatbot/prompt";
 import {
   assembleMultiDocumentContext,
@@ -447,9 +452,10 @@ assert(
   "prompt forbids mentioning internal retrieval/Firestore",
 );
 
-// Knowledge base has no pricing
+// Knowledge base has no published numeric prices
 const knowledge = getKnowledgeForLanguage("en");
-assert(!/price|cost|\$|SAR/i.test(knowledge), "knowledge base avoids public pricing");
+assert(!/\b\d{3,}\s*(SAR|\$|USD)/i.test(knowledge), "knowledge base avoids public numeric pricing");
+assert(/not published|customized/i.test(knowledge), "knowledge states pricing is unpublished");
 
 // Arabic knowledge available
 const arKnowledge = getKnowledgeForLanguage("ar");
@@ -622,6 +628,40 @@ assert(
   noAnswerPrompt.includes("do not have a confirmed published answer") ||
     noAnswerPrompt.includes("missing from knowledge"),
   "no-answer safeguard present in English prompt",
+);
+
+const meterCtx = extractContextFromMessage("عندي يخت 45 متر في جدة", "ar", emptyCustomerContext()).context;
+assert(meterCtx.yachtLength?.includes("45"), "extracts yacht length in meters");
+assert(meterCtx.location === "جدة", "extracts Jeddah with meter-length yacht");
+
+assert(extractGeminiText(null) === null, "null Gemini payload is invalid");
+assert(extractGeminiText(undefined) === null, "undefined Gemini payload is invalid");
+assert(extractGeminiText({}) === null, "empty Gemini object is invalid");
+assert(
+  extractGeminiText({ candidates: [{ content: { parts: [{ text: "" }] } }] }) === null,
+  "empty string Gemini text is invalid",
+);
+assert(
+  extractGeminiText({ candidates: [{ content: { parts: [{ text: "   " }] } }] }) === null,
+  "whitespace-only Gemini text is invalid",
+);
+assert(
+  extractGeminiText({ candidates: [{ content: { parts: [{ text: null }] } }] }) === null,
+  "null Gemini text part is invalid",
+);
+const emptyUserReply = ensureAssistantReply("", "ar", "empty");
+assert(emptyUserReply.trim().length > 0, "empty Gemini response does not yield empty user message");
+assert(
+  emptyUserReply === GEMINI_UNCLEAR_REPLY.ar,
+  "empty Gemini response uses unclear fallback",
+);
+assert(
+  ensureAssistantReply("   ", "en", "empty") === GEMINI_UNCLEAR_REPLY.en,
+  "whitespace Gemini response uses English unclear fallback",
+);
+assert(
+  ensureAssistantReply(null, "ar", "empty").includes("واتساب"),
+  "null Gemini response still offers WhatsApp",
 );
 
 console.log(`\nResults: ${passed} passed, ${failed} failed`);

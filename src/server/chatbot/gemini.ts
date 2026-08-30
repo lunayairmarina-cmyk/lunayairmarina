@@ -40,6 +40,19 @@ export class GeminiServiceError extends Error {
   }
 }
 
+export function extractGeminiText(payload: unknown): string | null {
+  if (!payload || typeof payload !== "object") return null;
+  const candidates = (payload as GeminiResponse).candidates;
+  if (!Array.isArray(candidates) || candidates.length === 0) return null;
+  const parts = candidates[0]?.content?.parts;
+  if (!Array.isArray(parts) || parts.length === 0) return null;
+  const text = parts
+    .map((part) => (typeof part?.text === "string" ? part.text : ""))
+    .join("")
+    .trim();
+  return text.length > 0 ? text : null;
+}
+
 function classifyGeminiFailure(status: number, message: string): GeminiServiceError["kind"] {
   if (status === 429) return "quota";
   if (status === 408) return "timeout";
@@ -105,7 +118,12 @@ async function callGeminiOnce(
       signal: controller.signal,
     });
 
-    const payload = (await response.json()) as GeminiResponse;
+    let payload: GeminiResponse;
+    try {
+      payload = (await response.json()) as GeminiResponse;
+    } catch {
+      throw new GeminiServiceError("Invalid Gemini response", { retryable: false, kind: "empty" });
+    }
 
     if (!response.ok) {
       const message = payload.error?.message ?? `Gemini request failed (${response.status})`;
@@ -116,13 +134,9 @@ async function callGeminiOnce(
       throw new GeminiServiceError(message, { retryable, status: response.status, kind });
     }
 
-    const text = payload.candidates?.[0]?.content?.parts
-      ?.map((part) => part.text ?? "")
-      .join("")
-      .trim();
-
+    const text = extractGeminiText(payload);
     if (!text) {
-      throw new GeminiServiceError("Empty Gemini response", { retryable: true, kind: "empty" });
+      throw new GeminiServiceError("Empty Gemini response", { retryable: false, kind: "empty" });
     }
 
     return text;
@@ -155,6 +169,13 @@ export async function generateChatReply(
     contactAlreadyAsked?: boolean;
   },
 ): Promise<string> {
+  if (!config.geminiApiKey) {
+    throw new GeminiServiceError("Gemini API key is not configured", {
+      retryable: false,
+      kind: "api",
+    });
+  }
+
   try {
     return await callGeminiOnce(
       config,

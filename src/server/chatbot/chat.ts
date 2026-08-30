@@ -7,6 +7,7 @@ import type {
 import {
   emptyCustomerContext,
   extractContextFromMessage,
+  hasVisitorContact,
   updateConversationSummary,
   type CustomerContext,
 } from "@/lib/agent/context";
@@ -25,6 +26,7 @@ import {
 } from "@/server/agent/conversationStoreAdmin";
 import {
   createKnowledgeCandidate,
+  estimateAnswerConfidence,
   shouldCreateKnowledgeCandidate,
 } from "@/server/agent/knowledgeCandidates";
 import { detectLeadSignal } from "@/server/agent/leadDetection";
@@ -43,15 +45,15 @@ import { getChatbotConfig } from "./config";
 import { resolveConversationHistory } from "./conversationHistory";
 import { createChatRequestId, logChatTrace } from "./chatTrace";
 import { checkRateLimit } from "./rateLimit";
-import { listConversationMessages } from "@/server/agent/conversationStore";
-import { listConversationMessagesAdmin } from "@/server/agent/conversationStoreAdmin";
-import { generateStaticReply } from "./static";
-import { buildContextStack, intentToTopic } from "./static/contextStack";
-import { extractEntities } from "./static/extractEntities";
-import { scoreCommercialIntent, commercialLevel } from "./static/commercialScore";
-import { qualifyLead } from "./static/leadQualification";
-import { computeLeadScoreDelta, mergeLeadContext, leadPatchFromContext } from "./static/leadScore";
-import { hasVisitorContact } from "@/lib/agent/context";
+import { generateChatReply, GeminiServiceError } from "./gemini";
+import { ensureAssistantReply } from "./geminiFallback";
+import { composeGeminiKnowledge } from "./knowledge";
+import { prepareGeminiHistory } from "./contextManagement";
+import { leadPatchFromContext } from "./leadPatch";
+import {
+  buildHistoryContextSnippet,
+  retrieveKnowledge,
+} from "@/server/agent/retrieve";
 
 /** Client history is ignored — only message/session/language are validated. */
 export function createChatRequestSchema(maxMessageLength: number) {
@@ -69,6 +71,15 @@ export function createChatRequestSchema(maxMessageLength: number) {
 }
 
 export { trimHistory } from "./contextManagement";
+
+function redactConversationSummaryForGemini(summary: string): string {
+  return summary
+    .replace(/(?:الجوال|Phone|الإيميل|Email):\s*[^\n.]+/gi, "")
+    .replace(/(?:\+?\d[\d\s\-()]{7,}\d)/g, "")
+    .replace(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
 
 export function validateChatRequest(
   input: unknown,
@@ -269,6 +280,8 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       customerContext,
     );
     customerContext = extracted.context;
+    customerContext.detectedLanguage = validated.data.language;
+    customerContext.messageCount = (customerContext.messageCount ?? 0) + 1;
 
     summary = updateConversationSummary(
       summary,
@@ -277,10 +290,57 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       customerContext,
     );
 
+    const geminiHistory = prepareGeminiHistory(conversationHistory, config);
+    const historyText = buildHistoryContextSnippet(geminiHistory);
+
+    logChatTrace("GEMINI_START", { sessionId: validated.data.sessionId }, requestId);
+
+    let retrieval: Awaited<ReturnType<typeof retrieveKnowledge>>;
+    try {
+      retrieval = await retrieveKnowledge(validated.data.message, validated.data.language, {
+        context: customerContext,
+        historyText,
+      });
+    } catch {
+      retrieval = {
+        documents: [],
+        formatted: "",
+        fromFallback: true,
+        analysis: {
+          original: validated.data.message,
+          normalized: validated.data.message,
+          tokens: [],
+          intent: "unknown",
+          preferredTypes: [],
+          entities: [],
+        },
+        diagnostic: {
+          query: validated.data.message,
+          normalizedQuery: validated.data.message,
+          intent: "unknown",
+          entities: [],
+          selected: [],
+          documentCount: 0,
+          fromFallback: true,
+          knowledgeSource: "static-fallback",
+          retrievalPass: "kb_primary",
+          websiteSearchUsed: false,
+          sufficiencyReason: "retrieve_error",
+        },
+      };
+    }
+    const resolvedIntent = retrieval.analysis.intent;
+    const topScore = retrieval.diagnostic.selected[0]?.score ?? 0;
+    const confidence = estimateAnswerConfidence(topScore, retrieval.documents.length);
+    const composedKnowledge = composeGeminiKnowledge(
+      validated.data.language,
+      retrieval.formatted,
+    );
+
     const lead = detectLeadSignal(
       validated.data.message,
       customerContext,
-      existing?.lastIntent ?? "general",
+      resolvedIntent,
       priorLeadStatus,
     );
     if (lead.phone && !customerContext.phone) {
@@ -293,70 +353,57 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       customerContext = { ...customerContext, name: lead.name };
     }
 
-    const turnIndex = conversationHistory.length;
-
-    let recentIntents: string[] = [];
+    let reply: string;
+    let fromGeminiFallback = false;
     try {
-      const adminDb = await tryGetAdminFirestore();
-      const rawMessages = adminDb
-        ? await listConversationMessagesAdmin(adminDb, validated.data.sessionId)
-        : await listConversationMessages(getDb(), validated.data.sessionId);
-      recentIntents = buildContextStack({
-        messages: rawMessages,
-        lastIntent: existing?.lastIntent,
-      }).recentIntents;
-    } catch {
-      recentIntents = existing?.lastIntent ? [existing.lastIntent] : [];
-    }
-
-    const visitorName =
-      customerContext.name?.trim() || existing?.visitorName?.trim() || undefined;
-
-    const staticResult = generateStaticReply({
-      message: validated.data.message,
-      language: validated.data.language,
-      sessionId: validated.data.sessionId,
-      lastIntent: existing?.lastIntent,
-      recentIntents,
-      turnIndex,
-      visitorName,
-    });
-
-    const reply = staticResult.reply;
-    const resolvedIntent = staticResult.intent;
-    const confidence = staticResult.confidence;
-
-    const entityExtract = extractEntities(validated.data.message);
-    const commLevel = commercialLevel(
-      scoreCommercialIntent(
+      reply = await generateChatReply(
+        config,
+        validated.data.language,
         validated.data.message,
-        resolvedIntent,
-        customerContext.leadScore ?? 0,
-      ),
-    );
-    const qualification = qualifyLead(resolvedIntent, entityExtract, commLevel);
-    const scoreDelta = computeLeadScoreDelta(resolvedIntent, entityExtract);
-    customerContext = mergeLeadContext(
-      customerContext,
-      qualification,
-      scoreDelta,
-      resolvedIntent,
-      [...recentIntents, resolvedIntent],
-      intentToTopic(resolvedIntent),
-    );
-    customerContext.detectedLanguage = validated.data.language;
-
-    logChatTrace(
-      "STATIC_REPLY",
-      {
-        sessionId: validated.data.sessionId,
-        intent: resolvedIntent,
-        confidence,
-        replyLength: reply.length,
-        clarified: staticResult.clarified,
-      },
-      requestId,
-    );
+        geminiHistory,
+        composedKnowledge,
+        {
+          conversationSummary: redactConversationSummaryForGemini(summary),
+          customerContext,
+          offerHandoff: lead.shouldOfferHandoff,
+          needsContactCapture: !hasVisitorContact(customerContext),
+          contactAlreadyAsked: hasVisitorContact(customerContext),
+        },
+      );
+      if (!reply.trim()) {
+        fromGeminiFallback = true;
+        reply = ensureAssistantReply(reply, validated.data.language, "empty");
+      }
+      logChatTrace(
+        fromGeminiFallback ? "GEMINI_FALLBACK" : "GEMINI_OK",
+        {
+          sessionId: validated.data.sessionId,
+          intent: resolvedIntent,
+          confidence,
+          replyLength: reply.length,
+          knowledgeSource: retrieval.diagnostic.knowledgeSource,
+          documentCount: retrieval.documents.length,
+        },
+        requestId,
+      );
+    } catch (error) {
+      fromGeminiFallback = true;
+      const kind = error instanceof GeminiServiceError ? error.kind : "unknown";
+      reply = ensureAssistantReply(
+        null,
+        validated.data.language,
+        kind === "empty" ? "empty" : "error",
+      );
+      logChatTrace(
+        "GEMINI_FALLBACK",
+        {
+          sessionId: validated.data.sessionId,
+          kind: error instanceof GeminiServiceError ? error.kind : "unknown",
+          hasApiKey: Boolean(config.geminiApiKey),
+        },
+        requestId,
+      );
+    }
 
     let leadId = existing?.leadId;
     const leadPatch = leadPatchFromContext(customerContext, resolvedIntent);
@@ -402,7 +449,7 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       customerContext,
       summary,
       intent: resolvedIntent,
-      retrievedIds: [],
+      retrievedIds: retrieval.documents.map((doc) => doc.id),
       confidence,
       leadStatus: lead.leadStatus,
       leadId,
@@ -412,10 +459,11 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
 
     let candidateCreated = false;
     if (
+      !fromGeminiFallback &&
       shouldCreateKnowledgeCandidate({
         intent: resolvedIntent,
-        retrievedCount: 0,
-        topScore: staticResult.confidence === "low" ? 0 : 5,
+        retrievedCount: retrieval.documents.length,
+        topScore,
         message: validated.data.message,
       })
     ) {
@@ -464,9 +512,9 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
       sessionId: validated.data.sessionId,
       language: validated.data.language,
       intent: resolvedIntent,
-      fromFallback: false,
-      knowledgeSource: "static",
-      documentCount: 0,
+      fromFallback: fromGeminiFallback || retrieval.fromFallback,
+      knowledgeSource: fromGeminiFallback ? "gemini-fallback" : retrieval.diagnostic.knowledgeSource,
+      documentCount: retrieval.documents.length,
       confidence,
       latencyMs: Date.now() - startedAt,
     });
@@ -483,7 +531,7 @@ export async function processChatMessage(input: unknown): Promise<ChatResponse> 
     logChatTrace(
       "REQUEST_FAILED",
       {
-        stage: "static",
+        stage: "gemini",
         code: errorCode,
         sessionId: validated.data.sessionId,
         conversationHistoryCount: validated.data.history.length,

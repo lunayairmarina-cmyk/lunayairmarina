@@ -132,7 +132,7 @@ export interface ConversationTurn {
 const PHONE_RE = /(?:\+?\d[\d\s\-()]{7,}\d)/;
 const EMAIL_RE = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i;
 
-/** Rule-based context extraction from user messages (no LLM). */
+/** Extract visitor facts from user messages for Gemini context (no LLM). */
 export function extractContextFromMessage(
   message: string,
   language: "ar" | "en",
@@ -144,6 +144,8 @@ export function extractContextFromMessage(
 
   const lengthMatch = normalized.match(/(\d+)\s*(?:ft|feet|foot|قدم)/i);
   if (lengthMatch) patch.yachtLength = `${lengthMatch[1]} feet`;
+  const meterMatch = normalized.match(/(\d+)\s*(?:m\b|متر|مترا|meters?)/i);
+  if (meterMatch) patch.yachtLength = `${meterMatch[1]}m`;
 
   if (/مالك\s*يخت|yacht owner|owner/i.test(normalized)) patch.customerType = "yacht_owner";
 
@@ -218,7 +220,9 @@ export function extractContextFromMessage(
   }
   if (interests.length) patch.interests = interests;
 
-  if (/عاجل|urgent|asap|بسرعة/i.test(normalized)) patch.urgency = "high";
+  if (/يخت|yacht|قارب|boat/.test(normalized)) patch.yachtMentioned = true;
+
+  if (/عاجل|urgent|asap|بسرعة|اليوم|today/i.test(normalized)) patch.urgency = "high";
   else if (/قريب|soon|قريبا/i.test(normalized)) patch.urgency = "medium";
 
   if (/whatsapp|واتس/i.test(normalized)) patch.requestedContactMethod = "whatsapp";
